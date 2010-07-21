@@ -40,4 +40,23 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
         $resp = $this->search->index($doc);
         $this->assertTrue($resp['ok'] == 1);
     }
+
+    
+    /**
+     * Test indexing a new document and having an auto id
+     * This means dupes will occur
+     */
+    public function testStringSearch() {
+        foreach (range(1,5) as $i) {
+            $doc = array(
+                'title' => 'One cool document',
+                'i' => $i,
+                'tag' => 'cool'
+            );
+            $this->search->index($doc);
+        }
+        sleep(1); // To make sure there will be documents. Sucks
+        $hits = $this->search->search("title:cool");
+        $this->assertGreaterThan(0, $hits['total']);
+    }
 }

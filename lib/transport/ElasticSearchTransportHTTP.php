@@ -23,6 +23,29 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
     }
     
     /**
+     * Search
+     *
+     * @return array
+     * @param mixed $id Optional
+     */
+    public function search($query) {
+        if (is_array($query)) {
+        }
+        elseif (is_string($query)) {
+            $url = $this->buildUrl(array(
+                $this->type, "_search?q=" . $query
+            ));
+            $result = $this->call($url, "GET");
+            if ($result['hits']['total'] > 0)
+                return $result['hits'];
+            else
+                return false;
+        }
+        else {
+        }
+    }
+    
+    /**
      * Basic http call
      *
      * @return array

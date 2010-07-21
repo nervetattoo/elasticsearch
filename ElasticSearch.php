@@ -23,7 +23,7 @@ class ElasticSearch {
     }
     
     /**
-     * Index a new document or update it if existing
+     * Fetch a document by its id
      *
      * @return array
      * @param mixed $id Optional
@@ -44,6 +44,17 @@ class ElasticSearch {
      */
     public function index($document, $id=false) {
         return $this->transport->index($document, $id);
+    }
+
+    /**
+     * Perform search, this is the sweet spot
+     *
+     * @return array
+     * @param array $document
+     * @param mixed $id Optional
+     */
+    public function search($query) {
+        return $this->transport->search($query);
     }
     
     /**
