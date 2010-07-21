@@ -1,16 +1,17 @@
 # ElasticSearch PHP client
+ElasticSearch is a distributed lucene powered search indexing, this is a PHP client for it
 ## Basic usage
-> $search = new ElasticSearch("localhost:9200", "myindex", "mytype");
-> $search->index(array('title' => 'My cool document'), $id);
-> $search->get($id);
-> $search->search('title:cool');
+`$search = new ElasticSearch("localhost:9200", "myindex", "mytype");
+`$search->index(array('title' => 'My cool document'), $id);`
+`$search->get($id);`
+`$search->search('title:cool');`
 
 ## Multiple indexes or types
-> $search->useIndex(array("one", "two"));
-> $search->useType(array("mytype", "other-type"));
-> $search->search('title:cool');
+`$search->useIndex(array("one", "two"));`
+`$search->useType(array("mytype", "other-type"));`
+`$search->search('title:cool');`
 
 ## Using the EQL
-> $search->search(array(
->   'term' => array('title' => 'cool')
-> );
+`$search->search(array(
+    'term' => array('title' => 'cool')
+);`
