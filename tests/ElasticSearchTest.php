@@ -6,7 +6,7 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
     public function setUp() {
         if ($this->search == null) {
             $transport = new ElasticSearchTransportHTTP("localhost", 9200);
-            $this->search = new ElasticSearch($transport, "test-index", "test-type");
+            $this->search = new ElasticSearchClient($transport, "test-index", "test-type");
         }
     }
 

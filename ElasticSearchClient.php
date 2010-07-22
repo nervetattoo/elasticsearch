@@ -2,7 +2,7 @@
 require_once 'lib/transport/ElasticSearchTransport.php';
 require_once 'lib/transport/ElasticSearchTransportHTTP.php';
 
-class ElasticSearch {
+class ElasticSearchClient {
 
     private $transport, $index, $type;
     
