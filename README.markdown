@@ -10,11 +10,13 @@ ElasticSearch is a distributed lucene powered search indexing, this is a PHP cli
     $search->search('title:cool');
 
 ## Multiple indexes or types
-    $search->useIndex(array("one", "two"));
-    $search->useType(array("mytype", "other-type"));
+    $search->setIndex(array("one", "two"));
+    $search->setType(array("mytype", "other-type"));
     $search->search('title:cool');
 
 ## Using the Query DSL
     $search->search(array(
-        'term' => array('title' => 'cool')
+        'query' => array(
+            'term' => array('title' => 'cool')
+        )
     );

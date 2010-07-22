@@ -6,6 +6,7 @@ abstract class ElasticSearchTransport {
     abstract public function index($document, $id=false);
     abstract public function request($path);
     abstract public function delete($id=false);
+    abstract public function search($query);
 
     public function setIndex($index) {
         $this->index = $index;

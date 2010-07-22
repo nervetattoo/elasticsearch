@@ -47,16 +47,90 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * This means dupes will occur
      */
     public function testStringSearch() {
-        foreach (range(1,5) as $i) {
-            $doc = array(
-                'title' => 'One cool document',
-                'i' => $i,
-                'tag' => 'cool'
-            );
+        $docs = array(
+            array('title' => 'One cool document'),
+            array('title' => 'The coolest'),
+            array('title' => 'Not cool')
+        );
+        foreach ($docs as $doc)
             $this->search->index($doc);
-        }
-        sleep(1); // To make sure there will be documents. Sucks
+        sleep(2); // To make sure there will be documents. Sucks
         $hits = $this->search->search("title:cool");
-        $this->assertGreaterThan(0, $hits['total']);
+        $this->assertEquals(2, $hits['total']);
+    }
+    
+    /**
+     * Try searching using the dsl
+     */
+    public function testSearch() {
+        $docs = array(
+            array('title' => 'not cool yo'),
+            array('title' => 'One cool document'),
+            array('title' => 'The coolest'),
+        );
+        foreach ($docs as $doc)
+            $this->search->index($doc);
+        sleep(2); // To make sure the documents will be ready
+
+        $hits = $this->search->search(array(
+            'query' => array(
+                'term' => array('title' => 'cool')
+            )
+        ));
+        $this->assertEquals(2, $hits['hits']['total']);
+
+        $hits = $this->search->search(array(
+            'facets' => array(
+                'stopword' => array(
+                    'query' => array(
+                        'term' => array('title' => 'not')
+                    ),
+                ),
+                'one' => array(
+                    'query' => array(
+                        'term' => array('title' => 'one')
+                    ),
+                ),
+            ),
+            'query' => array(
+                'term' => array('title' => 'cool')
+            ),
+        ));
+        $this->assertEquals(2, $hits['hits']['total']);
+        $this->assertEquals(1, $hits['facets']['one']);
+        $this->assertEquals(0, $hits['facets']['stopword']);
+    }
+
+    /**
+     * Test multi index search
+     */
+    public function testSearchMultipleIndexes() {
+        $docs = array(
+            array('title' => 'not cool yo'),
+            array('title' => 'One cool document'),
+            array('title' => 'The coolest'),
+        );
+        $indexes = array("test-index", "test2");
+        foreach ($indexes as $ind) {
+            $this->search->setIndex($ind);
+            foreach ($docs as $doc)
+                $this->search->index($doc);
+        }
+
+        sleep(2); // To make sure the documents will be ready
+
+        // Use both indexes when searching
+        $this->search->setIndex($indexes);
+        $hits = $this->search->search(array(
+            'query' => array(
+                'term' => array('title' => 'cool')
+            )
+        ));
+        $this->assertEquals(count($indexes) * 2, $hits['hits']['total']);
+
+        foreach ($indexes as $ind) {
+            $this->search->setIndex($ind);
+            $this->search->delete();
+        }
     }
 }

@@ -30,8 +30,22 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      */
     public function search($query) {
         if (is_array($query)) {
+            /**
+             * Array implies using the JSON query DSL
+             */
+            $url = $this->buildUrl(array(
+                $this->type, "_search"
+            ));
+            $result = $this->call($url, "GET", $query);
+            if ($result['hits']['total'] > 0)
+                return $result;
+            else
+                return false;
         }
         elseif (is_string($query)) {
+            /**
+             * String based search means http query string search
+             */
             $url = $this->buildUrl(array(
                 $this->type, "_search?q=" . $query
             ));
@@ -40,8 +54,6 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
                 return $result['hits'];
             else
                 return false;
-        }
-        else {
         }
     }
     

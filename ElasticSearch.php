@@ -23,6 +23,30 @@ class ElasticSearch {
     }
     
     /**
+     * Change what index to go against
+     * @return void
+     * @param mixed $index
+     */
+    public function setIndex($index) {
+        if (is_array($index))
+            $index = implode(",", array_filter($index));
+        $this->index = $index;
+        $this->transport->setIndex($index);
+    }
+    
+    /**
+     * Change what types to act against
+     * @return void
+     * @param mixed $type
+     */
+    public function setType($type) {
+        if (is_array($type))
+            $type = implode(",", array_filter($type));
+        $this->type = $type;
+        $this->transport->setType($type);
+    }
+    
+    /**
      * Fetch a document by its id
      *
      * @return array
@@ -51,7 +75,6 @@ class ElasticSearch {
      *
      * @return array
      * @param array $document
-     * @param mixed $id Optional
      */
     public function search($query) {
         return $this->transport->search($query);
@@ -61,6 +84,8 @@ class ElasticSearch {
      * Flush this index/type combination
      *
      * @return array
+     * @param mixed $id If id is supplied, delete that id for this index
+     *                  if not wipe the entire index
      */
     public function delete($id=false) {
         return $this->transport->delete($id);
