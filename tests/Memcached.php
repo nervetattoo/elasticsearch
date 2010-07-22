@@ -5,7 +5,7 @@ class ElasticSearchMemcachedTest extends ElasticSearchTest {
     protected $search = null;
     public function setUp() {
         if ($this->search == null) {
-            $transport = new ElasticSearchTransportMemcached("localhost", 11211);
+            $transport = new ElasticSearchTransportMemcached;
             $this->search = new ElasticSearchClient($transport, "test-index", "test-type");
         }
         else

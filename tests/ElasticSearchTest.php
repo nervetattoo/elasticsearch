@@ -35,6 +35,8 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * This means dupes will occur
      */
     public function testIndexingDocumentWithoutId() {
+        if ($this instanceof ElasticSearchMemcachedTest)
+            return;
         $doc = array(
             'title' => 'One cool document',
             'tag' => 'cool'
@@ -54,8 +56,8 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
             array('title' => 'The coolest'),
             array('title' => 'Not cool')
         );
-        foreach ($docs as $doc)
-            $this->search->index($doc);
+        foreach ($docs as $i => $doc)
+            $this->search->index($doc, $i);
         sleep(2); // To make sure there will be documents. Sucks
         $hits = $this->search->search("title:cool");
         $this->assertEquals(2, $hits['hits']['total']);
@@ -65,13 +67,15 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * Try searching using the dsl
      */
     public function testSearch() {
+        if ($this instanceof ElasticSearchMemcachedTest)
+            return;
         $docs = array(
             array('title' => 'not cool yo'),
             array('title' => 'One cool document'),
             array('title' => 'The coolest'),
         );
-        foreach ($docs as $doc)
-            $this->search->index($doc);
+        foreach ($docs as $id => $doc)
+            $this->search->index($doc, $id);
         sleep(2); // To make sure the documents will be ready
 
         $hits = $this->search->search(array(
@@ -107,6 +111,8 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * Test multi index search
      */
     public function testSearchMultipleIndexes() {
+        if ($this instanceof ElasticSearchMemcachedTest)
+            return;
         $docs = array(
             array('title' => 'not cool yo'),
             array('title' => 'One cool document'),
@@ -141,6 +147,8 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * Test delete by query
      */
     public function testDeleteByQuery() {
+        if ($this instanceof ElasticSearchMemcachedTest)
+            return;
         $doc = array('title' => 'not cool yo');
         $this->search->setIndex("test-index");
         $this->search->index($doc, 1);

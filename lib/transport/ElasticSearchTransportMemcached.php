@@ -1,12 +1,12 @@
 <?php
 
 class ElasticSearchTransportMemcached extends ElasticSearchTransport {
-    private $host = "", $port = 9200;
-    public function __construct($host, $port) {
+    private $host, $port;
+    public function __construct($host="127.0.0.1", $port=11311) {
         $this->host = $host;
         $this->port = $port;
-        $this->conn = new Memcached;
-        $this->conn->addServer($host, $port, true, 1);
+        $this->conn = new Memcache;
+        $this->conn->connect($host, $port);
     }
     
     /**
@@ -17,13 +17,15 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
      * @param mixed $id Optional
      */
     public function index($document, $id=false) {
-        if (!$id)
+        if ($id === false)
             throw new Exception("Memcached transport requires id when indexing");
 
+        $document = json_encode($document);
         $url = $this->buildUrl(array($this->type, $id));
-        $response = json_decode($this->conn->set($url, $document));
-        var_dump($response);
-        return $response;
+        $response = $this->conn->set($url, $document);
+        return array(
+            'ok' => $response
+        );
     }
     
     /**
@@ -49,7 +51,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             $url = $this->buildUrl(array(
                 $this->type, "_search?q=" . $query
             ));
-            $result = json_decode($this->conn($url));
+            $result = json_decode($this->conn->get($url), true);
         }
         return $result;
     }
@@ -94,10 +96,13 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         $url = $this->buildUrl($path);
         switch ($method) {
             case 'GET':
-                return json_decode($this->conn->get($url));
-            case 'GET':
-                return json_decode($this->conn->delete($url));
+                $result = $this->conn->get($url);
+                break;
+            case 'DELETE':
+                $result = $this->conn->delete($url);
+                break;
         }
+        return json_decode($result);
     }
     
     /**
