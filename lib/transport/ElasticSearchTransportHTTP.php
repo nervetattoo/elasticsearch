@@ -37,10 +37,6 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
                 $this->type, "_search"
             ));
             $result = $this->call($url, "GET", $query);
-            if ($result['hits']['total'] > 0)
-                return $result;
-            else
-                return false;
         }
         elseif (is_string($query)) {
             /**
@@ -50,11 +46,36 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
                 $this->type, "_search?q=" . $query
             ));
             $result = $this->call($url, "GET");
-            if ($result['hits']['total'] > 0)
-                return $result['hits'];
-            else
-                return false;
         }
+        return $result;
+    }
+    
+    /**
+     * Search
+     *
+     * @return array
+     * @param mixed $id Optional
+     */
+    public function deleteByQuery($query) {
+        if (is_array($query)) {
+            /**
+             * Array implies using the JSON query DSL
+             */
+            $url = $this->buildUrl(array(
+                $this->type, "_query"
+            ));
+            $result = $this->call($url, "DELETE", $query);
+        }
+        elseif (is_string($query)) {
+            /**
+             * String based search means http query string search
+             */
+            $url = $this->buildUrl(array(
+                $this->type, "_query?q=" . $query
+            ));
+            $result = $this->call($url, "DELETE");
+        }
+        return $result['ok'];
     }
     
     /**
@@ -112,7 +133,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
 
     private function handleError($url, $method, $payload, $response) {
         $err = "Request: \n";
-        $err .= "curl -X$method $url";
+        $err .= "curl -X$method http://{$this->host}:{$this->port}$url";
         if ($payload) $err .=  " -d '" . json_encode($payload) . "'";
         $err .= "\n";
         $err .= "Triggered some error: \n";

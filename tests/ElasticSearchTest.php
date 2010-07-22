@@ -8,6 +8,8 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
             $transport = new ElasticSearchTransportHTTP("localhost", 9200);
             $this->search = new ElasticSearchClient($transport, "test-index", "test-type");
         }
+        else
+            $this->search->setIndex("test-index");
     }
 
     public function tearDown() {
@@ -56,7 +58,7 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
             $this->search->index($doc);
         sleep(2); // To make sure there will be documents. Sucks
         $hits = $this->search->search("title:cool");
-        $this->assertEquals(2, $hits['total']);
+        $this->assertEquals(2, $hits['hits']['total']);
     }
     
     /**
@@ -132,5 +134,33 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
             $this->search->setIndex($ind);
             $this->search->delete();
         }
+    }
+
+
+    /**
+     * Test delete by query
+     */
+    public function testDeleteByQuery() {
+        $doc = array('title' => 'not cool yo');
+        $this->search->setIndex("test-index");
+        $this->search->index($doc, 1);
+
+        sleep(1); // To make sure the documents will be ready
+
+        $del = $this->search->delete(array(
+            'term' => array('title' => 'cool')
+        ));
+
+        $this->assertTrue($del);
+
+        sleep(1); // To make sure the documents will be ready
+
+        // Use both indexes when searching
+        $hits = $this->search->search(array(
+            'query' => array(
+                'term' => array('title' => 'cool')
+            )
+        ));
+        $this->assertEquals(0, $hits['hits']['total']);
     }
 }
