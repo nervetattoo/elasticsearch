@@ -12,8 +12,4 @@ class ElasticSearchMemcachedTest extends ElasticSearchParent {
         $this->search->delete();
         $this->search = null;
     }
-
-    public function testFoo() {
-        $this->assertTrue(true);
-    }
 }

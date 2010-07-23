@@ -49,13 +49,67 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
     }
     
     /**
-     * Test indexing a new document and having an auto id
-     * This means dupes will occur
+     * Test regular string search
      */
     public function testStringSearch() {
-        $this->addDocuments(array("test-index"), 2);
+        $this->addDocuments();
         sleep(1); // Indexing is only near real time
         $hits = $this->search->search("title:cool");
-        $this->assertEquals(2, $hits['hits']['total']);
+        $this->assertEquals(3, $hits['hits']['total']);
+    }
+    
+    /**
+     * Test a midly complex search
+     */
+    public function testSlightlyComplexSearch() {
+        $this->addDocuments();
+        $doc = array(
+            'title' => 'One cool document',
+            'body' => 'Lorem ipsum dolor sit amet',
+            'tag' => array('cool', "stuff", "2k")
+        );
+        $resp = $this->search->index($doc, 1);
+        sleep(1); // Indexing is only near real time
+
+        $hits = $this->search->search(array(
+            'query' => array(
+                'term' => array('title' => 'cool')
+            )
+        ));
+        $this->assertEquals(3, $hits['hits']['total']);
+    }
+
+    /**
+     * Test multi index search
+     */
+    public function testSearchMultipleIndexes() {
+        $indexes = array("test-index", "test2");
+        $this->addDocuments($indexes);
+        sleep(1); // To make sure the documents will be ready
+
+        // Use both indexes when searching
+        $this->search->setIndex($indexes);
+        $hits = $this->search->search('title:cool');
+        $this->assertEquals(count($indexes) * 3, $hits['hits']['total']);
+
+        foreach ($indexes as $ind) {
+            $this->search->setIndex($ind);
+            $this->search->delete();
+        }
+    }
+    
+    /**
+     * Try searching using the dsl
+     */
+    public function testSearch() {
+        $this->addDocuments();
+        sleep(1); // To make sure the documents will be ready
+
+        $hits = $this->search->search(array(
+            'query' => array(
+                'term' => array('title' => 'cool')
+           )
+        ));
+        $this->assertEquals(3, $hits['hits']['total']);
     }
 }

@@ -36,13 +36,16 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
      */
     public function search($query) {
         if (is_array($query)) {
-            return;
-            /**
-             * Array implies using the JSON query DSL
-             */
-            $url = $this->buildUrl(array(
-                $this->type, "_search"
-            ));
+            if (array_key_exists("query", $query)) {
+                $dsl = new ElasticSearchDSL($query);
+                $q = (string) $dsl;
+                $url = $this->buildUrl(array(
+                    $this->type, "_search?q=" . $q
+                ));
+                $result = json_decode($this->conn->get($url), true);
+                return $result;
+            }
+            throw new Exception("Memcached protocol doesnt support the full DSL, only query");
         }
         elseif (is_string($query)) {
             /**
@@ -52,8 +55,8 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
                 $this->type, "_search?q=" . $query
             ));
             $result = json_decode($this->conn->get($url), true);
+            return $result;
         }
-        return $result;
     }
     
     /**
