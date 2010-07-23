@@ -1,6 +1,6 @@
 <?php // vim:set ts=4 sw=4 et:
 require_once 'helper.php';
-class ElasticSearchTest extends PHPUnit_Framework_TestCase {
+class ElasticSearchHTTPTest extends ElasticSearchParent {
     
     protected $search = null;
     public function setUp() {
@@ -11,23 +11,9 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
         else
             $this->search->setIndex("test-index");
     }
-
     public function tearDown() {
         $this->search->delete();
         $this->search = null;
-    }
-
-    /**
-     * Test indexing a new document
-     */
-    public function testIndexingDocument() {
-        $doc = array(
-            'title' => 'One cool document',
-            'tag' => 'cool'
-        );
-        $resp = $this->search->index($doc, 1);
-
-        $this->assertTrue($resp['ok'] == 1);
     }
     
     /**
@@ -35,8 +21,6 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * This means dupes will occur
      */
     public function testIndexingDocumentWithoutId() {
-        if ($this instanceof ElasticSearchMemcachedTest)
-            return;
         $doc = array(
             'title' => 'One cool document',
             'tag' => 'cool'
@@ -67,8 +51,6 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * Try searching using the dsl
      */
     public function testSearch() {
-        if ($this instanceof ElasticSearchMemcachedTest)
-            return;
         $docs = array(
             array('title' => 'not cool yo'),
             array('title' => 'One cool document'),
@@ -81,7 +63,7 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
         $hits = $this->search->search(array(
             'query' => array(
                 'term' => array('title' => 'cool')
-            )
+           )
         ));
         $this->assertEquals(2, $hits['hits']['total']);
 
@@ -111,8 +93,6 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * Test multi index search
      */
     public function testSearchMultipleIndexes() {
-        if ($this instanceof ElasticSearchMemcachedTest)
-            return;
         $docs = array(
             array('title' => 'not cool yo'),
             array('title' => 'One cool document'),
@@ -147,8 +127,6 @@ class ElasticSearchTest extends PHPUnit_Framework_TestCase {
      * Test delete by query
      */
     public function testDeleteByQuery() {
-        if ($this instanceof ElasticSearchMemcachedTest)
-            return;
         $doc = array('title' => 'not cool yo');
         $this->search->setIndex("test-index");
         $this->search->index($doc, 1);

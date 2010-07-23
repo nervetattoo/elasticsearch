@@ -1,6 +1,6 @@
 <?php // vim:set ts=4 sw=4 et:
-require_once 'ElasticSearchTest.php';
-class ElasticSearchMemcachedTest extends ElasticSearchTest {
+require_once 'helper.php';
+class ElasticSearchMemcachedTest extends ElasticSearchParent {
     
     protected $search = null;
     public function setUp() {
@@ -10,5 +10,13 @@ class ElasticSearchMemcachedTest extends ElasticSearchTest {
         }
         else
             $this->search->setIndex("test-index");
+    }
+    public function tearDown() {
+        $this->search->delete();
+        $this->search = null;
+    }
+
+    public function testFoo() {
+        $this->assertTrue(true);
     }
 }
