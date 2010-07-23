@@ -16,17 +16,21 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
         }
         return array('title' => $sentence);
     }
-    protected function addDocuments($indexes=array("test-index"), $num=3) {
-        $words = array("cool", "dog");
+    protected function addDocuments($indexes=array("test-index"), $num=3, $rand=false) {
+        $words = array("cool", "dog", "lorem", "ipsum", "dolor", "sit", "amet");
         // Generate documents
         foreach ($indexes as $ind) {
             $this->search->setIndex($ind);
+            $tmpNum = $num;
 
             // Index documents
-            while ($num > 0) {
-                $num--;
-                $doc = $this->generateDocument($words, 5);
-                $this->search->index($doc, $num);
+            while ($tmpNum > 0) {
+                $tmpNum--;
+                if ($rand)
+                    $doc = $this->generateDocument($words, 5);
+                else
+                    $doc = array('title' => 'One cool document');
+                $this->search->index($doc, $tmpNum + 1);
             }
         }
     }

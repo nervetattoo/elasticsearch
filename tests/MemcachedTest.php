@@ -4,12 +4,9 @@ class ElasticSearchMemcachedTest extends ElasticSearchParent {
     
     protected $search = null;
     public function setUp() {
-        if ($this->search == null) {
-            $transport = new ElasticSearchTransportMemcached;
-            $this->search = new ElasticSearchClient($transport, "test-index", "test-type");
-        }
-        else
-            $this->search->setIndex("test-index");
+        $transport = new ElasticSearchTransportMemcached;
+        $this->search = new ElasticSearchClient($transport, "test-index", "test-type");
+        $this->search->delete();
     }
     public function tearDown() {
         $this->search->delete();
