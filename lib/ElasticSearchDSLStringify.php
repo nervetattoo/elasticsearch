@@ -2,6 +2,9 @@
 
 /**
  * Parse a DSL object into a string based representation
+ * Return string representation of DSL for search.
+ * This will remove certain fields that are not supported
+ * in a string representation
  *
  * @author Raymond Julin <raymond.julin@gmail.com>
  * @package ElasticSearchClient
@@ -12,12 +15,12 @@ class ElasticSearchDSLStringify {
 
     protected $dsl = array();
     
-    public function __construct(ElasticSearchDSL $dsl) {
+    public function __construct(array $dsl) {
         $this->dsl = $dsl;
     }
 
-    public function convert() {
-        $dsl = $this->dsl->toArray();
+    public function __toString() {
+        $dsl = $this->dsl;
         $query = $dsl['query'];
 
         $string = "";

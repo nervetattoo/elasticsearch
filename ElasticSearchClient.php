@@ -1,6 +1,8 @@
 <?php // vim:set ts=4 sw=4 et:
-require_once 'lib/ElasticSearchDSL.php';
 require_once 'lib/ElasticSearchDSLStringify.php';
+
+require_once 'lib/builder/ElasticSearchDSLBuilder.php';
+
 require_once 'lib/transport/ElasticSearchTransport.php';
 require_once 'lib/transport/ElasticSearchTransportHTTP.php';
 require_once 'lib/transport/ElasticSearchTransportMemcached.php';

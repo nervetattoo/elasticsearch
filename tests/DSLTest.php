@@ -8,7 +8,7 @@ class ElasticSearchDSLTest extends PHPUnit_Framework_TestCase {
                 'term' => array('title' => 'cool')
             )
         );
-        $dsl = new ElasticSearchDSL($arr);
+        $dsl = new ElasticSearchDSLStringify($arr);
         $strDsl = (string)$dsl;
         $this->assertEquals("title:cool", $strDsl);
     }
@@ -19,7 +19,7 @@ class ElasticSearchDSLTest extends PHPUnit_Framework_TestCase {
                 'term' => 'cool'
             )
         );
-        $dsl = new ElasticSearchDSL($arr);
+        $dsl = new ElasticSearchDSLStringify($arr);
         $strDsl = (string)$dsl;
         $this->assertEquals("cool", $strDsl);
     }
@@ -30,7 +30,7 @@ class ElasticSearchDSLTest extends PHPUnit_Framework_TestCase {
                 'term' => 'cool stuff'
             )
         );
-        $dsl = new ElasticSearchDSL($arr);
+        $dsl = new ElasticSearchDSLStringify($arr);
         $strDsl = (string)$dsl;
         $this->assertEquals('"cool stuff"', $strDsl);
     }
@@ -41,7 +41,7 @@ class ElasticSearchDSLTest extends PHPUnit_Framework_TestCase {
                 'term' => array('title' => 'cool stuff')
             )
         );
-        $dsl = new ElasticSearchDSL($arr);
+        $dsl = new ElasticSearchDSLStringify($arr);
         $strDsl = (string)$dsl;
         $this->assertEquals('title:"cool stuff"', $strDsl);
     }
@@ -55,15 +55,15 @@ class ElasticSearchDSLTest extends PHPUnit_Framework_TestCase {
                 'term' => array('title' => 'cool stuff')
             )
         );
-        $dsl = new ElasticSearchDSL($arr);
+        $dsl = new ElasticSearchDSLStringify($arr);
         $this->assertEquals('title:"cool stuff"&sort=title:reverse', (string)$dsl);
 
         $arr['sort'] = array('title');
-        $dsl = new ElasticSearchDSL($arr);
+        $dsl = new ElasticSearchDSLStringify($arr);
         $this->assertEquals('title:"cool stuff"&sort=title', (string)$dsl);
 
         $arr['sort'] = array(array('title' => array('reverse' => true)));
-        $dsl = new ElasticSearchDSL($arr);
+        $dsl = new ElasticSearchDSLStringify($arr);
         $this->assertEquals('title:"cool stuff"&sort=title:reverse', (string)$dsl);
     }
 
@@ -74,7 +74,7 @@ class ElasticSearchDSLTest extends PHPUnit_Framework_TestCase {
                 'term' => array('title' => 'cool')
             )
         );
-        $dsl = new ElasticSearchDSL($arr);
+        $dsl = new ElasticSearchDSLStringify($arr);
         $this->assertEquals('title:cool&fields=title,body', (string)$dsl);
     }
 }

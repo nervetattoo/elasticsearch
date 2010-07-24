@@ -1,0 +1,184 @@
+From: http://groups.google.com/a/elasticsearch.com/group/users/browse_thread/thread/549fb5ede5df6ff4/0890e504cc13d486
+
+QUERY DSL SPEC:  (better read in fixed-width font)
+--------------------------------------------------
+
+curl -XGET 'http://$server/_search                 -d '{ TOPLEVEL }'
+curl -XGET 'http://$server/_all/_search            -d '{ TOPLEVEL }'
+curl -XGET 'http://$server/_all/$types/_search     -d '{ TOPLEVEL }'
+curl -XGET 'http://$server/$indices/_search        -d '{ TOPLEVEL }'
+curl -XGET 'http://$server/$indices/$types/_search -d '{ TOPLEVEL }'
+
+TOPLEVEL:
+---------
+   {
+    explain:    BOOL,
+    from:       INT,
+    size:       INT,
+    fields:     ["field_1", "field_n"],
+    query:      { QUERY_CLAUSE      },
+    facets:     { FACETS_CLAUSE     },
+    sort:       { SORT_CLAUSE       }
+   }
+
+QUERY_CLAUSE:
+-------------
+   {
+    term:             { TERM_QUERY           }
+    | range:          { RANGE_QUERY          }
+    | prefix:         { PREFIX_QUERY         }
+    | wildcard:       { WILDCARD_QUERY       }
+    | matchAll:       { MATCH_ALL_QUERY      }
+    | queryString:    { QUERY_STRING_QUERY   }
+    | bool:           { BOOLEAN_QUERY        }
+    | disMax:         { DISMAX_QUERY         }
+    | constantScore:  { CONSTANT_SCORE_QUERY }
+    | filteredQuery:  { FILTERED_QUERY       },    
+   }
+
+FILTER_CLAUSE:
+--------------
+   {
+    query:            { QUERY_CLAUSE          },
+    | term:           { TERM_FILTER           },
+    | range:          { RANGE_FILTER          },
+    | prefix:         { PREFIX_FILTER         },
+    | wildcard:       { WILDCARD_FILTER       },
+    | bool:           { BOOLEAN_FILTER        },
+    | constantScore:  { CONSTANT_SCORE_QUERY  }
+   }
+
+FACETS_CLAUSE:
+--------------
+   {
+    $facet_name_1:   { QUERY_CLAUSE },
+    $facet_name_n:   ...
+   }
+
+SORT_CLAUSE:
+------------
+   [
+      $fieldname_1 | "score
+    | { $fieldname_1 : { reverse: BOOL }},
+      ...
+   ]          
+
+TERM_FILTER:
+------------
+   { $fieldname:  VALUE_1 }
+
+TERM_QUERY:
+-----------
+   { $fieldname:  VALUE_1 }
+ | { $fieldname: { value: VALUE, boost: FLOAT } }
+
+PREFIX_FILTER:
+--------------
+   { $fieldname:  STRING}
+
+PREFIX_QUERY:
+-------------
+   { $fieldname:  STRING}
+ | { $fieldname: { prefix: STRING_1, boost: FLOAT } }
+
+WILDCARD_FILTER:
+----------------
+   { $fieldname:   STRING }
+
+WILDCARD_QUERY:
+---------------
+   { $fieldname:   STRING }
+ | { $fieldname: { wildcard: STRING, boost: FLOAT } }
+
+MATCH_ALL_QUERY:
+----------------
+   {}
+ | { boost:  FLOAT }
+
+RANGE_FILTER:
+-------------
+    {   $fieldname:  {
+            from:           INT | FLOAT | STRING | DATETIME,
+            to:             INT | FLOAT | STRING﻿ | DATETIME,
+            includeLower:   BOOL,
+            includeUpper:   BOOL,
+    }}
+
+RANGE_QUERY:
+------------
+    {   $fieldname:  {
+            from:           INT | FLOAT | STRING﻿ | DATETIME,
+            to:             INT | FLOAT | STRING﻿ | DATETIME,
+            includeLower:   BOOL
+            includeUpper:   BOOL
+            boost:          FLOAT        
+    }}
+
+BOOLEAN_FILTER:
+---------------
+    {
+        must:     { FILTER_CLAUSE } | [ { FILTER_CLAUSE }, ... ],
+        should:   { FILTER_CLAUSE } | [ { FILTER_CLAUSE }, ... ],
+        mustNot:  { FILTER_CLAUSE } | [ { FILTER_CLAUSE }, ... ],
+
+        minimumNumberShouldMatch:   INT
+    }
+
+BOOLEAN_QUERY:
+--------------
+    {
+        must:     { QUERY_CLAUSE} | [ { QUERY_CLAUSE }, ... ],
+        should:   { QUERY_CLAUSE} | [ { QUERY_CLAUSE }, ... ],
+        mustNot:  { QUERY_CLAUSE} | [ { QUERY_CLAUSE }, ... ],
+
+        boost:    FLOAT,
+        minimumNumberShouldMatch:   INT
+    }
+
+DISMAX_QUERY:
+-------------
+    {
+        queries:                [ { QUERY_CLAUSE }, ... ],
+        tieBreakerMultiplier:   FLOAT,
+        boost:                  FLOAT
+    }
+
+CONSTANT_SCORE_QUERY:
+---------------------
+    {
+        filter: { FILTER_CLAUSE }
+        boost:  FLOAT
+    }
+
+FILTERED_QUERY:
+---------------
+    {
+        query:  { QUERY_CLAUSE       },
+        filter: { FILTER_CLAUSE, ... }
+    }
+
+QUERY_STRING_QUERY:
+-------------------
+   {
+    query:                      STRING,
+    defaultField:               $fieldname,        
+    defaultOperator:            "AND" | "OR",
+    analyzer:                   STRING,            
+    allowLeadingWildcard:       BOOL,
+    lowercaseExpandedTerms:     BOOL,
+    enablePositionIncrements:   BOOL,              
+    fuzzyPrefixLength:          BOOL,              
+    fuzzyMinSim:                FLOAT,
+    phraseSlop:                 INT,    
+    boost:                      FLOAT
+   }
+
+ARGUMENT TYPES:
+---------------
+   - BOOL:      true | false
+   - INT:       integer  eg 5
+   - FLOAT:     float    eg 1.2
+   - STRING:    text     eg "foo"
+   - DATETIME:  dates and times
+                eg ﻿"﻿2010-02-31T13:30:45", "2010-02-31", ﻿"13:30:45"
+   - VALUE:     BOOL | INT | FLOAT | STRING | DATETIME 

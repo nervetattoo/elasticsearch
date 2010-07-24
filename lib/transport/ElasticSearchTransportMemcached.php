@@ -37,7 +37,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
     public function search($query) {
         if (is_array($query)) {
             if (array_key_exists("query", $query)) {
-                $dsl = new ElasticSearchDSL($query);
+                $dsl = new ElasticSearchDSLStringify($query);
                 $q = (string) $dsl;
                 $url = $this->buildUrl(array(
                     $this->type, "_search?q=" . $q
