@@ -90,8 +90,16 @@ class ElasticSearchClient {
      *                  if not wipe the entire index
      */
     public function delete($id=false) {
-        if (is_array($id))
-            return $this->transport->deleteByQuery($id);
         return $this->transport->delete($id);
+    }
+    
+    /**
+     * Flush this index/type combination
+     *
+     * @return array
+     * @param mixed $query Text or array based query to delete everything that matches
+     */
+    public function deleteByQuery($query) {
+        return $this->transport->deleteByQuery($query);
     }
 }

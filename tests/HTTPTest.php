@@ -36,7 +36,7 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
 
         sleep(1); // To make sure the documents will be ready
 
-        $del = $this->search->delete(array(
+        $del = $this->search->deleteByQuery(array(
             'term' => array('title' => 'cool')
         ));
 
