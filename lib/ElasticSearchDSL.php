@@ -30,12 +30,18 @@ class ElasticSearchDSL {
      * @return string
      */
     public function __toString() {
-        $dsl = $this->dsl['query'];
+        $dsl = $this->dsl;
+        $query = $dsl['query'];
+
         $string = "";
-        if (array_key_exists("term", $dsl))
-            $string .= $this->transformDSLTermToString($dsl['term']);
-        if (array_key_exists("wildcard", $dsl))
-            $string .= $this->transformDSLTermToString($dsl['wildcard']);
+        if (array_key_exists("term", $query))
+            $string .= $this->transformDSLTermToString($query['term']);
+        if (array_key_exists("wildcard", $query))
+            $string .= $this->transformDSLTermToString($query['wildcard']);
+        if (array_key_exists("sort", $dsl))
+            $string .= $this->transformDSLSortToString($dsl['sort']);
+        if (array_key_exists("fields", $dsl))
+            $string .= $this->transformDSLFieldsToString($dsl['fields']);
         return $string;
     }
 
@@ -51,20 +57,60 @@ class ElasticSearchDSL {
         if (is_array($dslTerm)) {
             $key = key($dslTerm);
             $value = $dslTerm[$key];
-
-            /**
-             * If a specific key is used as key in the array
-             * this should translate to searching in a specific field (field:term)
-             */
             if (is_string($key))
                 $string .= "$key:";
-            if (strpos(" ", $value) !== false)
-                $string .= '"' . $value . '"';
-            else
-                $string .= $value;
         }
         else
-            $string .= $dslTerm;
+            $value = $dslTerm;
+        /**
+         * If a specific key is used as key in the array
+         * this should translate to searching in a specific field (field:term)
+         */
+        if (strpos($value, " ") !== false)
+            $string .= '"' . $value . '"';
+        else
+            $string .= $value;
+        return $string;
+    }
+
+    /**
+     * Transform search parameters to string
+     *
+     * @return string
+     * @param mixed $dslSort
+     */
+    protected function transformDSLSortToString($dslSort) {
+        $string = "";
+        if (is_array($dslSort)) {
+            foreach ($dslSort as $sort) {
+                if (is_array($sort)) {
+                    $field = key($sort);
+                    $info = current($sort);
+                }
+                else
+                    $field = $sort;
+                $string .= "&sort=" . $field;
+                if (isset($info)) {
+                    if (is_string($info) && $info == "desc")
+                        $string .= ":reverse";
+                    elseif (is_array($info) && array_key_exists("reverse", $info) && $info['reverse'])
+                        $string .= ":reverse";
+                }
+            }
+        }
+        return $string;
+    }
+
+    /**
+     * Transform a selection of fields to return to string form
+     *
+     * @return string
+     * @param mixed $dslFields
+     */
+    protected function transformDSLFieldsToString($dslFields) {
+        $string = "";
+        if (is_array($dslFields))
+            $string .= "&fields=" . join(",", $dslFields);
         return $string;
     }
 }
