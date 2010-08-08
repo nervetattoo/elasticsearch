@@ -32,6 +32,8 @@ class ElasticSearchDSLBuilder {
      * @param array $options
      */
     public function __construct(array $options=array()) {
+        foreach ($options as $key => $value)
+            $this->$key = $value;
     }
 
     /**
@@ -41,7 +43,8 @@ class ElasticSearchDSLBuilder {
      * @param array $options
      */
     public function query(array $options=array()) {
-        $this->query = new ElasticSearchDSLBuilderQuery($options);
+        if (!($this->query instanceof ElasticSearchDSLBuilderQuery))
+            $this->query = new ElasticSearchDSLBuilderQuery($options);
         return $this->query;
     }
 
@@ -52,6 +55,10 @@ class ElasticSearchDSLBuilder {
      */
     public function build() {
         $built = array();
+        if ($this->from != null)
+            $built['from'] = $this->from;
+        if ($this->size != null)
+            $built['size'] = $this->size;
         if (!$this->query)
             throw new Exception("Query must be specified");
         else

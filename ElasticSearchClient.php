@@ -82,7 +82,10 @@ class ElasticSearchClient {
      * @param array $document
      */
     public function search($query) {
-        return $this->transport->search($query);
+        $start = $this->getMicroTime();
+        $result = $this->transport->search($query);
+        $result['time'] = $this->getMicroTime() - $start;
+        return $result;
     }
     
     /**
@@ -105,4 +108,10 @@ class ElasticSearchClient {
     public function deleteByQuery($query) {
         return $this->transport->deleteByQuery($query);
     }
+
+    private function getMicroTime() {
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float)$usec + (float)$sec);
+    }
+
 }
