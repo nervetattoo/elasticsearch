@@ -9,7 +9,8 @@ class ElasticSearchMemcachedTest extends ElasticSearchParent {
         $this->search->delete();
     }
     public function tearDown() {
-        $this->search->delete();
+        if (is_object($this->search))
+            $this->search->delete();
         $this->search = null;
     }
 }

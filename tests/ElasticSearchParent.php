@@ -14,7 +14,7 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
             $sentence .= $words[0] . " ";
             $len--;
         }
-        return array('title' => $sentence);
+        return array('title' => $sentence, 'rank' => rand(1, 10));
     }
     protected function addDocuments($indexes=array("test-index"), $num=3, $rand=false) {
         $words = array("cool", "dog", "lorem", "ipsum", "dolor", "sit", "amet");
@@ -29,7 +29,7 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
                 if ($rand)
                     $doc = $this->generateDocument($words, 5);
                 else
-                    $doc = array('title' => 'One cool document');
+                    $doc = array('title' => 'One cool document', 'rank' => rand(1,10));
                 $this->search->index($doc, $tmpNum + 1);
             }
         }
@@ -53,29 +53,8 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
      */
     public function testStringSearch() {
         $this->addDocuments();
-        sleep(1); // Indexing is only near real time
+        sleep(2); // Indexing is only near real time
         $hits = $this->search->search("title:cool");
-        $this->assertEquals(3, $hits['hits']['total']);
-    }
-    
-    /**
-     * Test a midly complex search
-     */
-    public function testSlightlyComplexSearch() {
-        $this->addDocuments();
-        $doc = array(
-            'title' => 'One cool document',
-            'body' => 'Lorem ipsum dolor sit amet',
-            'tag' => array('cool', "stuff", "2k")
-        );
-        $resp = $this->search->index($doc, 1);
-        sleep(1); // Indexing is only near real time
-
-        $hits = $this->search->search(array(
-            'query' => array(
-                'term' => array('title' => 'cool')
-            )
-        ));
         $this->assertEquals(3, $hits['hits']['total']);
     }
 
@@ -103,13 +82,34 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
      */
     public function testSearch() {
         $this->addDocuments();
-        sleep(1); // To make sure the documents will be ready
+        sleep(2); // To make sure the documents will be ready
 
         $hits = $this->search->search(array(
             'query' => array(
                 'term' => array('title' => 'cool')
            )
         ));
+        $this->assertEquals(3, $hits['hits']['total']);
+    }
+    
+    /**
+     * Test sort
+     */
+    public function testSort() {
+        $this->addDocuments();
+        sleep(2); // To make sure the documents will be ready
+
+        $arr = array(
+            'sort' => array(
+                array('rank' => array('reverse'=>true)),
+                array('rank' => 'asc'),
+                'rank'
+            ),
+            'query' => array(
+                'term' => array('title' => 'cool')
+            )
+        );
+        $hits = $this->search->search($arr);
         $this->assertEquals(3, $hits['hits']['total']);
     }
 }
