@@ -123,7 +123,10 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         if ($data !== false)
             $data = json_decode($data, true);
         else
-            throw new Exception("Transport call to API failed");
+        {
+            $postData = json_encode($payload);
+            throw new Exception("Transport call to API failed on payload [$postData]");
+        }
 
         if (array_key_exists('error', $data))
             $this->handleError($url, $method, $payload, $data);
