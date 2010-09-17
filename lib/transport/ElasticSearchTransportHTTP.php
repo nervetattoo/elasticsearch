@@ -1,7 +1,35 @@
 <?php
+if (!defined('CURLE_OPERATION_TIMEDOUT'))
+    define('CURLE_OPERATION_TIMEDOUT', 28);
+
+class ElasticSearchTransportHTTPException extends ElasticSearchException {
+    protected $payload;
+    public function setPayload($payload) {
+        $this->payload = $payload;
+    }
+    public function getPayload() {
+        return $this->payload;
+    }
+}
 
 class ElasticSearchTransportHTTP extends ElasticSearchTransport {
-    private $host = "", $port = 9200;
+    
+    /**
+     * How long before timing out CURL call
+     */
+    const TIMEOUT = 5;
+
+    /**
+     * What host to connect to for server
+     * @var string
+     */
+    protected $host = "";
+    
+    /**
+     * Port to connect on
+     * @var int
+     */
+    protected $port = 9200;
     public function __construct($host, $port) {
         $this->host = $host;
         $this->port = $port;
@@ -17,7 +45,12 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
     public function index($document, $id=false) {
         $url = $this->buildUrl(array($this->type, $id));
         $method = ($id == false) ? "POST" : "PUT";
-        $response = $this->call($url, $method, $document );
+        try {
+            $response = $this->call($url, $method, $document);
+        }
+        catch (Exception $e) {
+            throw $e;
+        }
 
         return $response;
     }
@@ -36,7 +69,12 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
             $url = $this->buildUrl(array(
                 $this->type, "_search"
             ));
-            $result = $this->call($url, "GET", $query);
+            try {
+                $result = $this->call($url, "GET", $query);
+            }
+            catch (Exception $e) {
+                throw $e;
+            }
         }
         elseif (is_string($query)) {
             /**
@@ -46,6 +84,12 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
                 $this->type, "_search?q=" . $query
             ));
             $result = $this->call($url, "GET");
+            try {
+                $result = $this->call($url, "GET");
+            }
+            catch (Exception $e) {
+                throw $e;
+            }
         }
         return $result;
     }
@@ -64,7 +108,12 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
             $url = $this->buildUrl(array(
                 $this->type, "_query"
             ));
-            $result = $this->call($url, "DELETE", $query);
+            try {
+                $result = $this->call($url, "DELETE", $query);
+            }
+            catch (Exception $e) {
+                throw $e;
+            }
         }
         elseif (is_string($query)) {
             /**
@@ -73,7 +122,12 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
             $url = $this->buildUrl(array(
                 $this->type, "_query?q=" . $query
             ));
-            $result = $this->call($url, "DELETE");
+            try {
+                $result = $this->call($url, "DELETE");
+            }
+            catch (Exception $e) {
+                throw $e;
+            }
         }
         return $result['ok'];
     }
@@ -86,7 +140,13 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      */
     public function request($path, $method="GET") {
         $url = $this->buildUrl($path);
-        return $this->call($url, $method);
+        try {
+            $result = $this->call($url, $method);
+        }
+        catch (Exception $e) {
+            throw $e;
+        }
+        return $result;
     }
     
     /**
@@ -109,9 +169,12 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @param string $method (GET/POST/PUT/DELETE)
      * @param array $payload The document/instructions to pass along
      */
-    private function call($url, $method="GET", $payload=false) {
+    protected function call($url, $method="GET", $payload=false) {
         $conn = curl_init();
-        curl_setopt($conn, CURLOPT_URL, "http://" . $this->host . $url);
+        $protocol = "http";
+        $requestURL = $protocol . "://" . $this->host . $url;
+        curl_setopt($conn, CURLOPT_URL, $requestURL);
+        curl_setopt($conn, CURLOPT_TIMEOUT, self::TIMEOUT);
         curl_setopt($conn, CURLOPT_PORT, $this->port);
         curl_setopt($conn, CURLOPT_RETURNTRANSFER, 1) ;
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
@@ -124,8 +187,43 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
             $data = json_decode($data, true);
         else
         {
-            $postData = json_encode($payload);
-            throw new Exception("Transport call to API failed on payload [$postData]");
+            /**
+             * cUrl error code reference can be found here:
+             * http://curl.haxx.se/libcurl/c/libcurl-errors.html
+             */
+            $errno = curl_errno($conn);
+            switch ($errno)
+            {
+                case CURLE_UNSUPPORTED_PROTOCOL:
+                    $error = "Unsupported protocol [$protocol]";
+                    break;
+                case CURLE_FAILED_INIT:
+                    $error = "Internal cUrl error?";
+                    break;
+                case CURLE_URL_MALFORMAT:
+                    $error = "Malformed URL [$requestURL] -d " . json_encode($payload);
+                    break;
+                case CURLE_COULDNT_RESOLVE_PROXY:
+                    $error = "Couldnt resolve proxy";
+                    break;
+                case CURLE_COULDNT_RESOLVE_HOST:
+                    $error = "Couldnt resolve host";
+                    break;
+                case CURLE_COULDNT_CONNECT:
+                    $error = "Couldnt connect to host [{$this->host}], ElasticSearch down?";
+                    break;
+                case CURLE_OPERATION_TIMEDOUT:
+                    $error = "Operation timed out on [$requestURL]";
+                    break;
+                default:
+                    $error = "Unknown error";
+                    if ($errno == 0)
+                        $error .= ". Non-cUrl error";
+                    break;
+            }
+            $exception = new ElasticSearchTransportHTTPException($error);
+            $exception->setPayload($payload);
+            throw $exception;
         }
 
         if (array_key_exists('error', $data))
@@ -134,7 +232,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         return $data;
     }
 
-    private function handleError($url, $method, $payload, $response) {
+    protected function handleError($url, $method, $payload, $response) {
         $err = "Request: \n";
         $err .= "curl -X$method http://{$this->host}:{$this->port}$url";
         if ($payload) $err .=  " -d '" . json_encode($payload) . "'";
@@ -150,7 +248,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @return string
      * @param array $path
      */
-    private function buildUrl($path=false) {
+    protected function buildUrl($path=false) {
         $url = "/" . $this->index;
         if ($path && count($path) > 0)
             $url .= "/" . implode("/", array_filter($path));

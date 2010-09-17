@@ -1,4 +1,5 @@
 <?php // vim:set ts=4 sw=4 et:
+require_once 'lib/ElasticSearchException.php';
 require_once 'lib/ElasticSearchDSLStringify.php';
 
 require_once 'lib/builder/ElasticSearchDSLBuilder.php';

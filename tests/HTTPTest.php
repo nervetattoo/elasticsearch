@@ -82,4 +82,14 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
         ));
         $this->assertEquals(3, $hits['hits']['total']);
     }
+
+    
+    /**
+     * @expectedException ElasticSearchTransportHTTPException
+     */
+    public function testSearchThrowExceptionWhenServerDown() {
+        $transport = new ElasticSearchTransportHTTP("localhost", 9300);
+        $search = new ElasticSearchClient($transport, "test-index", "test-type");
+        $search->search("title:cool");
+    }
 }
