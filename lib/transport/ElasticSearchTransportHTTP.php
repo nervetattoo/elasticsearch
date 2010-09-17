@@ -3,12 +3,29 @@ if (!defined('CURLE_OPERATION_TIMEDOUT'))
     define('CURLE_OPERATION_TIMEDOUT', 28);
 
 class ElasticSearchTransportHTTPException extends ElasticSearchException {
-    protected $payload;
-    public function setPayload($payload) {
-        $this->payload = $payload;
+    protected $data = array(
+        'payload' => null,
+        'protocol' => null,
+        'port' => null,
+        'host' => null,
+        'url' => null,
+        'method' => null,
+    );
+    public function __set($key, $value) {
+        if (array_key_exists($key, $this->data))
+            $this->data[$key] = $value;
     }
-    public function getPayload() {
-        return $this->payload;
+    public function __get($key) {
+        if (array_key_exists($key, $this->data))
+            return $this->data[$key];
+        else
+            return false;
+    }
+
+    public function getCLICommand() {
+        $postData = json_encode($this->payload);
+        $curlCall = "curl -X{$method} 'http://{$this->host}:{$this->port}$this->url' -d '$postData'";
+        return $curlCall;
     }
 }
 
@@ -222,7 +239,11 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
                     break;
             }
             $exception = new ElasticSearchTransportHTTPException($error);
-            $exception->setPayload($payload);
+            $exception->payload = $payload;
+            $exception->port = $this->port;
+            $exception->protocol = $protocol;
+            $exception->host = $this->host;
+            $exception->method = $method;
             throw $exception;
         }
 
