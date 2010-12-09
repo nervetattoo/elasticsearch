@@ -155,10 +155,10 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @return array
      * @param mixed $id Optional
      */
-    public function request($path, $method="GET") {
+    public function request($path, $method="GET", $payload=false) {
         $url = $this->buildUrl($path);
         try {
-            $result = $this->call($url, $method);
+            $result = $this->call($url, $method, $payload);
         }
         catch (Exception $e) {
             throw $e;

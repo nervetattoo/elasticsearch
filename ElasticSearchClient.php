@@ -64,6 +64,21 @@ class ElasticSearchClient {
             ? $response
             : $response['_source'];
     }
+    
+    /**
+     * Perform a request
+     *
+     * @return array
+     * @param mixed $id Optional
+     */
+    public function request($path, $method, $payload, $verbose=false) {
+        $path = array_merge((array) $this->type, (array) $path);
+
+        $response = $this->transport->request($path, $method, $payload);
+        return ($verbose)
+            ? $response
+            : $response['_source'];
+    }
 
     /**
      * Index a new document or update it if existing

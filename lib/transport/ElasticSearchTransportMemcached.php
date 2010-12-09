@@ -95,7 +95,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
      * @return array
      * @param mixed $id Optional
      */
-    public function request($path, $method="GET") {
+    public function request($path, $method="GET", $payload=false) {
         $url = $this->buildUrl($path);
         switch ($method) {
             case 'GET':
