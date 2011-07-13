@@ -92,4 +92,33 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
         $search = new ElasticSearchClient($transport, "test-index", "test-type");
         $search->search("title:cool");
     }
+
+    /**
+     * Test highlighting
+     */
+    public function testHighlightedSearch() {
+        $query = array(
+            'query' => array(
+                'term' => array(
+                    'title' => 'cool'
+                )
+            ), 
+            'highlight' => array(
+                'fields' => array(
+                    'title' => new stdClass()
+                )
+            )
+        );
+        $doc = array(
+            'title' => 'One cool document',
+            'body' => 'Lorem ipsum dolor sit amet',
+            'tag' => array('cool', "stuff", "2k")
+        );
+        $refresh = true;
+        $resp = $this->search->index($doc, 1, compact('refresh'));
+        $results = $this->search->search($query);
+        $hit = $results['hits']['hits'][0];
+        $this->assertTrue(array_key_exists('highlight', $hit));
+        $this->assertRegexp('/<em>/', $hit['highlight']['title'][0]);
+    }
 }
