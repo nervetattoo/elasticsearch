@@ -16,7 +16,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
      * @param array $document
      * @param mixed $id Optional
      */
-    public function index($document, $id=false) {
+    public function index($document, $id=false, array $options = array()) {
         if ($id === false)
             throw new Exception("Memcached transport requires id when indexing");
 
@@ -63,9 +63,10 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
      * Search
      *
      * @return array
-     * @param mixed $id Optional
+     * @param mixed $query String or array to use as criteria for delete
+     * @param array $options Parameters to pass to delete action
      */
-    public function deleteByQuery($query) {
+    public function deleteByQuery($query, array $options = array()) {
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
@@ -73,7 +74,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             return;
             $url = $this->buildUrl(array(
                 $this->type, "_query"
-            ));
+            ), $options);
             $result = $this->call($url, "DELETE", $query);
         }
         elseif (is_string($query)) {
@@ -83,7 +84,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             return;
             $url = $this->buildUrl(array(
                 $this->type, "_query?q=" . $query
-            ));
+            ), $options);
             $result = $this->call($url, "DELETE");
         }
         return $result['ok'];
@@ -112,8 +113,9 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
      * Flush this index/type combination
      *
      * @return array
+     * @param array $options Parameters to pass to delete action
      */
-    public function delete($id=false) {
+    public function delete($id=false, array $options = array()) {
         if ($id)
             return $this->request(array($this->type, $id), "DELETE");
         else
@@ -158,20 +160,5 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         $err .= "Triggered some error: \n";
         $err .= $response['error'] . "\n";
         //echo $err;
-    }
-
-    /**
-     * Build a callable url
-     *
-     * @return string
-     * @param array $path
-     */
-    private function buildUrl($path=false) {
-        $url = "/" . $this->index;
-        if ($path && count($path) > 0)
-            $url .= "/" . implode("/", array_filter($path));
-        if (substr($url, -1) == "/")
-            $url = substr($url, 0, -1);
-        return $url;
     }
 }

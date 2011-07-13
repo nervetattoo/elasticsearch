@@ -30,19 +30,17 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
      * Test delete by query
      */
     public function testDeleteByQuery() {
+        $refresh = true;
         $doc = array('title' => 'not cool yo');
         $this->search->setIndex("test-index");
-        $this->search->index($doc, 1);
-
-        sleep(1); // To make sure the documents will be ready
+        $this->search->index($doc, 1, compact('refresh'));
 
         $del = $this->search->deleteByQuery(array(
             'term' => array('title' => 'cool')
-        ));
+        ), compact('refresh'));
+        sleep(1);
 
         $this->assertTrue($del);
-
-        sleep(1); // To make sure the documents will be ready
 
         // Use both indexes when searching
         $hits = $this->search->search(array(
@@ -63,8 +61,7 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
             'body' => 'Lorem ipsum dolor sit amet',
             'tag' => array('cool', "stuff", "2k")
         );
-        $resp = $this->search->index($doc, 1);
-        sleep(1); // Indexing is only near real time
+        $resp = $this->search->index($doc, 1, array('refresh' => true));
 
         $hits = $this->search->search(array(
             'query' => array(
@@ -83,7 +80,6 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
         $this->assertEquals(3, $hits['hits']['total']);
     }
 
-    
     /**
      * @expectedException ElasticSearchTransportHTTPException
      */

@@ -86,9 +86,11 @@ class ElasticSearchClient {
      * @return array
      * @param array $document
      * @param mixed $id Optional
+     * @param array $options Allow sending query parameters to control indexing further
+     *        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
      */
-    public function index($document, $id=false) {
-        return $this->transport->index($document, $id);
+    public function index($document, $id=false, array $options = array()) {
+        return $this->transport->index($document, $id, $options);
     }
 
     /**
@@ -110,9 +112,10 @@ class ElasticSearchClient {
      * @return array
      * @param mixed $id If id is supplied, delete that id for this index
      *                  if not wipe the entire index
+     * @param array $options Parameters to pass to delete action
      */
-    public function delete($id=false) {
-        return $this->transport->delete($id);
+    public function delete($id=false, array $options = array()) {
+        return $this->transport->delete($id, $options);
     }
     
     /**
@@ -120,9 +123,10 @@ class ElasticSearchClient {
      *
      * @return array
      * @param mixed $query Text or array based query to delete everything that matches
+     * @param array $options Parameters to pass to delete action
      */
-    public function deleteByQuery($query) {
-        return $this->transport->deleteByQuery($query);
+    public function deleteByQuery($query, array $options = array()) {
+        return $this->transport->deleteByQuery($query, $options);
     }
 
     private function getMicroTime() {

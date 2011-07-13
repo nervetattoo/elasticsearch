@@ -59,8 +59,8 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @param array $document
      * @param mixed $id Optional
      */
-    public function index($document, $id=false) {
-        $url = $this->buildUrl(array($this->type, $id));
+    public function index($document, $id=false, array $options = array()) {
+        $url = $this->buildUrl(array($this->type, $id), $options);
         $method = ($id == false) ? "POST" : "PUT";
         try {
             $response = $this->call($url, $method, $document);
@@ -116,15 +116,16 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      *
      * @return array
      * @param mixed $id Optional
+     * @param array $options Parameters to pass to delete action
      */
-    public function deleteByQuery($query) {
+    public function deleteByQuery($query, array $options = array()) {
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
              */
             $url = $this->buildUrl(array(
                 $this->type, "_query"
-            ));
+            ), $options);
             try {
                 $result = $this->call($url, "DELETE", $query);
             }
@@ -138,7 +139,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
              */
             $url = $this->buildUrl(array(
                 $this->type, "_query?q=" . $query
-            ));
+            ), $options);
             try {
                 $result = $this->call($url, "DELETE");
             }
@@ -170,8 +171,10 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * Flush this index/type combination
      *
      * @return array
+     * @param mixed $id Id of document to delete
+     * @param array $options Parameters to pass to delete action
      */
-    public function delete($id=false) {
+    public function delete($id=false, array $options = array()) {
         if ($id)
             return $this->request(array($this->type, $id), "DELETE");
         else
@@ -261,20 +264,5 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         $err .= "Triggered some error: \n";
         $err .= $response['error'] . "\n";
         //echo $err;
-    }
-
-    /**
-     * Build a callable url
-     *
-     * @return string
-     * @param array $path
-     */
-    protected function buildUrl($path=false) {
-        $url = "/" . $this->index;
-        if ($path && count($path) > 0)
-            $url .= "/" . implode("/", array_filter($path));
-        if (substr($url, -1) == "/")
-            $url = substr($url, 0, -1);
-        return $url;
     }
 }

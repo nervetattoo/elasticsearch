@@ -13,4 +13,9 @@ class ElasticSearchMemcachedTest extends ElasticSearchParent {
             $this->search->delete();
         $this->search = null;
     }
+
+    protected function addDocuments($indexes=array("test-index"), $num=3, $rand=false) {
+        parent::addDocuments($indexes, $num, $rand);
+        sleep(1);
+    }
 }

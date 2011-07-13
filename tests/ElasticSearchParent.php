@@ -19,6 +19,9 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
     protected function addDocuments($indexes=array("test-index"), $num=3, $rand=false) {
         $words = array("cool", "dog", "lorem", "ipsum", "dolor", "sit", "amet");
         // Generate documents
+        $options = array(
+            'refresh' => true 
+        );
         foreach ($indexes as $ind) {
             $this->search->setIndex($ind);
             $tmpNum = $num;
@@ -30,7 +33,7 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
                     $doc = $this->generateDocument($words, 5);
                 else
                     $doc = array('title' => 'One cool document', 'rank' => rand(1,10));
-                $this->search->index($doc, $tmpNum + 1);
+                $this->search->index($doc, $tmpNum + 1, $options);
             }
         }
     }
@@ -53,7 +56,6 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
      */
     public function testStringSearch() {
         $this->addDocuments();
-        sleep(2); // Indexing is only near real time
         $hits = $this->search->search("title:cool");
         $this->assertEquals(3, $hits['hits']['total']);
     }
@@ -64,7 +66,6 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
     public function testSearchMultipleIndexes() {
         $indexes = array("test-index", "test2");
         $this->addDocuments($indexes);
-        sleep(1); // To make sure the documents will be ready
 
         // Use both indexes when searching
         $this->search->setIndex($indexes);
@@ -82,7 +83,6 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
      */
     public function testSearch() {
         $this->addDocuments();
-        sleep(2); // To make sure the documents will be ready
 
         $hits = $this->search->search(array(
             'query' => array(
@@ -97,7 +97,6 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
      */
     public function testSort() {
         $this->addDocuments();
-        sleep(2); // To make sure the documents will be ready
 
         $arr = array(
             'sort' => array(
