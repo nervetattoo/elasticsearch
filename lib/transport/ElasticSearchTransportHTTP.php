@@ -47,9 +47,18 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @var int
      */
     protected $port = 9200;
+	
+    /**
+     * curl handler which is needed for reusing existing http connection to the server
+     * @var resource
+     */
+    protected $ch;
+	
+	
     public function __construct($host, $port) {
         $this->host = $host;
         $this->port = $port;
+        $this->ch = curl_init();
     }
     
     /**
@@ -190,7 +199,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @param array $payload The document/instructions to pass along
      */
     protected function call($url, $method="GET", $payload=false) {
-        $conn = curl_init();
+        $conn = $this->ch;
         $protocol = "http";
         $requestURL = $protocol . "://" . $this->host . $url;
         curl_setopt($conn, CURLOPT_URL, $requestURL);
@@ -198,6 +207,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         curl_setopt($conn, CURLOPT_PORT, $this->port);
         curl_setopt($conn, CURLOPT_RETURNTRANSFER, 1) ;
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
+        curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
         if (is_array($payload) && count($payload) > 0)
             curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
