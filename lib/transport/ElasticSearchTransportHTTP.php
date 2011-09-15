@@ -30,7 +30,7 @@ class ElasticSearchTransportHTTPException extends ElasticSearchException {
 }
 
 class ElasticSearchTransportHTTP extends ElasticSearchTransport {
-    
+
     /**
      * How long before timing out CURL call
      */
@@ -41,26 +41,26 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @var string
      */
     protected $host = "";
-    
+
     /**
      * Port to connect on
      * @var int
      */
     protected $port = 9200;
-	
+
     /**
      * curl handler which is needed for reusing existing http connection to the server
      * @var resource
      */
     protected $ch;
-	
-	
+
+
     public function __construct($host, $port) {
         $this->host = $host;
         $this->port = $port;
         $this->ch = curl_init();
     }
-    
+
     /**
      * Index a new document or update it if existing
      *
@@ -80,7 +80,22 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
 
         return $response;
     }
-    
+    public function bulk($bulks, array $options = array()) {
+      $url = '/_bulk';
+      if (count($options) > 0)
+        $url .= "?" . http_build_query($options);
+
+      $response = array();
+      foreach (array_chunk($bulks, 100) as $chunk) {
+        try {
+          $response[] = $this->call($url, "POST", $chunk, true);
+        } catch (Exception $e) {
+          throw $e;
+        }
+      }
+      return $response;
+    }
+
     /**
      * Search
      *
@@ -119,7 +134,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result;
     }
-    
+
     /**
      * Search
      *
@@ -158,7 +173,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result['ok'];
     }
-    
+
     /**
      * Basic http call
      *
@@ -175,7 +190,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result;
     }
-    
+
     /**
      * Flush this index/type combination
      *
@@ -189,7 +204,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         else
             return $this->request(false, "DELETE");
     }
-    
+
     /**
      * Perform a http call against an url with an optional payload
      *
@@ -197,8 +212,10 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @param string $url
      * @param string $method (GET/POST/PUT/DELETE)
      * @param array $payload The document/instructions to pass along
+     * @param bool $is_bulk The payload has to be encoded differently if
+     *                      bulk mode is to be used
      */
-    protected function call($url, $method="GET", $payload=false) {
+    protected function call($url, $method="GET", $payload=false, $is_bulk=false) {
         $conn = $this->ch;
         $protocol = "http";
         $requestURL = $protocol . "://" . $this->host . $url;
@@ -209,8 +226,16 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
         curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
-        if (is_array($payload) && count($payload) > 0)
-            curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
+        if (is_array($payload) && count($payload) > 0) {
+            if ($is_bulk) {
+                $payloadstr = "";
+                foreach ($payload as $bulk)
+                  $payloadstr .= "\n".$bulk->encode();
+                curl_setopt($conn, CURLOPT_POSTFIELDS, $payloadstr);
+            }
+            else
+                curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
+        }
 
         $data = curl_exec($conn);
         if ($data !== false)

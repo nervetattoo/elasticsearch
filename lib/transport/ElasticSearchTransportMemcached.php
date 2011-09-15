@@ -8,7 +8,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         $this->conn = new Memcache;
         $this->conn->connect($host, $port);
     }
-    
+
     /**
      * Index a new document or update it if existing
      *
@@ -27,7 +27,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             'ok' => $response
         );
     }
-    
+
     /**
      * Search
      *
@@ -58,7 +58,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             return $result;
         }
     }
-    
+
     /**
      * Search
      *
@@ -89,7 +89,10 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         }
         return $result['ok'];
     }
-    
+
+    public function bulk ($bulks, array $options = array()) {
+    }
+
     /**
      * Basic http call
      *
@@ -108,7 +111,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         }
         return json_decode($result);
     }
-    
+
     /**
      * Flush this index/type combination
      *
@@ -121,7 +124,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         else
             return $this->request(false, "DELETE");
     }
-    
+
     /**
      * Perform a http call against an url with an optional payload
      *

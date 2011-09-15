@@ -11,7 +11,7 @@ require_once 'lib/transport/ElasticSearchTransportMemcached.php';
 class ElasticSearchClient {
 
     private $transport, $index, $type;
-    
+
     /**
      * Construct search client
      *
@@ -27,7 +27,7 @@ class ElasticSearchClient {
         $this->transport->setIndex($index);
         $this->transport->setType($type);
     }
-    
+
     /**
      * Change what index to go against
      * @return void
@@ -39,7 +39,7 @@ class ElasticSearchClient {
         $this->index = $index;
         $this->transport->setIndex($index);
     }
-    
+
     /**
      * Change what types to act against
      * @return void
@@ -51,7 +51,7 @@ class ElasticSearchClient {
         $this->type = $type;
         $this->transport->setType($type);
     }
-    
+
     /**
      * Fetch a document by its id
      *
@@ -64,7 +64,7 @@ class ElasticSearchClient {
             ? $response
             : $response['_source'];
     }
-    
+
     /**
      * Perform a request
      *
@@ -94,6 +94,18 @@ class ElasticSearchClient {
     }
 
     /**
+     *
+     * @return array
+     * @param array $documents
+     * @param array Optional $ids
+     * @param array $options Allow sending query parameters to control indexing further
+     *        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
+     */
+    public function index_bulk($documents, array $ids = array(), array $types = array(), array $options = array()) {
+        return $this->transport->index_bulk($documents, $ids, $types, $options);
+    }
+
+    /**
      * Perform search, this is the sweet spot
      *
      * @return array
@@ -105,7 +117,7 @@ class ElasticSearchClient {
         $result['time'] = $this->getMicroTime() - $start;
         return $result;
     }
-    
+
     /**
      * Flush this index/type combination
      *
@@ -117,7 +129,7 @@ class ElasticSearchClient {
     public function delete($id=false, array $options = array()) {
         return $this->transport->delete($id, $options);
     }
-    
+
     /**
      * Flush this index/type combination
      *
