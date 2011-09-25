@@ -209,11 +209,10 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
         curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
-        if (is_array($payload) && count($payload) > 0) {
+        if (is_array($payload) && count($payload) > 0)
             curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
-        } else {
+        else
         	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
-        }
 
         $data = curl_exec($conn);
         if ($data !== false)
