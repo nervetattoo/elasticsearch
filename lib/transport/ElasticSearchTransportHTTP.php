@@ -109,7 +109,6 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
             $url = $this->buildUrl(array(
                 $this->type, "_search?q=" . $query
             ));
-            $result = $this->call($url, "GET");
             try {
                 $result = $this->call($url, "GET");
             }
