@@ -7,6 +7,7 @@ require_once 'lib/builder/ElasticSearchDSLBuilder.php';
 require_once 'lib/transport/ElasticSearchTransport.php';
 require_once 'lib/transport/ElasticSearchTransportHTTP.php';
 require_once 'lib/transport/ElasticSearchTransportMemcached.php';
+require_once 'lib/transport/ElasticSearchTransportThrift.php';
 
 class ElasticSearchClient {
 
@@ -24,8 +25,8 @@ class ElasticSearchClient {
         $this->index = $index;
         $this->type = $type;
         $this->transport = $transport;
-        $this->transport->setIndex($index);
-        $this->transport->setType($type);
+        $this->setIndex($index);
+        $this->setType($type);
     }
     
     /**
@@ -59,7 +60,9 @@ class ElasticSearchClient {
      * @param mixed $id Optional
      */
     public function get($id, $verbose=false) {
-        $response = $this->transport->request(array($this->type, $id), "GET");
+        if (empty($id))
+			throw new Exception('empty id on get call');
+		$response = $this->transport->request(array($this->type, $id), "GET");
         return ($verbose)
             ? $response
             : $response['_source'];
