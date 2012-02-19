@@ -1,33 +1,9 @@
 <?php
+require_once 'ElasticSearchTransportHTTPException.php';
+
 if (!defined('CURLE_OPERATION_TIMEDOUT'))
     define('CURLE_OPERATION_TIMEDOUT', 28);
 
-class ElasticSearchTransportHTTPException extends ElasticSearchException {
-    protected $data = array(
-        'payload' => null,
-        'protocol' => null,
-        'port' => null,
-        'host' => null,
-        'url' => null,
-        'method' => null,
-    );
-    public function __set($key, $value) {
-        if (array_key_exists($key, $this->data))
-            $this->data[$key] = $value;
-    }
-    public function __get($key) {
-        if (array_key_exists($key, $this->data))
-            return $this->data[$key];
-        else
-            return false;
-    }
-
-    public function getCLICommand() {
-        $postData = json_encode($this->payload);
-        $curlCall = "curl -X{$method} 'http://{$this->host}:{$this->port}$this->url' -d '$postData'";
-        return $curlCall;
-    }
-}
 
 class ElasticSearchTransportHTTP extends ElasticSearchTransport {
 
@@ -37,27 +13,14 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
     const TIMEOUT = 5;
 
     /**
-     * What host to connect to for server
-     * @var string
-     */
-    protected $host = "";
-
-    /**
-     * Port to connect on
-     * @var int
-     */
-    protected $port = 9200;
-
-    /**
      * curl handler which is needed for reusing existing http connection to the server
      * @var resource
      */
     protected $ch;
 
 
-    public function __construct($host, $port) {
-        $this->host = $host;
-        $this->port = $port;
+    public function __construct($host='localhost', $port=9200) {
+        parent::__construct($host, $port);
         $this->ch = curl_init();
     }
 
@@ -124,7 +87,6 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
             $url = $this->buildUrl(array(
                 $this->type, "_search?q=" . $query
             ));
-            $result = $this->call($url, "GET");
             try {
                 $result = $this->call($url, "GET");
             }
@@ -175,10 +137,14 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
     }
 
     /**
-     * Basic http call
+     * Perform a request against the given path/method/payload combination
+     * Example:
+     * $es->request('/_status');
      *
+     * @param string|array $path
+     * @param string $method
+     * @param array|false $payload
      * @return array
-     * @param mixed $id Optional
      */
     public function request($path, $method="GET", $payload=false) {
         $url = $this->buildUrl($path);
