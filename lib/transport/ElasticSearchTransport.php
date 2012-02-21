@@ -60,7 +60,7 @@ abstract class ElasticSearchTransport {
      *
      * @param string|array $path
      * @param string $method
-     * @param array|false $payload
+     * @param array|string|false $payload
      */
     abstract public function request($path, $method="GET", $payload=false);
 
