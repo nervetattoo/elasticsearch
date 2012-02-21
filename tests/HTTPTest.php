@@ -11,7 +11,7 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
         $this->search->delete();
         $this->search = null;
     }
-    
+
     /**
      * Test indexing a new document and having an auto id
      * This means dupes will occur
@@ -50,7 +50,7 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
         ));
         $this->assertEquals(0, $hits['hits']['total']);
     }
-    
+
     /**
      * Test a midly complex search
      */
@@ -98,7 +98,7 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
                 'term' => array(
                     'title' => 'cool'
                 )
-            ), 
+            ),
             'highlight' => array(
                 'fields' => array(
                     'title' => new stdClass()

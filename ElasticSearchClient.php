@@ -11,7 +11,7 @@ require_once 'lib/transport/ElasticSearchTransportMemcached.php';
 class ElasticSearchClient {
 
     private $transport, $index, $type;
-    
+
     /**
      * Construct search client
      *
@@ -27,7 +27,7 @@ class ElasticSearchClient {
         $this->transport->setIndex($index);
         $this->transport->setType($type);
     }
-    
+
     /**
      * Change what index to go against
      * @return void
@@ -39,7 +39,7 @@ class ElasticSearchClient {
         $this->index = $index;
         $this->transport->setIndex($index);
     }
-    
+
     /**
      * Change what types to act against
      * @return void
@@ -51,7 +51,7 @@ class ElasticSearchClient {
         $this->type = $type;
         $this->transport->setType($type);
     }
-    
+
     /**
      * Fetch a document by its id
      *
@@ -64,14 +64,14 @@ class ElasticSearchClient {
             ? $response
             : $response['_source'];
     }
-    
+
     /**
      * Perform a request
      *
      * @return array
      * @param mixed $id Optional
      */
-    public function request($path, $method, $payload, $verbose=false) {
+    public function request($path, $method='GET', $payload=false, $verbose=false) {
         $path = array_merge((array) $this->type, (array) $path);
 
         $response = $this->transport->request($path, $method, $payload);
@@ -105,7 +105,7 @@ class ElasticSearchClient {
         $result['time'] = $this->getMicroTime() - $start;
         return $result;
     }
-    
+
     /**
      * Flush this index/type combination
      *
@@ -117,7 +117,7 @@ class ElasticSearchClient {
     public function delete($id=false, array $options = array()) {
         return $this->transport->delete($id, $options);
     }
-    
+
     /**
      * Flush this index/type combination
      *
