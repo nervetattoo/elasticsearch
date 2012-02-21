@@ -25,7 +25,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             'ok' => $response
         );
     }
-    
+
     /**
      * Search
      *
@@ -56,7 +56,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             return $result;
         }
     }
-    
+
     /**
      * Perform a request against the given path/method/payload combination
      * Example:
@@ -79,7 +79,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         }
         return json_decode($result);
     }
-    
+
     /**
      * Flush this index/type combination
      *

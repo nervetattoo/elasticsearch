@@ -28,3 +28,14 @@ $search->search(array(
     )
 );
 ```
+## Using the bulk API
+```php
+<?php
+$bulk = $es->bulk(array('chunk' => 100));
+
+foreach ($items as $item)
+    $bulk->index($item->indexable());
+foreach ($delete as $item)
+    $bulk->delete($item->id);
+$bulk->commit();
+?>

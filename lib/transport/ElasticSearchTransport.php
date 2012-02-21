@@ -45,6 +45,9 @@ abstract class ElasticSearchTransport {
      */
     abstract public function index($document, $id=false, array $options = array());
 
+
+    abstract public function bulk($bulks, array $options = array());
+
     /**
      * Perform a request against the given path/method/payload combination
      * Example:
@@ -93,6 +96,41 @@ abstract class ElasticSearchTransport {
      */
     public function setType($type) {
         $this->type = $type;
+    }
+    /*
+     * Bulk index new documents or update them if existing.
+     * Only supports documents of the type set before.
+     *
+     * @return array
+     * @param array $documents The documents to index.
+     * @param array $ids Optionally: the IDs of the documents in the same order.
+     *                   Use NULL for not specifying the ID for only one document.
+     * @param array $types the types of the document
+     */
+    public function index_bulk($documents, array $ids=array(), array $types = array(), array $options = array()) {
+      $bulks = array();
+      if (is_array($ids) && count($documents) == count($ids))
+        $use_ids = true;
+      else {
+        $use_ids = false;
+        $id = false;
+      }
+      if (is_array($types) && count($documents) == count($types))
+        $use_types = true;
+      else {
+        $use_types = false;
+        $type = false;
+      }
+
+      foreach ($documents as $i=>$doc) {
+        if ($use_ids)
+          $id = $ids[$i];
+        if ($use_types)
+          $type = $types[$i];
+
+        $bulks[] = new BulkItem ("index", $this->index, $id, $type, $doc);
+      }
+      return $this->bulk ($bulks);
     }
 
     /**
