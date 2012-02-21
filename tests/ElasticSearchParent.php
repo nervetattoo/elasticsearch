@@ -4,7 +4,7 @@ require_once 'helper.php';
  * These tests cover the union of every transports api
  */
 abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
-    
+
     protected $search = null;
 
     protected function generateDocument($words, $len=4) {
@@ -77,7 +77,7 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
             $this->search->delete();
         }
     }
-    
+
     /**
      * Try searching using the dsl
      */
@@ -91,7 +91,7 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
         ));
         $this->assertEquals(3, $hits['hits']['total']);
     }
-    
+
     /**
      * Test sort
      */

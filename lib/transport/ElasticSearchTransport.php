@@ -7,7 +7,7 @@ abstract class ElasticSearchTransport {
      * @var string
      */
     protected $host = "";
-    
+
     /**
      * Port to connect on
      * @var int
@@ -19,7 +19,7 @@ abstract class ElasticSearchTransport {
      * @var string
      */
     protected $index;
-    
+
     /**
      * ElasticSearch document type
      * @var string
@@ -67,7 +67,7 @@ abstract class ElasticSearchTransport {
      * @param array|string $query
      */
     abstract public function search($query);
-    
+
     /**
      * Search
      *
