@@ -9,6 +9,7 @@
  */
 require_once 'lib/ElasticSearchException.php';
 require_once 'lib/ElasticSearchDSLStringify.php';
+require_once 'lib/ElasticSearchBulk.php';
 
 require_once 'lib/builder/ElasticSearchDSLBuilder.php';
 
@@ -135,6 +136,13 @@ class ElasticSearchClient {
      */
     public function deleteByQuery($query, array $options = array()) {
         return $this->transport->deleteByQuery($query, $options);
+    }
+
+    /**
+     * @return mixed A new bulk object to collect operations.
+     */
+    public function bulk() {
+        return new ElasticSearchBulk($this->transport, $this->index, $this->type);
     }
 
     private function getMicroTime() {
