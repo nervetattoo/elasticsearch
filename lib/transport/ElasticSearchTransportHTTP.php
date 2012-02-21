@@ -1,4 +1,4 @@
-<?php
+<?php // vim:set ts=4 sw=4 et:
 require_once 'ElasticSearchTransportHTTPException.php';
 
 if (!defined('CURLE_OPERATION_TIMEDOUT'))
