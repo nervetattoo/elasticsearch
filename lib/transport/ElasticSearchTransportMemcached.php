@@ -1,4 +1,4 @@
-<?php
+<?php // vim:set ts=4 sw=4 et:
 
 class ElasticSearchTransportMemcached extends ElasticSearchTransport {
     public function __construct($host="127.0.0.1", $port=11311) {
