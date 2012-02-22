@@ -67,7 +67,7 @@ class ElasticSearchBulk {
      * @param string $type The default type
      * @param int $chunksize
      */
-    public function __construct($transport, $index, $type, $chunksize=2) {
+    public function __construct($transport, $index, $type, $chunksize=0) {
         $this->transport = $transport;
         $this->index = $index;
         $this->type = $type;
