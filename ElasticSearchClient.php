@@ -18,7 +18,7 @@ class ElasticSearchClient {
      * If no index and type is given, try to get its values from a URL passed
      * as $transport or from the ELASTICSEARCH_URL environmental variable.
      *
-     * @return ElasticSearch
+     * @return ElasticSearchClient
      * @param false|string|ElasticSearchTransport $transport
      * @param false|string $index
      * @param false|string $type
@@ -29,7 +29,7 @@ class ElasticSearchClient {
             if (! $transport)
                 $transport = getenv('ELASTICSEARCH_URL');
             if (! $transport)
-                throw new Exception('A setup URL cannot be empty.');
+                throw new Exception('ELASTICSEARCH_URL must be set for autodetection to work.');
             if (! preg_match('/^(\w+:\/\/)?\w(\w|\.\w)*:\d+\/[\w_\.]+\/[\w_\.]+$/', $transport))
                 throw new Exception("A setup URL needs to be the of the form http://host:port/index/type.");
 
