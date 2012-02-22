@@ -20,32 +20,44 @@ class ElasticSearchClient {
      *
      * @return ElasticSearchClient
      * @param false|string|ElasticSearchTransport $transport
-     * @param false|string $index
-     * @param false|string $type
+     * @param false|string|array $index
+     * @param false|string|array $type
      */
     public function __construct($transport=false, $index=false, $type=false) {
 
-        if (!$index) {
+        if (! $transport) {
             if (! $transport)
                 $transport = getenv('ELASTICSEARCH_URL');
             if (! $transport)
                 throw new Exception('ELASTICSEARCH_URL must be set for autodetection to work.');
-            if (! preg_match('/^(\w+:\/\/)?\w(\w|\.\w)*:\d+\/[\w_\.]+\/[\w_\.]+$/', $transport))
+            if (! preg_match('/^(\w+:\/\/)?\w(\w|\.\w)*:\d+($|\/$|\/[\w_\.]+)($|\/$|\/[\w_\.]+$)/', $transport))
                 throw new Exception("A setup URL needs to be the of the form http://host:port/index/type.");
 
             // strip protocol, we only support http anyway
             $transport = preg_replace('/^[\w\d]+:\/\//', '', $transport);
-            list($transport, $index, $type) = explode('/', $transport);
-            list($host, $port) = explode(':', $transport);
+            $components = explode('/', $transport);
 
+            list($host, $port) = explode(':', $components[0]);
             $transport = new ElasticSearchTransportHTTP($host, $port);
+
+            if (count($components) > 1) {
+                if (! $index)
+                    $index = $components[1];
+                if (count($components) > 2 && ! $type)
+                    $type = $components[2];
+            }
+            echo "host=$host,port=$port,index=$index,type=$type\n";
         }
 
-        $this->index = $index;
-        $this->type = $type;
         $this->transport = $transport;
-        $this->transport->setIndex($index);
-        $this->transport->setType($type);
+        if ($index) {
+            $this->index = $index;
+            $this->transport->setIndex($index);
+        }
+        if ($type) {
+            $this->type = $type;
+            $this->transport->setType($type);
+        }
     }
 
     /**
@@ -79,6 +91,8 @@ class ElasticSearchClient {
      * @param mixed $id Optional
      */
     public function get($id, $verbose=false) {
+        if (! $this->type || ! $this->index)
+            throw new Exception("ElasticsearchClient: You need to setType and setIndex before.");
         $response = $this->transport->request(array($this->type, $id), "GET");
         return ($verbose)
             ? $response
@@ -92,6 +106,9 @@ class ElasticSearchClient {
      * @param mixed $id Optional
      */
     public function request($path, $method='GET', $payload=false, $verbose=false) {
+        if (! $this->type || ! $this->index)
+            throw new Exception("ElasticsearchClient: You need to setType and setIndex before.");
+
         $path = array_merge((array) $this->type, (array) $path);
 
         $response = $this->transport->request($path, $method, $payload);
@@ -110,6 +127,8 @@ class ElasticSearchClient {
      *        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
      */
     public function index($document, $id=false, array $options = array()) {
+        if (! $this->type || ! $this->index)
+            throw new Exception("ElasticsearchClient: You need to setType and setIndex before.");
         return $this->transport->index($document, $id, $options);
     }
 
@@ -120,6 +139,8 @@ class ElasticSearchClient {
      * @param array $document
      */
     public function search($query) {
+        if (! $this->type || ! $this->index)
+            throw new Exception("ElasticsearchClient: You need to setType and setIndex before.");
         $start = $this->getMicroTime();
         $result = $this->transport->search($query);
         $result['time'] = $this->getMicroTime() - $start;
@@ -135,6 +156,8 @@ class ElasticSearchClient {
      * @param array $options Parameters to pass to delete action
      */
     public function delete($id=false, array $options = array()) {
+        if (! $this->type || ! $this->index)
+            throw new Exception("ElasticsearchClient: You need to setType and setIndex before.");
         return $this->transport->delete($id, $options);
     }
 
@@ -146,6 +169,8 @@ class ElasticSearchClient {
      * @param array $options Parameters to pass to delete action
      */
     public function deleteByQuery($query, array $options = array()) {
+        if (! $this->type || ! $this->index)
+            throw new Exception("ElasticsearchClient: You need to setType and setIndex before.");
         return $this->transport->deleteByQuery($query, $options);
     }
 
