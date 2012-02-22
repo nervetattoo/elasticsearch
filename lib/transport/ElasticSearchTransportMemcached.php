@@ -1,4 +1,4 @@
-<?php
+<?php // vim:set ts=4 sw=4 et:
 
 class ElasticSearchTransportMemcached extends ElasticSearchTransport {
     public function __construct($host="127.0.0.1", $port=11311) {
@@ -6,7 +6,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         $this->conn = new Memcache;
         $this->conn->connect($host, $port);
     }
-    
+
     /**
      * Index a new document or update it if existing
      *
@@ -25,7 +25,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             'ok' => $response
         );
     }
-    
+
     /**
      * Search
      *
@@ -79,7 +79,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         }
         return json_decode($result);
     }
-    
+
     /**
      * Flush this index/type combination
      *

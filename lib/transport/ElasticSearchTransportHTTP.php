@@ -1,4 +1,4 @@
-<?php
+<?php // vim:set ts=4 sw=4 et:
 require_once 'ElasticSearchTransportHTTPException.php';
 
 if (!defined('CURLE_OPERATION_TIMEDOUT'))
@@ -6,24 +6,24 @@ if (!defined('CURLE_OPERATION_TIMEDOUT'))
 
 
 class ElasticSearchTransportHTTP extends ElasticSearchTransport {
-    
+
     /**
      * How long before timing out CURL call
      */
     const TIMEOUT = 5;
-	
+
     /**
      * curl handler which is needed for reusing existing http connection to the server
      * @var resource
      */
     protected $ch;
-	
-	
+
+
     public function __construct($host='localhost', $port=9200) {
         parent::__construct($host, $port);
         $this->ch = curl_init();
     }
-    
+
     /**
      * Index a new document or update it if existing
      *
@@ -43,7 +43,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
 
         return $response;
     }
-    
+
     /**
      * Search
      *
@@ -81,7 +81,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result;
     }
-    
+
     /**
      * Search
      *
@@ -120,7 +120,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result['ok'];
     }
-    
+
     /**
      * Perform a request against the given path/method/payload combination
      * Example:
@@ -141,7 +141,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result;
     }
-    
+
     /**
      * Flush this index/type combination
      *
