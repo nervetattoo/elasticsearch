@@ -13,14 +13,34 @@ class ElasticSearchClient {
     private $transport, $index, $type;
 
     /**
-     * Construct search client
+     * Construct search client.
+     *
+     * If no index and type is given, try to get its values from a URL passed
+     * as $transport or from the ELASTICSEARCH_URL environmental variable.
      *
      * @return ElasticSearch
-     * @param ElasticSearchTransport $transport
-     * @param string $index
-     * @param string $type
+     * @param false|string|ElasticSearchTransport $transport
+     * @param false|string $index
+     * @param false|string $type
      */
-    public function __construct($transport, $index, $type) {
+    public function __construct($transport=false, $index=false, $type=false) {
+
+        if (!$index) {
+            if (! $transport)
+                $transport = getenv('ELASTICSEARCH_URL');
+            if (! $transport)
+                throw new Exception('A setup URL cannot be empty.');
+            if (! preg_match('/^(\w+:\/\/)?\w(\w|\.\w)*:\d+\/[\w_\.]+\/[\w_\.]+$/', $transport))
+                throw new Exception("A setup URL needs to be the of the form http://host:port/index/type.");
+
+            // strip protocol, we only support http anyway
+            $transport = preg_replace('/^[\w\d]+:\/\//', '', $transport);
+            list($transport, $index, $type) = explode('/', $transport);
+            list($host, $port) = explode(':', $transport);
+
+            $transport = new ElasticSearchTransportHTTP($host, $port);
+        }
+
         $this->index = $index;
         $this->type = $type;
         $this->transport = $transport;
