@@ -28,12 +28,12 @@ class ElasticSearchBulk {
     /**
      * @const string Indicate index operation
      */
-    const ES_BULK_INDEX = 'index';
+    const INDEX = 'index';
 
     /**
      * @const string Indicate delete operation
      */
-    const ES_BULK_DELETE = 'delete';
+    const DELETE = 'delete';
 
     /**
      * @var ElasticSearchTransport The transport
@@ -46,31 +46,32 @@ class ElasticSearchBulk {
     protected $index;
 
     /**
-     * @var type The default type
+     * @var string The default type
      */
     protected $type;
 
     /**
-     * @var array The items to delete in the form array($doc)
-     * i.e. this is an array of an array with the document to delete.
+     * @var int the chunksize
      */
-    protected $to_delete = array();
+    protected $chunksize;
 
     /**
-     * @var array The items to index in the form array($metadata, $doc)
+     * @var array The encoded operations
      */
-    protected $to_index = array();
+    protected $bulk_strs = array();
 
     /**
      * return ElasticSearchBulk
      * @param ElasticSearchTransport $transport The transport
      * @param string $index The default index
      * @param string $type The default type
+     * @param int $chunksize
      */
-    public function __construct($transport, $index, $type) {
+    public function __construct($transport, $index, $type, $chunksize=0) {
         $this->transport = $transport;
         $this->index = $index;
         $this->type = $type;
+        $this->chunksize = $chunksize;
     }
 
     /**
@@ -91,7 +92,7 @@ class ElasticSearchBulk {
         // second overwrites first
         $meta = array_merge(array('_type'=>$this->type, '_index'=>$this->index), $meta);
 
-        $this->to_index[] = array($meta, $doc);
+        $this->bulk_strs[] = $this->encode_operation(self::INDEX, $meta, $doc);
     }
 
     /**
@@ -103,9 +104,10 @@ class ElasticSearchBulk {
      * @param string index
      */
     public function delete($id, $type='', $index='') {
-        $this->to_delete[] = array(array('_id' => $id,
-            '_type' => $type ? $type : $this->type,
-            '_index'=> $index? $index: $this->index
+        $this->bulk_strs[] = $this->encode_operation(self::DELETE,
+            array('_id' => $id,
+                '_type' => $type ? $type : $this->type,
+                '_index'=> $index? $index: $this->index
         ));
     }
 
@@ -114,31 +116,39 @@ class ElasticSearchBulk {
      * @param array $options Not used atm
      */
     public function commit($options = array()) {
-        $istr = join("\n", array_map(function ($doc) {
-                return $this->encode_item(ElasticSearchBulk::ES_BULK_INDEX, $doc);
-            }, $this->to_index));
-        $dstr = join("\n", array_map(function ($doc) {
-                return $this->encode_item(ElasticSearchBulk::ES_BULK_DELETE, $doc);
-            }, $this->to_delete));
+        $count = count($this->bulk_strs);
+        $chunksize = $this->chunksize? $this->chunksize: $count;
 
-        # nb: there needs to be a newline at the end.
-        $str = join("\n", array($istr, $dstr))."\n";
+        $ret = array();
+        $strs = $this->bulk_strs;
 
-        // clear staging arrays
-        $this->to_index = $this->to_delete = array();
+        $ix = 0;
+        while ($ix < count($this->bulk_strs)) {
+            $strs = array_slice($strs, $ix, $ix+$chunksize);
 
-        $ret = $this->transport->request('/_bulk', 'POST', $str);
+            # nb: there needs to be a newline at the end.
+            $str = join("\n", $strs)."\n";
+            $ret = array_merge($ret, $this->transport->request('/_bulk', 'POST', $str));
+
+            $ix += $chunksize;
+            $strs = array_slice($strs, $ix);
+        }
+        // reset array
+        $this->bulk_strs = array();
+
         return $ret;
     }
 
     /**
-     * @param array $doc The document
+     * @param array $metadata
+     * @param array $payload
+     * @return string the encoded string
      */
-    protected function encode_item($type, $doc) {
-        $str = json_encode(array($type => $doc[0]));
+    protected function encode_operation($type, $metadata, $payload=false) {
+        $str = json_encode(array($type => $metadata));
 
-        if (count($doc) > 1)
-            $str.= "\n".json_encode($doc[1]);
+        if ($payload)
+            $str.= "\n".json_encode($payload);
         return $str;
     }
 }
