@@ -1,4 +1,4 @@
-<?php
+<?php // vim:set ts=4 sw=4 et:
 require_once 'ElasticSearchTransportHTTPException.php';
 
 if (!defined('CURLE_OPERATION_TIMEDOUT'))
@@ -6,24 +6,24 @@ if (!defined('CURLE_OPERATION_TIMEDOUT'))
 
 
 class ElasticSearchTransportHTTP extends ElasticSearchTransport {
-    
+
     /**
      * How long before timing out CURL call
      */
     const TIMEOUT = 5;
-	
+
     /**
      * curl handler which is needed for reusing existing http connection to the server
      * @var resource
      */
     protected $ch;
-	
-	
+
+
     public function __construct($host='localhost', $port=9200) {
         parent::__construct($host, $port);
         $this->ch = curl_init();
     }
-    
+
     /**
      * Index a new document or update it if existing
      *
@@ -43,7 +43,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
 
         return $response;
     }
-    
+
     /**
      * Search
      *
@@ -81,7 +81,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result;
     }
-    
+
     /**
      * Search
      *
@@ -120,7 +120,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result['ok'];
     }
-    
+
     /**
      * Perform a request against the given path/method/payload combination
      * Example:
@@ -128,10 +128,12 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      *
      * @param string|array $path
      * @param string $method
-     * @param array|false $payload
+     * @param array|string|false $payload to be encoded if it is an array, assumed to already be encoded if string.
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
+        if (! is_array($path))
+          $path = array($path);
         $url = $this->buildUrl($path);
         try {
             $result = $this->call($url, $method, $payload);
@@ -141,7 +143,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         }
         return $result;
     }
-    
+
     /**
      * Flush this index/type combination
      *
@@ -155,14 +157,14 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         else
             return $this->request(false, "DELETE");
     }
-    
+
     /**
      * Perform a http call against an url with an optional payload
      *
      * @return array
      * @param string $url
      * @param string $method (GET/POST/PUT/DELETE)
-     * @param array $payload The document/instructions to pass along
+     * @param array|string $payload The document/instructions to pass along. Assume it is already encoded, if it is a string.
      */
     protected function call($url, $method="GET", $payload=false) {
         $conn = $this->ch;
@@ -175,10 +177,10 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
         curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
-        if (is_array($payload) && count($payload) > 0)
-            curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
+        if ((is_array($payload) && count($payload) > 0) || is_string($payload) && $payload !== "")
+            curl_setopt($conn, CURLOPT_POSTFIELDS, is_string($payload) ? $payload : json_encode($payload));
         else
-        	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
+        	  curl_setopt($conn, CURLOPT_POSTFIELDS, null);
 
         $data = curl_exec($conn);
         if ($data !== false)

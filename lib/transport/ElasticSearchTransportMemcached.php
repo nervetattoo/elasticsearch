@@ -1,4 +1,4 @@
-<?php
+<?php // vim:set ts=4 sw=4 et:
 
 class ElasticSearchTransportMemcached extends ElasticSearchTransport {
     public function __construct($host="127.0.0.1", $port=11311) {
@@ -6,7 +6,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
         $this->conn = new Memcache;
         $this->conn->connect($host, $port);
     }
-    
+
     /**
      * Index a new document or update it if existing
      *
@@ -25,7 +25,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             'ok' => $response
         );
     }
-    
+
     /**
      * Search
      *
@@ -56,15 +56,19 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             return $result;
         }
     }
-    
+
     /**
      * Perform a request against the given path/method/payload combination
      * Example:
      * $es->request('/_status');
      *
+     * It does only support GET and DELETE requests and silently ignores the
+     * payload.
+     *
      * @param string|array $path
      * @param string $method
-     * @param array|false $payload
+     * @param array|string|false $payload
+     *
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
@@ -76,10 +80,12 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             case 'DELETE':
                 $result = $this->conn->delete($url);
                 break;
+            default:
+                throw new Exception("Memcached (or this implementation) does not support $method-requests.");
         }
         return json_decode($result);
     }
-    
+
     /**
      * Flush this index/type combination
      *
