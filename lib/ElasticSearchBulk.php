@@ -1,28 +1,33 @@
 <?php // vim:set ts=4 sw=4 et:
-# Copyright 2012 Tobias Florek. All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice,
-# this list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-# this list of conditions and the following disclaimer in the documentation
-# and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE FREEBSD PROJECT `AS IS'' AND ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-# EVENT SHALL THE FREEBSD PROJECT OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+/*
+ Copyright 2012 Tobias Florek. All rights reserved.
 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ 1. Redistributions of source code must retain the above copyright notice,
+ this list of conditions and the following disclaimer.
+
+ 2. Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation
+ and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED `AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/**
+ * @author Tobias Florek
+ */
 class ElasticSearchBulk {
 
     /**
@@ -56,9 +61,9 @@ class ElasticSearchBulk {
     protected $chunksize;
 
     /**
-     * @var array The encoded operations
+     * @var array The encoded operations as array of strings
      */
-    protected $bulk_strs = array();
+    protected $chunks = array();
 
     /**
      * return ElasticSearchBulk
@@ -89,10 +94,9 @@ class ElasticSearchBulk {
         if ($id)
             $meta['_id'] = $id;
 
-        // second overwrites first
-        $meta = array_merge(array('_type'=>$this->type, '_index'=>$this->index), $meta);
+        $meta+= array('_type'=>$this->type, '_index'=>$this->index);
 
-        $this->bulk_strs[] = $this->encode_operation(self::INDEX, $meta, $doc);
+        $this->chunks[] = $this->encode_operation(self::INDEX, $meta, $doc);
     }
 
     /**
@@ -104,7 +108,7 @@ class ElasticSearchBulk {
      * @param string index
      */
     public function delete($id, $type='', $index='') {
-        $this->bulk_strs[] = $this->encode_operation(self::DELETE,
+        $this->chunks[] = $this->encode_operation(self::DELETE,
             array('_id' => $id,
                 '_type' => $type ? $type : $this->type,
                 '_index'=> $index? $index: $this->index
@@ -116,25 +120,25 @@ class ElasticSearchBulk {
      * @param array $options Not used atm
      */
     public function commit($options = array()) {
-        $count = count($this->bulk_strs);
+        $count = count($this->chunks);
         $chunksize = $this->chunksize? $this->chunksize: $count;
 
         $ret = array();
-        $strs = $this->bulk_strs;
+        $strs = $this->chunks;
 
         $ix = 0;
-        while ($ix < count($this->bulk_strs)) {
+        while ($ix < count($this->chunks)) {
             $strs = array_slice($strs, $ix, $ix+$chunksize);
 
-            # nb: there needs to be a newline at the end.
+            // nb: there needs to be a newline at the end.
             $str = join("\n", $strs)."\n";
-            $ret = array_merge($ret, $this->transport->request('/_bulk', 'POST', $str));
+            $ret+= $this->transport->request('/_bulk', 'POST', $str);
 
             $ix += $chunksize;
             $strs = array_slice($strs, $ix);
         }
         // reset array
-        $this->bulk_strs = array();
+        $this->chunks = array();
 
         return $ret;
     }

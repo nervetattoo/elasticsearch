@@ -28,7 +28,7 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
         $words = array("cool", "dog", "lorem", "ipsum", "dolor", "sit", "amet");
         // Generate documents
         $options = array(
-            'refresh' => true 
+            'refresh' => true
         );
         foreach ($indexes as $ind) {
             $this->search->setIndex($ind);
@@ -57,35 +57,6 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
         $resp = $this->search->index($doc, 1);
 
         $this->assertTrue($resp['ok'] == 1);
-    }
-
-    /**
-     * Test mixed bulk operations
-     */
-    public function testBulkOperations() {
-        $is_count = 3;
-        $this->addDocuments(array('test-index'), $is_count);
-
-        $add_count = 4;
-        $adds = array();
-        for ($i=0; $i < $add_count; $i=$i+1)
-            $adds[] = array('title'=>"$i, a cool document", 'rank' => rand(1, 10));
-
-        $delete_count = 2;
-
-        $bulk = $this->search->bulk();
-        foreach ($adds as $i=>$item)
-            $bulk->index($item);
-
-        # delete index 1, ..., $delete_count-1
-        for ($i=1; $i<=$delete_count; $i+=1)
-            $bulk->delete($i);
-        $bulk->commit();
-
-        // wait a second for shard to index
-        sleep(2);
-        $hits = $this->search->request('_count', 'GET', false, true);
-        $this->assertEquals($is_count + $add_count - $delete_count, $hits['count']);
     }
 
     /**

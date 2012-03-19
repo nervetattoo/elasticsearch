@@ -140,7 +140,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
-        if (! is_array($path))
+        if (!is_array($path))
           $path = array($path);
         $url = $this->buildUrl($path);
         try {
