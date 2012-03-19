@@ -26,7 +26,10 @@
 */
 
 /**
- * @author Tobias Florek
+ * @author Tobias Florek <me@ibotty.net>
+ * @package ElasticSearchClient
+ * @since 0.2
+ * Created: 2012
  */
 class ElasticSearchBulk {
 
@@ -94,7 +97,7 @@ class ElasticSearchBulk {
         if ($id)
             $meta['_id'] = $id;
 
-        $meta+= array('_type'=>$this->type, '_index'=>$this->index);
+        $meta += array('_type'=>$this->type, '_index'=>$this->index);
 
         $this->chunks[] = $this->encode_operation(self::INDEX, $meta, $doc);
     }
@@ -120,25 +123,10 @@ class ElasticSearchBulk {
      * @param array $options Not used atm
      */
     public function commit($options = array()) {
-        $count = count($this->chunks);
-        $chunksize = $this->chunksize? $this->chunksize: $count;
+        $chunksize = $this->chunksize? $this->chunksize: count($this->chunks);
 
-        $ret = array();
-        $strs = $this->chunks;
-
-        $ix = 0;
-        while ($ix < count($this->chunks)) {
-            $strs = array_slice($strs, $ix, $ix+$chunksize);
-
-            // nb: there needs to be a newline at the end.
-            $str = join("\n", $strs)."\n";
-            $ret+= $this->transport->request('/_bulk', 'POST', $str);
-
-            $ix += $chunksize;
-            $strs = array_slice($strs, $ix);
-        }
-        // reset array
-        $this->chunks = array();
+        foreach (array_chunk($this->chunks, $chunksize) as $chunks)
+            $ret += $this->transport->request('/_bulk', 'POST', join("\n", $chunks) . "\n");
 
         return $ret;
     }
@@ -152,7 +140,7 @@ class ElasticSearchBulk {
         $str = json_encode(array($type => $metadata));
 
         if ($payload)
-            $str.= "\n".json_encode($payload);
+            $str .= "\n".json_encode($payload);
         return $str;
     }
 }
