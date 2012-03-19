@@ -83,21 +83,20 @@ class ElasticSearchBulk {
     }
 
     /**
+     * add a document to index later.
+     *
      * @param array $doc A document to index
-     * @param string $id The ID to use
-     * @param string $index The index to use
-     * @param string $type The type to use
-     * @param array $meta The metadata to use (overwritten by $id, $index and $type, if specified)
+     * @param array $meta The metadata to use if it is an array, id otherwise
+     * @param array $options unused
      */
-    public function index($doc, $id='', $index='', $type='', $meta=array()) {
-        if ($index)
-            $meta['_index'] = $index;
-        if ($type)
-            $meta['_type'] = $type;
-        if ($id)
-            $meta['_id'] = $id;
+    public function index($doc, $meta = array(), $options = array()) {
+        if (!is_array($meta))
+            $meta = array("_id" => $meta);
 
-        $meta += array('_type'=>$this->type, '_index'=>$this->index);
+        if (!isset($meta["_index"]))
+            $meta['_index'] = $this->index;
+        if (!isset($meta["_type"]))
+            $meta['_type'] = $this->type;
 
         $this->chunks[] = $this->encode_operation(self::INDEX, $meta, $doc);
     }
