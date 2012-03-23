@@ -1,4 +1,7 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch\DSL;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -15,11 +18,11 @@
  * in a string representation
  *
  * @author Raymond Julin <raymond.julin@gmail.com>
- * @package ElasticSearchClient
+ * @package ElasticSearch
  * @since 0.1
  * Created: 2010-07-24
  */
-class ElasticSearchDSLStringify {
+class Stringify {
 
     protected $dsl = array();
     

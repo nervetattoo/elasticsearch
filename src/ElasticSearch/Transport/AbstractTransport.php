@@ -1,4 +1,7 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch\Transport;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -8,7 +11,7 @@
  * file that was distributed with this source code.
  */
 
-abstract class ElasticSearchTransport {
+abstract class AbstractTransport {
 
     /**
      * What host to connect to for server

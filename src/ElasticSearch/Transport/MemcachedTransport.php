@@ -1,4 +1,10 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch\Transport;
+
+use \Memcache;
+use \ElasticSearch\DSL\Stringify;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -8,7 +14,7 @@
  * file that was distributed with this source code.
  */
 
-class ElasticSearchTransportMemcached extends ElasticSearchTransport {
+class MemcachedTransport extends AbstractTransport {
     public function __construct($host="127.0.0.1", $port=11311) {
         parent::__construct($host, $port);
         $this->conn = new Memcache;
@@ -43,7 +49,7 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
     public function search($query) {
         if (is_array($query)) {
             if (array_key_exists("query", $query)) {
-                $dsl = new ElasticSearchDSLStringify($query);
+                $dsl = new Stringify($query);
                 $q = (string) $dsl;
                 $url = $this->buildUrl(array(
                     $this->type, "_search?q=" . $q

@@ -1,4 +1,10 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch;
+
+use ElasticSearch\Client;
+use ElasticSearch\Transport\MemcachedTransport;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -7,13 +13,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-require_once 'helper.php';
-class ElasticSearchMemcachedTest extends ElasticSearchParent {
+class MemcachedTest extends TestBase {
     
     protected $search = null;
     public function setUp() {
-        $transport = new ElasticSearchTransportMemcached;
-        $this->search = new ElasticSearchClient($transport, "test-index", "test-type");
+        $transport = new MemcachedTransport;
+        $this->search = new Client($transport, "test-index", "test-type");
         $this->search->delete();
     }
     public function tearDown() {

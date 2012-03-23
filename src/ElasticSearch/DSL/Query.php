@@ -1,4 +1,7 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch\DSL;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -16,7 +19,7 @@
  * @since 0.1
  * Created: 2010-07-24
  */
-class ElasticSearchDSLBuilderQuery {
+class Query {
     protected $term = null;
     protected $range = null;
     protected $prefix = null;
@@ -66,7 +69,7 @@ class ElasticSearchDSLBuilderQuery {
      * @param array $options
      */
     public function range(array $options=array()) {
-        $this->range = new ElasticSearchDSLBuilderRangeQuery($options);
+        $this->range = new RangeQuery($options);
         return $this->range;
     }
 

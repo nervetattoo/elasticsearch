@@ -1,4 +1,11 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch;
+
+use \stdClass;
+use ElasticSearch\Client;
+use ElasticSearch\Transport\HTTPTransport;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -7,12 +14,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-require_once 'helper.php';
-class ElasticSearchHTTPTest extends ElasticSearchParent {
+class HTTPTest extends TestBase {
 
     public function setUp() {
-        $transport = new ElasticSearchTransportHTTP("localhost", 9200);
-        $this->search = new ElasticSearchClient($transport, "test-index", "test-type");
+        $transport = new HTTPTransport("localhost", 9200);
+        $this->search = new Client($transport, "test-index", "test-type");
         $this->search->delete();
     }
     public function tearDown() {
@@ -89,11 +95,11 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
     }
 
     /**
-     * @expectedException ElasticSearchTransportHTTPException
+     * @expectedException ElasticSearch\Transport\HTTPTransportException
      */
     public function testSearchThrowExceptionWhenServerDown() {
-        $transport = new ElasticSearchTransportHTTP("localhost", 9300);
-        $search = new ElasticSearchClient($transport, "test-index", "test-type");
+        $transport = new HTTPTransport("localhost", 9300);
+        $search = new Client($transport, "test-index", "test-type");
         $search->search("title:cool");
     }
 

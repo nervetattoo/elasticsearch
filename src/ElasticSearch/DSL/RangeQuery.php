@@ -1,4 +1,7 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch\DSL;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -16,7 +19,7 @@
  * @since 0.1
  * Created: 2010-07-24
  */
-class ElasticSearchDSLBuilderRangeQuery {
+class RangeQuery {
     protected $fieldname = null;
     protected $from = null;
     protected $to = null;

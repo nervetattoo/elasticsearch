@@ -1,4 +1,10 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch;
+
+use \PHPUnit_Framework_TestCase;
+use ElasticSearch\DSL\Builder;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -7,11 +13,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-require_once 'helper.php';
-class ElasticSearchBuilderTest extends PHPUnit_Framework_TestCase {
+class BuilderTest extends PHPUnit_Framework_TestCase {
 
     public function testTermQuery() {
-        $dsl = new ElasticSearchDSLBuilder;
+        $dsl = new Builder;
         $query = $dsl->query();
         $query->term("cool", "title");
 
@@ -28,7 +33,7 @@ class ElasticSearchBuilderTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testRangeQuery() {
-        $dsl = new ElasticSearchDSLBuilder;
+        $dsl = new Builder;
         $query = $dsl->query();
         $query->range(array(
             'age' => array(
@@ -60,7 +65,7 @@ class ElasticSearchBuilderTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testRangeQueryAlternativeSyntax() {
-        $dsl = new ElasticSearchDSLBuilder;
+        $dsl = new Builder;
         $query = $dsl->query();
         $range = $query->range();
         $range->fieldname('age')

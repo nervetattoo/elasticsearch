@@ -1,4 +1,7 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch\Transport;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -7,13 +10,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-require_once 'ElasticSearchTransportHTTPException.php';
 
 if (!defined('CURLE_OPERATION_TIMEDOUT'))
     define('CURLE_OPERATION_TIMEDOUT', 28);
 
 
-class ElasticSearchTransportHTTP extends ElasticSearchTransport {
+class HTTPTransport extends AbstractTransport {
     
     /**
      * How long before timing out CURL call
@@ -227,7 +229,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
                         $error .= ". Non-cUrl error";
                     break;
             }
-            $exception = new ElasticSearchTransportHTTPException($error);
+            $exception = new HTTPTransportException($error);
             $exception->payload = $payload;
             $exception->port = $this->port;
             $exception->protocol = $protocol;

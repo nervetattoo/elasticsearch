@@ -1,4 +1,7 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch;
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -7,24 +10,16 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-require_once 'lib/ElasticSearchException.php';
-require_once 'lib/ElasticSearchDSLStringify.php';
 
-require_once 'lib/builder/ElasticSearchDSLBuilder.php';
-
-require_once 'lib/transport/ElasticSearchTransport.php';
-require_once 'lib/transport/ElasticSearchTransportHTTP.php';
-require_once 'lib/transport/ElasticSearchTransportMemcached.php';
-
-class ElasticSearchClient {
+class Client {
 
     private $transport, $index, $type;
     
     /**
      * Construct search client
      *
-     * @return ElasticSearch
-     * @param ElasticSearchTransport $transport
+     * @return ElasticSearch\Client
+     * @param ElasticSearch\Transport\Transport $transport
      * @param string $index
      * @param string $type
      */

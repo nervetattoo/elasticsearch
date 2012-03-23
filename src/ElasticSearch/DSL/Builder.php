@@ -1,4 +1,6 @@
 <?php // vim:set ts=4 sw=4 et:
+
+namespace ElasticSearch\DSL;
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -7,8 +9,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-require_once 'ElasticSearchDSLBuilderQuery.php';
-require_once 'ElasticSearchDSLBuilderRangeQuery.php';
 
 /**
  * Helper stuff for working with the ElasticSearch DSL
@@ -21,7 +21,7 @@ require_once 'ElasticSearchDSLBuilderRangeQuery.php';
  * @since 0.1
  * Created: 2010-07-23
  */
-class ElasticSearchDSLBuilder {
+class Builder {
 
     protected $dsl = array();
 
@@ -52,7 +52,7 @@ class ElasticSearchDSLBuilder {
      */
     public function query(array $options=array()) {
         if (!($this->query instanceof ElasticSearchDSLBuilderQuery))
-            $this->query = new ElasticSearchDSLBuilderQuery($options);
+            $this->query = new Query($options);
         return $this->query;
     }
 
