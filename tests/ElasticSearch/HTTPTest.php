@@ -17,13 +17,28 @@ use ElasticSearch\Transport\HTTPTransport;
 class HTTPTest extends TestBase {
 
     public function setUp() {
-        $transport = new HTTPTransport("localhost", 9200);
-        $this->search = new Client($transport, "test-index", "test-type");
+        $this->search = Client::connection(array(
+            'index' => 'test-index',
+            'type' => 'test-type'
+        ));
         $this->search->delete();
     }
     public function tearDown() {
-        $this->search->delete();
-        $this->search = null;
+        if ($this->search) {
+            $this->search->delete();
+            $this->search = null;
+        }
+    }
+
+    public function testDsnIsCorrectlyParsed() {
+        $search = Client::connection('http://test.com:9100/index/type');
+        $config = array(
+            'protocol' => 'http',
+            'servers' => 'test.com:9100',
+            'index' => 'index',
+            'type' => 'type'
+        );
+        $this->assertEquals($config, $search->config());
     }
     
     /**
@@ -98,8 +113,12 @@ class HTTPTest extends TestBase {
      * @expectedException ElasticSearch\Transport\HTTPTransportException
      */
     public function testSearchThrowExceptionWhenServerDown() {
-        $transport = new HTTPTransport("localhost", 9300);
-        $search = new Client($transport, "test-index", "test-type");
+        //$search = Client::connection('http://127.0.0.1:9300'));
+        $search = Client::connection(array(
+            'servers' => array(
+                '127.0.0.1:9300'
+            )
+        ));
         $search->search("title:cool");
     }
 

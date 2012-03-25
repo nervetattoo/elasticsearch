@@ -12,6 +12,24 @@ namespace ElasticSearch;
  */
 
 class Client {
+    const DEFAULT_PROTOCOL = 'http';
+    const DEFAULT_SERVER = '127.0.0.1:9200';
+    const DEFAULT_INDEX = 'default-index';
+    const DEFAULT_TYPE = 'default-type';
+
+    protected $_config = array();
+
+    protected static $_defaults = array(
+        'protocol' => Client::DEFAULT_PROTOCOL,
+        'servers' => Client::DEFAULT_SERVER,
+        'index' => Client::DEFAULT_INDEX,
+        'type' => Client::DEFAULT_TYPE
+    );
+
+    protected static $_protocols = array(
+        'http' => 'ElasticSearch\\Transport\\HTTPTransport',
+        'memcached' => 'ElasticSearch\\Transport\\MemcachedTransport',
+    );
 
     private $transport, $index, $type;
     
@@ -23,12 +41,51 @@ class Client {
      * @param string $index
      * @param string $type
      */
-    public function __construct($transport, $index, $type) {
+    public function __construct($transport, $index = null, $type = null) {
         $this->index = $index;
         $this->type = $type;
         $this->transport = $transport;
         $this->transport->setIndex($index);
         $this->transport->setType($type);
+    }
+
+    /**
+     * Get a client instance
+     * Defaults to opening a http transport connection to 127.0.0.1:9200
+     *
+     * @param string|array $config Allow overriding only the configuration bits you desire
+     *   - _transport_
+     *   - _host_
+     *   - _port_
+     *   - _index_
+     *   - _type_
+     * @return ElasticSearch\Client
+     */
+    public static function connection($config = array()) {
+        if (is_string($config)) {
+            $config = self::parseDsn($config);
+        }
+        $config += self::$_defaults;
+
+        $protocol = $config['protocol'];
+        if (!isset(self::$_protocols[$protocol])) {
+            throw new \Exception("Tried to use unknown protocol: $protocol");
+        }
+        $class = self::$_protocols[$protocol];
+
+        $server = is_array($config['servers']) ? $config['servers'][0] : $config['servers'];
+        list($host, $port) = explode(':', $server);
+        $transport = new $class($host, $port);
+        $client = new self($transport, $config['index'], $config['type']);
+        $client->config($config);
+        return $client;
+    }
+
+    public function config($config = null) {
+        if (!$config)
+            return $this->_config;
+        if (is_array($config))
+            $this->_config = $config + $this->_config;
     }
     
     /**
@@ -137,4 +194,14 @@ class Client {
         return ((float)$usec + (float)$sec);
     }
 
+    protected static function parseDsn($dsn) {
+        $parts = parse_url($dsn);
+        $protocol = $parts['scheme'];
+        $servers = $parts['host'] . ':' . $parts['port'];
+        if (isset($parts['path'])) {
+            $path = explode('/', $parts['path']);
+            list($index, $type) = array_values(array_filter($path));
+        }
+        return compact('protocol', 'servers', 'index', 'type');
+    }
 }
