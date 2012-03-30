@@ -1,6 +1,6 @@
 {
     "name" : "nervetattoo/elasticsearch",
-    "type" : "client",
+    "type" : "library",
     "description" : "ElasticSearch client for PHP 5.3",
     "keywords" : ["elasticsearch", "client"],
     "homepage" : "http://github.com/nervetattoo/elasticsearch",
