@@ -172,7 +172,7 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
      * @param string $method (GET/POST/PUT/DELETE)
      * @param array $payload The document/instructions to pass along
      */
-    protected function call($url, $method="GET", $payload=false) {
+    public function call($url, $method="GET", $payload=false) {
         $conn = $this->ch;
         $protocol = "http";
         $requestURL = $protocol . "://" . $this->host . $url;
