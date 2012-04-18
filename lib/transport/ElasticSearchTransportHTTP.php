@@ -188,11 +188,13 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
         else
         	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
 
-        $data = curl_exec($conn);
-        if ($data !== false)
-            $data = json_decode($data, true);
-        else
-        {
+        $curl_response = curl_exec($conn);
+        if ($curl_response !== false) {
+            $data = json_decode($curl_response, true);
+			if(empty($data)) {
+				$data = array('error' => $curl_response);
+			}
+        } else {
             /**
              * cUrl error code reference can be found here:
              * http://curl.haxx.se/libcurl/c/libcurl-errors.html
@@ -236,8 +238,9 @@ class ElasticSearchTransportHTTP extends ElasticSearchTransport {
             throw $exception;
         }
 
-        if (array_key_exists('error', $data))
+        if (array_key_exists('error', $data)) {
             $this->handleError($url, $method, $payload, $data);
+		}
 
         return $data;
     }
