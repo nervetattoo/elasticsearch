@@ -79,11 +79,11 @@ class ElasticSearchClient {
      * @return array
      * @param mixed $id Optional
      */
-    public function request($path, $method, $payload, $verbose=false) {
+    public function request($path, $method, $payload = false, $verbose=false) {
         $path = array_merge((array) $this->type, (array) $path);
 
         $response = $this->transport->request($path, $method, $payload);
-        return ($verbose)
+        return ($verbose or empty($response['_source']))
             ? $response
             : $response['_source'];
     }
