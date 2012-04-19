@@ -1,3 +1,4 @@
+[![Build Status](https://secure.travis-ci.org/nervetattoo/elasticsearch.png?branch=dev)](http://travis-ci.org/nervetattoo/elasticsearch)
 # ElasticSearch PHP client
 ElasticSearch is a distributed lucene powered search indexing, this is a PHP client for it
 
