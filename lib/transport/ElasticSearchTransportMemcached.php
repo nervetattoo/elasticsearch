@@ -64,15 +64,19 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             return $result;
         }
     }
-    
+
     /**
      * Perform a request against the given path/method/payload combination
      * Example:
      * $es->request('/_status');
      *
+     * It does only support GET and DELETE requests and silently ignores the
+     * payload.
+     *
      * @param string|array $path
      * @param string $method
-     * @param array|false $payload
+     * @param array|string|false $payload
+     *
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
@@ -84,6 +88,8 @@ class ElasticSearchTransportMemcached extends ElasticSearchTransport {
             case 'DELETE':
                 $result = $this->conn->delete($url);
                 break;
+            default:
+                throw new Exception("Memcached (or this implementation) does not support $method-requests.");
         }
         return json_decode($result);
     }

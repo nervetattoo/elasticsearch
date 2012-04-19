@@ -19,7 +19,7 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
         $this->search->delete();
         $this->search = null;
     }
-    
+
     /**
      * Test indexing a new document and having an auto id
      * This means dupes will occur
@@ -58,7 +58,7 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
         ));
         $this->assertEquals(0, $hits['hits']['total']);
     }
-    
+
     /**
      * Test a midly complex search
      */
@@ -106,7 +106,7 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
                 'term' => array(
                     'title' => 'cool'
                 )
-            ), 
+            ),
             'highlight' => array(
                 'fields' => array(
                     'title' => new stdClass()
@@ -124,5 +124,34 @@ class ElasticSearchHTTPTest extends ElasticSearchParent {
         $hit = $results['hits']['hits'][0];
         $this->assertTrue(array_key_exists('highlight', $hit));
         $this->assertRegexp('/<em>/', $hit['highlight']['title'][0]);
+    }
+
+    /**
+     * Test mixed bulk operations
+     */
+    public function testBulkOperations() {
+        $is_count = 3;
+        $this->addDocuments(array('test-index'), $is_count);
+
+        $add_count = 4;
+        $adds = array();
+        for ($i=0; $i < $add_count; $i=$i+1)
+            $adds[] = array('title'=>"$i, a cool document", 'rank' => rand(1, 10));
+
+        $delete_count = 2;
+
+        $bulk = $this->search->bulk();
+        foreach ($adds as $i=>$item)
+            $bulk->index($item);
+
+        # delete index 1, ..., $delete_count-1
+        for ($i = 1; $i <= $delete_count; $i += 1)
+            $bulk->delete($i);
+        $bulk->commit();
+
+        // wait a second for shard to index
+        sleep(2);
+        $hits = $this->search->request('_count', 'GET', false, true);
+        $this->assertEquals($is_count + $add_count - $delete_count, $hits['count']);
     }
 }

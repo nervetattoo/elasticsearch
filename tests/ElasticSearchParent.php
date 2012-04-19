@@ -28,7 +28,7 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
         $words = array("cool", "dog", "lorem", "ipsum", "dolor", "sit", "amet");
         // Generate documents
         $options = array(
-            'refresh' => true 
+            'refresh' => true
         );
         foreach ($indexes as $ind) {
             $this->search->setIndex($ind);
@@ -58,7 +58,7 @@ abstract class ElasticSearchParent extends PHPUnit_Framework_TestCase {
 
         $this->assertTrue($resp['ok'] == 1);
     }
-    
+
     /**
      * Test regular string search
      */
