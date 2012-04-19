@@ -1,7 +1,7 @@
 language: php
 php:
   - 5.3
-before_install:
-  - ./tests/install-php-memcache.sh
+before_script:
+  - sh tests/install-php-memcache.sh
   - sudo service elasticsearch start
   - sleep 3
