@@ -62,6 +62,9 @@ class Client {
      * @return ElasticSearch\Client
      */
     public static function connection($config = array()) {
+        if (!$config && ($url = getenv('ELASTICSEARCH_URL'))) {
+            $config = $url;
+        }
         if (is_string($config)) {
             $config = self::parseDsn($config);
         }
