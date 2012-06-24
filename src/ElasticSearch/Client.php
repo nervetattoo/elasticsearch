@@ -122,10 +122,7 @@ class Client {
      * @param mixed $id Optional
      */
     public function get($id, $verbose=false) {
-        $response = $this->transport->request(array($this->type, $id), "GET");
-        return ($verbose)
-            ? $response
-            : $response['_source'];
+        return $this->request(array($this->type, $id), "GET");
     }
     
     /**
@@ -138,7 +135,7 @@ class Client {
         $path = array_merge((array) $this->type, (array) $path);
 
         $response = $this->transport->request($path, $method, $payload);
-        return ($verbose)
+        return ($verbose || !isset($response['_source']))
             ? $response
             : $response['_source'];
     }

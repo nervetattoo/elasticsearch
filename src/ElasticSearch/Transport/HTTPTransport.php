@@ -190,11 +190,14 @@ class HTTPTransport extends AbstractTransport {
         else
         	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
 
-        $data = curl_exec($conn);
-        if ($data !== false)
-            $data = json_decode($data, true);
-        else
-        {
+        $response = curl_exec($conn);
+        if ($response !== false) {
+            $data = json_decode($response, true);
+            if (!$data) {
+                $data = array('error' => $response);
+            }
+        }
+        else {
             /**
              * cUrl error code reference can be found here:
              * http://curl.haxx.se/libcurl/c/libcurl-errors.html
@@ -238,19 +241,6 @@ class HTTPTransport extends AbstractTransport {
             throw $exception;
         }
 
-        if (array_key_exists('error', $data))
-            $this->handleError($url, $method, $payload, $data);
-
         return $data;
-    }
-
-    protected function handleError($url, $method, $payload, $response) {
-        $err = "Request: \n";
-        $err .= "curl -X$method http://{$this->host}:{$this->port}$url";
-        if ($payload) $err .=  " -d '" . json_encode($payload) . "'";
-        $err .= "\n";
-        $err .= "Triggered some error: \n";
-        $err .= $response['error'] . "\n";
-        //echo $err;
     }
 }
