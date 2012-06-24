@@ -7,14 +7,12 @@ ElasticSearch is a distributed lucene powered search indexing, this is a PHP cli
 ```php
 <?php
 use \ElasticSearch\Client;
-// Use dsn string or configuration array specifying keys
+// The recommended way to go about things is to use an environment variable called ELASTICSEARCH_URL
+$es = Client::connection();
+
+// Alternatively you can use dsn string
 $es = Client::connection('http://127.0.0.1:9200/myindex/mytype');
-$es = Client::connection(array(
-    'server' => '127.0.0.1:9200',
-    'protocol' => 'http',
-    'index' => 'myindex',
-    'type' => 'mytype'
-));
+
 $es->index(array('title' => 'My cool document'), $id);
 $es->get($id);
 $es->search('title:cool');
@@ -38,4 +36,18 @@ $es->search(array(
         'term' => array('title' => 'cool')
     )
 );
+```
+
+## Provide configuration as array
+
+Using an array for configuration also works
+
+```php
+<?php
+$es = Client::connection(array(
+    'server' => '127.0.0.1:9200',
+    'protocol' => 'http',
+    'index' => 'myindex',
+    'type' => 'mytype'
+));
 ```
