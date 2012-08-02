@@ -2,7 +2,9 @@
 # ElasticSearch PHP client
 ElasticSearch is a distributed lucene powered search indexing, this is a PHP client for it
 
-## Installation
+## Usage
+
+### Initial setup 
 
 1. Install composer. `curl -s http://getcomposer.org/installer | php`
 2. Create `composer.json` containing:
@@ -17,10 +19,12 @@ ElasticSearch is a distributed lucene powered search indexing, this is a PHP cli
 3. Run `./composer.phar install`
 4. Keep up-to-date: `./composer.phar update`
 
-## Basic usage
+### Indexing and searching
 
 ```php
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
+
 use \ElasticSearch\Client;
 // The recommended way to go about things is to use an environment variable called ELASTICSEARCH_URL
 $es = Client::connection();
@@ -33,7 +37,7 @@ $es->get($id);
 $es->search('title:cool');
 ```
 
-## Search multiple indexes or types
+### Search multiple indexes or types
 
 ```php
 <?php
@@ -42,7 +46,7 @@ $es->setType(array("mytype", "other-type"));
 $es->search('title:cool');
 ```
 
-## Using the Query DSL
+### Using the Query DSL
 
 ```php
 <?php
@@ -53,7 +57,7 @@ $es->search(array(
 );
 ```
 
-## Provide configuration as array
+### Provide configuration as array
 
 Using an array for configuration also works
 
