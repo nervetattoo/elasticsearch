@@ -2,7 +2,6 @@
 
 namespace ElasticSearch\tests\units;
 
-require_once getcwd() . '/atoum.phar';
 require_once getcwd() . '/vendor/autoload.php';
 
 use \mageekguy\atoum;
@@ -95,7 +94,6 @@ class Mapping extends atoum\test
             'tweet' => array('type' => 'string')
         ));
 
-        print_R($response);
         $this->assert->array($response)->isNotEmpty();
     }
 }
