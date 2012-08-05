@@ -16,10 +16,8 @@
 	"php" : ">=5.3.0"
     },
     "require-dev" : {
-	"mageekguy/atoum" : "dev-fpm@dev"
-    },
-    "config" : {
-	"bin-dir" : "bin/"
+	"mageekguy/atoum" : "dev-fpm@dev",
+	"EHER/PHPUnit" : "dev-master@dev"
     },
     "autoload" : {
         "psr-0" : {

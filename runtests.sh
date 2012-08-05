@@ -1,1 +1,1 @@
-./bin/atoum -d tests/units && phpunit
+./vendor/bin/atoum -d tests/units && ./vendor/bin/phpunit
