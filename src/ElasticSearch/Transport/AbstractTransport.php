@@ -115,7 +115,7 @@ abstract class AbstractTransport {
      */
     protected function buildUrl($path=false, array $options = array()) {
         $url = "/" . $this->index;
-        if ($path && count($path) > 0)
+        if ($path && is_array($path) && count($path) > 0)
             $url .= "/" . implode("/", array_filter($path));
         if (substr($url, -1) == "/")
             $url = substr($url, 0, -1);
