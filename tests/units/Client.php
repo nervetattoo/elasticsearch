@@ -199,4 +199,17 @@ class Client extends \ElasticSearch\tests\Base
             ->array($results['hits']['hits'][0]['highlight'])
             ->hasKey('title');
     }
+
+    public function testConfigIsReadFromEnv() {
+        $esURL = 'http://127.0.0.1:9200/index/type';
+        putenv("ELASTICSEARCH_URL={$esURL}");
+
+        $client = \ElasticSearch\Client::connection();
+        $config = $client->config();
+        $this->assert->array($config)
+            ->hasKeys(array('index', 'type'));
+        $this->assert->string($config['index'])->isEqualTo('index');
+        $this->assert->string($config['type'])->isEqualTo('type');
+        putenv("ELASTICSEARCH_URL");
+    }
 }
