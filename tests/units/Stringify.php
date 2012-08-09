@@ -1,9 +1,7 @@
 <?php // vim:set ts=4 sw=4 et:
+namespace ElasticSearch\DSL\tests\units;
 
-namespace ElasticSearch;
-
-use \PHPUnit_Framework_TestCase;
-use ElasticSearch\DSL\Stringify;
+require_once __DIR__ . '/../Base.php';
 
 /**
  * This file is part of the ElasticSearch PHP client
@@ -13,17 +11,18 @@ use ElasticSearch\DSL\Stringify;
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-class DSLTest extends PHPUnit_Framework_TestCase {
-    
+class Stringify extends \ElasticSearch\tests\Base
+{
     public function testNamedTerm() {
         $arr = array(
             'query' => array(
                 'term' => array('title' => 'cool')
             )
         );
-        $dsl = new Stringify($arr);
+        $dsl = new \ElasticSearch\DSL\Stringify($arr);
         $strDsl = (string)$dsl;
-        $this->assertEquals("title:cool", $strDsl);
+        $this->assert->string((string) $dsl)
+            ->isEqualTo('title:cool');
     }
 
     public function testTerm() {
@@ -32,9 +31,9 @@ class DSLTest extends PHPUnit_Framework_TestCase {
                 'term' => 'cool'
             )
         );
-        $dsl = new Stringify($arr);
-        $strDsl = (string)$dsl;
-        $this->assertEquals("cool", $strDsl);
+        $dsl = new \ElasticSearch\DSL\Stringify($arr);
+        $this->assert->string((string) $dsl)
+            ->isEqualTo('cool');
     }
 
     public function testGroupedTerms() {
@@ -43,9 +42,9 @@ class DSLTest extends PHPUnit_Framework_TestCase {
                 'term' => 'cool stuff'
             )
         );
-        $dsl = new Stringify($arr);
-        $strDsl = (string)$dsl;
-        $this->assertEquals('"cool stuff"', $strDsl);
+        $dsl = new \ElasticSearch\DSL\Stringify($arr);
+        $this->assert->string((string) $dsl)
+            ->isEqualTo('"cool stuff"');
     }
 
     public function testNamedGroupedTerms() {
@@ -54,9 +53,9 @@ class DSLTest extends PHPUnit_Framework_TestCase {
                 'term' => array('title' => 'cool stuff')
             )
         );
-        $dsl = new Stringify($arr);
-        $strDsl = (string)$dsl;
-        $this->assertEquals('title:"cool stuff"', $strDsl);
+        $dsl = new \ElasticSearch\DSL\Stringify($arr);
+        $this->assert->string((string) $dsl)
+            ->isEqualTo('title:"cool stuff"');
     }
 
     public function testSort() {
@@ -68,16 +67,19 @@ class DSLTest extends PHPUnit_Framework_TestCase {
                 'term' => array('title' => 'cool stuff')
             )
         );
-        $dsl = new Stringify($arr);
-        $this->assertEquals('title:"cool stuff"&sort=title:reverse', (string)$dsl);
+        $dsl = new \ElasticSearch\DSL\Stringify($arr);
+        $this->assert->string((string) $dsl)
+            ->isEqualTo('title:"cool stuff"&sort=title:reverse');
 
         $arr['sort'] = array('title');
-        $dsl = new Stringify($arr);
-        $this->assertEquals('title:"cool stuff"&sort=title', (string)$dsl);
+        $dsl = new \ElasticSearch\DSL\Stringify($arr);
+        $this->assert->string((string) $dsl)
+            ->isEqualTo('title:"cool stuff"&sort=title');
 
         $arr['sort'] = array(array('title' => array('reverse' => true)));
-        $dsl = new Stringify($arr);
-        $this->assertEquals('title:"cool stuff"&sort=title:reverse', (string)$dsl);
+        $dsl = new \ElasticSearch\DSL\Stringify($arr);
+        $this->assert->string((string) $dsl)
+            ->isEqualTo('title:"cool stuff"&sort=title:reverse');
     }
 
     public function testLimitReturnFields() {
@@ -87,7 +89,8 @@ class DSLTest extends PHPUnit_Framework_TestCase {
                 'term' => array('title' => 'cool')
             )
         );
-        $dsl = new Stringify($arr);
-        $this->assertEquals('title:cool&fields=title,body', (string)$dsl);
+        $dsl = new \ElasticSearch\DSL\Stringify($arr);
+        $this->assert->string((string) $dsl)
+            ->isEqualTo('title:cool&fields=title,body');
     }
 }

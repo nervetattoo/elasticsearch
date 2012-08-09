@@ -1,9 +1,7 @@
 <?php // vim:set ts=4 sw=4 et:
+namespace ElasticSearch\DSL\tests\units;
 
-namespace ElasticSearch;
-
-use \PHPUnit_Framework_TestCase;
-use ElasticSearch\DSL\Builder;
+require_once __DIR__ . '/../Base.php';
 
 /**
  * This file is part of the ElasticSearch PHP client
@@ -13,10 +11,11 @@ use ElasticSearch\DSL\Builder;
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-class BuilderTest extends PHPUnit_Framework_TestCase {
 
+class Builder extends \ElasticSearch\tests\Base
+{
     public function testTermQuery() {
-        $dsl = new Builder;
+        $dsl = new \ElasticSearch\DSL\Builder;
         $query = $dsl->query();
         $query->term("cool", "title");
 
@@ -26,14 +25,14 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
             )
         );
         $built = $dsl->build();
-        $this->assertEquals($arr, $built);
+        $this->assert->array($built)->isEqualTo($arr);
+
         $query->wildcard("cool*", "title");
-        $built = $dsl->build();
-        $this->assertEquals($arr, $built);
+        $this->assert->array($dsl->build())->isEqualTo($arr);
     }
 
     public function testRangeQuery() {
-        $dsl = new Builder;
+        $dsl = new \ElasticSearch\DSL\Builder;
         $query = $dsl->query();
         $query->range(array(
             'age' => array(
@@ -60,12 +59,11 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
             )
         );
 
-        $built = $dsl->build();
-        $this->assertEquals($arr, $built);
+        $this->assert->array($dsl->build())->isEqualTo($arr);
     }
 
     public function testRangeQueryAlternativeSyntax() {
-        $dsl = new Builder;
+        $dsl = new \ElasticSearch\DSL\Builder;
         $query = $dsl->query();
         $range = $query->range();
         $range->fieldname('age')
@@ -90,7 +88,6 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
             )
         );
 
-        $built = $dsl->build();
-        $this->assertEquals($arr, $built);
+        $this->assert->array($dsl->build())->isEqualTo($arr);
     }
 }
