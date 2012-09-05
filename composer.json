@@ -16,8 +16,7 @@
 	"php" : ">=5.3.0"
     },
     "require-dev" : {
-	"mageekguy/atoum" : "dev-master@dev",
-	"EHER/PHPUnit" : "dev-master@dev"
+	"mageekguy/atoum" : "dev-master@dev"
     },
     "autoload" : {
         "psr-0" : {
