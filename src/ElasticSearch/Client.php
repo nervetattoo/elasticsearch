@@ -32,7 +32,7 @@ class Client {
     );
 
     private $transport, $index, $type;
-    
+
     /**
      * Construct search client
      *
@@ -42,11 +42,8 @@ class Client {
      * @param string $type
      */
     public function __construct($transport, $index = null, $type = null) {
-        $this->index = $index;
-        $this->type = $type;
         $this->transport = $transport;
-        $this->transport->setIndex($index);
-        $this->transport->setType($type);
+        $this->setIndex($index)->setType($type);
     }
 
     /**
@@ -90,7 +87,7 @@ class Client {
         if (is_array($config))
             $this->_config = $config + $this->_config;
     }
-    
+
     /**
      * Change what index to go against
      * @return void
@@ -101,8 +98,9 @@ class Client {
             $index = implode(",", array_filter($index));
         $this->index = $index;
         $this->transport->setIndex($index);
+        return $this;
     }
-    
+
     /**
      * Change what types to act against
      * @return void
@@ -113,8 +111,9 @@ class Client {
             $type = implode(",", array_filter($type));
         $this->type = $type;
         $this->transport->setType($type);
+        return $this;
     }
-    
+
     /**
      * Fetch a document by its id
      *
@@ -124,12 +123,44 @@ class Client {
     public function get($id, $verbose=false) {
         return $this->request(array($this->type, $id), "GET");
     }
-    
+
+    /**
+     * Puts a mapping on index
+     *
+     * @param array|object $mapping
+     */
+    public function map($mapping, array $config = array()) {
+        if (is_array($mapping)) $mapping = new Mapping($mapping);
+        $mapping->config($config);
+
+        try {
+            $type = $mapping->config('type');
+        }
+        catch (\Exception $e) {} // No type is cool
+        if (isset($type) && !$this->passesTypeConstraint($type)) {
+            throw new Exception("Cant create mapping due to type constraint mismatch");
+        }
+
+        return $this->request(array('_mapping'), 'PUT', $mapping->export(), true);
+    }
+
+    protected function passesTypeConstraint($constraint) {
+        if (is_string($constraint)) $constraint = array($constraint);
+        $currentType = explode(',', $this->type);
+        $includeTypes = array_intersect($constraint, $currentType);
+        return ($constraint && count($includeTypes) === count($constraint));
+    }
+
     /**
      * Perform a request
      *
      * @return array
-     * @param mixed $id Optional
+     * @param mixed $path Request path to use.
+     *     `type` is prepended to this path inside request
+     * @param string $method HTTP verb to use
+     * @param mixed $payload Array of data to be json-encoded
+     * @param bool $verbose Controls response data, if `false`
+     *     only `_source` of response is returned
      */
     public function request($path, $method, $payload = false, $verbose=false) {
         $path = array_merge((array) $this->type, (array) $path);
@@ -177,7 +208,7 @@ class Client {
     public function delete($id=false, array $options = array()) {
         return $this->transport->delete($id, $options);
     }
-    
+
     /**
      * Flush this index/type combination
      *

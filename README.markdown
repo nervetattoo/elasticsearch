@@ -37,13 +37,26 @@ $es->get($id);
 $es->search('title:cool');
 ```
 
+### Creating mapping
+
+```php
+<?php
+$es->map(array(
+    'title' => array(
+        'type' => 'string',
+	'index' => 'analyzed'
+    )
+));
+```
+
 ### Search multiple indexes or types
 
 ```php
 <?php
-$es->setIndex(array("one", "two"));
-$es->setType(array("mytype", "other-type"));
-$es->search('title:cool');
+$results = $es
+    ->setIndex(array("one", "two"))
+    ->setType(array("mytype", "other-type"))
+    ->search('title:cool');
 ```
 
 ### Using the Query DSL
