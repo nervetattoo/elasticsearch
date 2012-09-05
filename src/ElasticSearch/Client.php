@@ -32,7 +32,7 @@ class Client {
     );
 
     private $transport, $index, $type;
-    
+
     /**
      * Construct search client
      *
@@ -87,7 +87,7 @@ class Client {
         if (is_array($config))
             $this->_config = $config + $this->_config;
     }
-    
+
     /**
      * Change what index to go against
      * @return void
@@ -100,7 +100,7 @@ class Client {
         $this->transport->setIndex($index);
         return $this;
     }
-    
+
     /**
      * Change what types to act against
      * @return void
@@ -113,7 +113,7 @@ class Client {
         $this->transport->setType($type);
         return $this;
     }
-    
+
     /**
      * Fetch a document by its id
      *
@@ -150,7 +150,7 @@ class Client {
         $includeTypes = array_intersect($constraint, $currentType);
         return ($constraint && count($includeTypes) === count($constraint));
     }
-    
+
     /**
      * Perform a request
      *
@@ -208,7 +208,7 @@ class Client {
     public function delete($id=false, array $options = array()) {
         return $this->transport->delete($id, $options);
     }
-    
+
     /**
      * Flush this index/type combination
      *
