@@ -100,13 +100,14 @@ class HTTPTransport extends AbstractTransport {
      * @param array $options Parameters to pass to delete action
      */
     public function deleteByQuery($query, array $options = array()) {
+        $options += array(
+            'refresh' => true
+        );
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
              */
-            $url = $this->buildUrl(array(
-                $this->type, "_query"
-            ), $options);
+            $url = $this->buildUrl(array($this->type, "_query"));
             try {
                 $result = $this->call($url, "DELETE", $query);
             }
@@ -118,9 +119,7 @@ class HTTPTransport extends AbstractTransport {
             /**
              * String based search means http query string search
              */
-            $url = $this->buildUrl(array(
-                $this->type, "_query?q=" . $query
-            ), $options);
+            $url = $this->buildUrl(array($this->type, "_query"), array('q' => $query));
             try {
                 $result = $this->call($url, "DELETE");
             }
@@ -128,7 +127,10 @@ class HTTPTransport extends AbstractTransport {
                 throw $e;
             }
         }
-        return $result['ok'];
+        if ($options['refresh']) {
+            $this->request('_refresh', "POST");
+        }
+        return !isset($result['error']) && $result['ok'];
     }
     
     /**

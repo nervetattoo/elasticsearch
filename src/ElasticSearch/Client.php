@@ -131,7 +131,7 @@ class Client {
      * @return array
      * @param mixed $id Optional
      */
-    public function request($path, $method, $payload, $verbose=false) {
+    public function request($path, $method, $payload = false, $verbose=false) {
         $path = array_merge((array) $this->type, (array) $path);
 
         $response = $this->transport->request($path, $method, $payload);
@@ -187,6 +187,15 @@ class Client {
      */
     public function deleteByQuery($query, array $options = array()) {
         return $this->transport->deleteByQuery($query, $options);
+    }
+
+    /**
+     * Perform refresh of current indexes
+     *
+     * @return array
+     */
+    public function refresh() {
+        return $this->request('_refresh', "POST");
     }
 
     private function getMicroTime() {
