@@ -44,12 +44,7 @@ class HTTPTransport extends AbstractTransport {
     public function index($document, $id=false, array $options = array()) {
         $url = $this->buildUrl(array($this->type, $id), $options);
         $method = ($id == false) ? "POST" : "PUT";
-        try {
-            $response = $this->call($url, $method, $document);
-        }
-        catch (Exception $e) {
-            throw $e;
-        }
+        $response = $this->call($url, $method, $document);
 
         return $response;
     }
@@ -68,12 +63,7 @@ class HTTPTransport extends AbstractTransport {
             $url = $this->buildUrl(array(
                 $this->type, "_search"
             ));
-            try {
-                $result = $this->call($url, "GET", $query);
-            }
-            catch (Exception $e) {
-                throw $e;
-            }
+            $result = $this->call($url, "GET", $query);
         }
         elseif (is_string($query)) {
             /**
@@ -82,12 +72,7 @@ class HTTPTransport extends AbstractTransport {
             $url = $this->buildUrl(array(
                 $this->type, "_search?q=" . $query
             ));
-            try {
-                $result = $this->call($url, "GET");
-            }
-            catch (Exception $e) {
-                throw $e;
-            }
+            $result = $this->call($url, "GET");
         }
         return $result;
     }
@@ -108,24 +93,14 @@ class HTTPTransport extends AbstractTransport {
              * Array implies using the JSON query DSL
              */
             $url = $this->buildUrl(array($this->type, "_query"));
-            try {
-                $result = $this->call($url, "DELETE", $query);
-            }
-            catch (Exception $e) {
-                throw $e;
-            }
+            $result = $this->call($url, "DELETE", $query);
         }
         elseif (is_string($query)) {
             /**
              * String based search means http query string search
              */
             $url = $this->buildUrl(array($this->type, "_query"), array('q' => $query));
-            try {
-                $result = $this->call($url, "DELETE");
-            }
-            catch (Exception $e) {
-                throw $e;
-            }
+            $result = $this->call($url, "DELETE");
         }
         if ($options['refresh']) {
             $this->request('_refresh', "POST");
@@ -145,12 +120,7 @@ class HTTPTransport extends AbstractTransport {
      */
     public function request($path, $method="GET", $payload=false) {
         $url = $this->buildUrl($path);
-        try {
-            $result = $this->call($url, $method, $payload);
-        }
-        catch (Exception $e) {
-            throw $e;
-        }
+        $result = $this->call($url, $method, $payload);
         return $result;
     }
     
