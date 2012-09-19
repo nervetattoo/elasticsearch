@@ -191,9 +191,9 @@ class Client {
      * @param array $document
      */
     public function search($query) {
-        $start = $this->getMicroTime();
+        $start = microtime(true);
         $result = $this->transport->search($query);
-        $result['time'] = $this->getMicroTime() - $start;
+        $result['time'] = microtime(true) - $start;
         return $result;
     }
     
@@ -227,11 +227,6 @@ class Client {
      */
     public function refresh() {
         return $this->request('_refresh', "POST");
-    }
-
-    private function getMicroTime() {
-        list($usec, $sec) = explode(" ", microtime());
-        return ((float)$usec + (float)$sec);
     }
 
     protected static function parseDsn($dsn) {
