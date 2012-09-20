@@ -70,6 +70,15 @@ $es->search(array(
 );
 ```
 
+### Using params passed through request string
+
+```php
+<?php
+$results = $es->search($request_body, ['routing' => 'value']);
+$results = $es->search($request_body, ['search_type' => 'count']);
+```
+
+
 ### Provide configuration as array
 
 Using an array for configuration also works
