@@ -17,13 +17,13 @@ abstract class AbstractTransport {
      * What host to connect to for server
      * @var string
      */
-    protected $host = "";
+    protected $host;
     
     /**
      * Port to connect on
      * @var int
      */
-    protected $port = 9200;
+    protected $port;
 
     /**
      * ElasticSearch index
