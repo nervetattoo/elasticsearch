@@ -31,7 +31,15 @@ class HTTPTransport extends AbstractTransport {
 	
     public function __construct($host='localhost', $port=9200) {
         parent::__construct($host, $port);
-        $this->ch = curl_init();
+        $conn = curl_init();
+        curl_setopt_array($conn, array(
+            CURLOPT_TIMEOUT			=> self::TIMEOUT,
+            CURLOPT_PORT			=> $this->port,
+            CURLOPT_RETURNTRANSFER	=> true,
+            CURLOPT_FORBID_REUSE	=> true,
+            CURLOPT_FRESH_CONNECT	=> true,
+        ) );
+        $this->ch = $conn;
     }
     
     /**
@@ -151,13 +159,9 @@ class HTTPTransport extends AbstractTransport {
         $protocol = "http";
         $requestURL = $protocol . "://" . $this->host . $url;
         curl_setopt($conn, CURLOPT_URL, $requestURL);
-        curl_setopt($conn, CURLOPT_TIMEOUT, self::TIMEOUT);
-        curl_setopt($conn, CURLOPT_PORT, $this->port);
-        curl_setopt($conn, CURLOPT_RETURNTRANSFER, 1) ;
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
-        curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
-        if (is_array($payload) && count($payload) > 0)
+        if (false !== $payload)
             curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
         else
         	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
@@ -165,9 +169,8 @@ class HTTPTransport extends AbstractTransport {
         $response = curl_exec($conn);
         if ($response !== false) {
             $data = json_decode($response, true);
-            if (!$data) {
-                $data = array('error' => $response);
-            }
+            if (false === $data)
+                throw new Exception( 'ElasticSearch responded invalid JSON' );
         }
         else {
             /**
