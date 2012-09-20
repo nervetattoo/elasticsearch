@@ -86,6 +86,7 @@ class Client {
             return $this->_config;
         if (is_array($config))
             $this->_config = $config + $this->_config;
+        return $this;
     }
 
     /**
