@@ -37,6 +37,37 @@ $es->get($id);
 $es->search('title:cool');
 ```
 
+### Selecting index & type
+
+```php
+<?php
+# setIndex( $index, $type = false ) sets index & type.
+# setType( $type ) sets only type.
+# FALSE value - use all indices/types
+
+$es->setIndex( 'index', 'type' );
+# path: /index/type
+
+$es->setType( 'type2' );
+# path: /index/type2
+
+$es->setType( false );
+# same as $es->setIndex( 'index' );
+# path: /index
+
+$es->setIndex( false );
+# path: /
+
+$es->setType( 'type' );
+# in this case same as $this->setIndex( false, 'type' )
+# path: /_all/type
+
+$es->setIndex( 'index', true );
+# TRUE - will avoid type changing
+# path: /index/type
+
+```
+
 ### Creating mapping
 
 ```php
@@ -69,6 +100,15 @@ $es->search(array(
     )
 );
 ```
+
+### Using params passed through request string
+
+```php
+<?php
+$results = $es->search($request_body, ['routing' => 'value']);
+$results = $es->search($request_body, ['search_type' => 'count']);
+```
+
 
 ### Provide configuration as array
 

@@ -7,6 +7,12 @@ use ElasticSearch\tests\Helper;
 
 class Client extends \ElasticSearch\tests\Base
 {
+	protected static $CONFIG = array
+	(
+		'index'	=> 'default-index',
+		'type'	=> 'default-type'
+	);
+	
     public function tearDown() {
         \ElasticSearch\Client::connection()->delete();
     }
@@ -30,7 +36,8 @@ class Client extends \ElasticSearch\tests\Base
         $doc = array(
             'title' => 'One cool ' . $this->getTag()
         );
-        $resp = \ElasticSearch\Client::connection()->index($doc, 1, array('refresh' => true));
+        $resp = \ElasticSearch\Client::connection(static::$CONFIG)
+        	->index($doc, 1, array('refresh' => true));
 
         $this->assert->array($resp)->hasKey('ok')
             ->boolean($resp['ok'])->isTrue(1);
@@ -40,7 +47,7 @@ class Client extends \ElasticSearch\tests\Base
      * Test regular string search
      */
     public function testStringSearch() {
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(static::$CONFIG);
         $tag = $this->getTag();
         Helper::addDocuments($client, 3, $tag);
         $resp = $client->search("title:$tag");
@@ -57,7 +64,7 @@ class Client extends \ElasticSearch\tests\Base
         $doc = array(
             'title' => 'One cool ' . $this->getTag()
         );
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(static::$CONFIG);
         $resp = $client->index($doc, false, array('refresh' => true));
         $this->assert->array($resp)->hasKey('ok')
             ->boolean($resp['ok'])->isTrue(1);
@@ -68,7 +75,7 @@ class Client extends \ElasticSearch\tests\Base
      */
     public function testDeleteByQuery() {
         $options = array('refresh' => true);
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(static::$CONFIG);
         $word = $this->getTag();
         $resp = $client->index(array('title' => $word), 1, $options);
 
@@ -92,7 +99,7 @@ class Client extends \ElasticSearch\tests\Base
      * Test a midly complex search
      */
     public function testSlightlyComplexSearch() {
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(static::$CONFIG);
 
         $uniqueWord = $this->getTag();
         $docs = 3;
@@ -129,20 +136,20 @@ class Client extends \ElasticSearch\tests\Base
      */
     public function testSearchMultipleIndexes()
     {
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(static::$CONFIG);
         $tag = $this->getTag();
 
         $primaryIndex = 'test-index';
         $secondaryIndex = 'test-index2';
         $doc = array('title' => $tag);
         $options = array('refresh' => true);
-        $client->setIndex($secondaryIndex)->index($doc, false, $options);
-        $client->setIndex($primaryIndex)->index($doc, false, $options);
+        $client->setIndex($secondaryIndex, true)->index($doc, false, $options);
+        $client->setIndex($primaryIndex, true)->index($doc, false, $options);
 
         $indexes = array($primaryIndex, $secondaryIndex);
 
         // Use both indexes when searching
-        $resp = $client->setIndex($indexes)->search("title:$tag");
+        $resp = $client->setIndex($indexes, true)->search("title:$tag");
 
         $this->assert->array($resp)->hasKey('hits')
             ->array($resp['hits'])->hasKey('total')
@@ -170,7 +177,7 @@ class Client extends \ElasticSearch\tests\Base
      * Test highlighting
      */
     public function testHighlightedSearch() {
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(static::$CONFIG);
         $ind = $client->index(array( 
             'title' => 'One cool document',
             'body' => 'Lorem ipsum dolor sit amet',

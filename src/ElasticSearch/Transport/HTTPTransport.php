@@ -31,7 +31,15 @@ class HTTPTransport extends AbstractTransport {
 	
     public function __construct($host='localhost', $port=9200) {
         parent::__construct($host, $port);
-        $this->ch = curl_init();
+        $conn = curl_init();
+        curl_setopt_array($conn, array(
+            CURLOPT_TIMEOUT			=> self::TIMEOUT,
+            CURLOPT_PORT			=> $this->port,
+            CURLOPT_RETURNTRANSFER	=> true,
+            CURLOPT_FORBID_REUSE	=> true,
+            CURLOPT_FRESH_CONNECT	=> true,
+        ) );
+        $this->ch = $conn;
     }
     
     /**
@@ -42,53 +50,35 @@ class HTTPTransport extends AbstractTransport {
      * @param mixed $id Optional
      */
     public function index($document, $id=false, array $options = array()) {
-        $url = $this->buildUrl(array($this->type, $id), $options);
-        $method = ($id == false) ? "POST" : "PUT";
-        try {
-            $response = $this->call($url, $method, $document);
-        }
-        catch (Exception $e) {
-            throw $e;
-        }
+        $url = $this->buildUrl($id, $options);
+        $method = ($id === false) ? "POST" : "PUT";
+        $response = $this->call($url, $method, $document);
 
         return $response;
     }
     
     /**
-     * Search
+     * requestWithQuery
      *
      * @return array
-     * @param mixed $id Optional
+     * @param mixed $query Query string or DSL array
+     * @param string $path action to perform (_search, _query, etc.)
+     * @param string $method HTTP method
+     * @param array $reqParams Parameters to pass in URI
      */
-    public function search($query) {
-        if (is_array($query)) {
-            /**
-             * Array implies using the JSON query DSL
-             */
-            $url = $this->buildUrl(array(
-                $this->type, "_search"
-            ));
-            try {
-                $result = $this->call($url, "GET", $query);
-            }
-            catch (Exception $e) {
-                throw $e;
-            }
+    protected function requestWithQuery($query, $path,
+    	$method, $reqParams = array())
+    {
+        if (is_array( $query ))
+        {
+        	$post =& $query;
+        } else
+        {
+        	$reqParams[ 'q' ] = $query;
+        	$post = false;
         }
-        elseif (is_string($query)) {
-            /**
-             * String based search means http query string search
-             */
-            $url = $this->buildUrl(array(
-                $this->type, "_search?q=" . $query
-            ));
-            try {
-                $result = $this->call($url, "GET");
-            }
-            catch (Exception $e) {
-                throw $e;
-            }
-        }
+        $url = $this->buildUrl($path, $reqParams);
+        $result = $this->call($url, $method, $post);
         return $result;
     }
     
@@ -96,40 +86,25 @@ class HTTPTransport extends AbstractTransport {
      * Search
      *
      * @return array
+     * @param mixed $query Query string or DSL array
+     * @param array $reqParams Parameters to pass in URI
+     */
+    public function search($query, array $reqParams = array()) {
+        return $this->requestWithQuery($query, '_search', 'GET', $reqParams);
+    }
+    
+    /**
+     * Search
+     *
+     * @return array
      * @param mixed $id Optional
+     * @param array $reqParams Parameters to pass in URI
      * @param array $options Parameters to pass to delete action
      */
-    public function deleteByQuery($query, array $options = array()) {
-        $options += array(
-            'refresh' => true
-        );
-        if (is_array($query)) {
-            /**
-             * Array implies using the JSON query DSL
-             */
-            $url = $this->buildUrl(array($this->type, "_query"));
-            try {
-                $result = $this->call($url, "DELETE", $query);
-            }
-            catch (Exception $e) {
-                throw $e;
-            }
-        }
-        elseif (is_string($query)) {
-            /**
-             * String based search means http query string search
-             */
-            $url = $this->buildUrl(array($this->type, "_query"), array('q' => $query));
-            try {
-                $result = $this->call($url, "DELETE");
-            }
-            catch (Exception $e) {
-                throw $e;
-            }
-        }
-        if ($options['refresh']) {
-            $this->request('_refresh', "POST");
-        }
+    public function deleteByQuery($query, array $reqParams = array())
+    {
+        $result =
+        	$this->requestWithQuery($query, '_query', 'DELETE', $reqParams);
         return !isset($result['error']) && $result['ok'];
     }
     
@@ -143,14 +118,11 @@ class HTTPTransport extends AbstractTransport {
      * @param array|false $payload
      * @return array
      */
-    public function request($path, $method="GET", $payload=false) {
-        $url = $this->buildUrl($path);
-        try {
-            $result = $this->call($url, $method, $payload);
-        }
-        catch (Exception $e) {
-            throw $e;
-        }
+    public function request($path, $method="GET", array $reqParams = array(),
+    	$payload=false)
+    {
+        $url = $this->buildUrl($path, $reqParams);
+        $result = $this->call($url, $method, $payload);
         return $result;
     }
     
@@ -162,10 +134,7 @@ class HTTPTransport extends AbstractTransport {
      * @param array $options Parameters to pass to delete action
      */
     public function delete($id=false, array $options = array()) {
-        if ($id)
-            return $this->request(array($this->type, $id), "DELETE");
-        else
-            return $this->request(false, "DELETE");
+        return $this->request($id, "DELETE", $options);
     }
     
     /**
@@ -181,13 +150,9 @@ class HTTPTransport extends AbstractTransport {
         $protocol = "http";
         $requestURL = $protocol . "://" . $this->host . $url;
         curl_setopt($conn, CURLOPT_URL, $requestURL);
-        curl_setopt($conn, CURLOPT_TIMEOUT, self::TIMEOUT);
-        curl_setopt($conn, CURLOPT_PORT, $this->port);
-        curl_setopt($conn, CURLOPT_RETURNTRANSFER, 1) ;
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
-        curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
-        if (is_array($payload) && count($payload) > 0)
+        if (false !== $payload)
             curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
         else
         	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
@@ -195,9 +160,8 @@ class HTTPTransport extends AbstractTransport {
         $response = curl_exec($conn);
         if ($response !== false) {
             $data = json_decode($response, true);
-            if (!$data) {
-                $data = array('error' => $response);
-            }
+            if (false === $data)
+                throw new Exception( 'ElasticSearch responded invalid JSON' );
         }
         else {
             /**
