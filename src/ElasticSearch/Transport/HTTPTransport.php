@@ -50,38 +50,35 @@ class HTTPTransport extends AbstractTransport {
      * @param mixed $id Optional
      */
     public function index($document, $id=false, array $options = array()) {
-        $url = $this->buildUrl(array($this->type, $id), $options);
-        $method = ($id == false) ? "POST" : "PUT";
+        $url = $this->buildUrl($id, $options);
+        $method = ($id === false) ? "POST" : "PUT";
         $response = $this->call($url, $method, $document);
 
         return $response;
     }
     
     /**
-     * Search
+     * requestWithQuery
      *
      * @return array
-     * @param mixed $id Optional
+     * @param mixed $query Query string or DSL array
+     * @param string $path action to perform (_search, _query, etc.)
+     * @param string $method HTTP method
+     * @param array $reqParams Parameters to pass in URI
      */
-    public function search($query) {
-        if (is_array($query)) {
-            /**
-             * Array implies using the JSON query DSL
-             */
-            $url = $this->buildUrl(array(
-                $this->type, "_search"
-            ));
-            $result = $this->call($url, "GET", $query);
+    protected function requestWithQuery($query, $path,
+    	$method, $reqParams = array())
+    {
+        if (is_array( $query ))
+        {
+        	$post =& $query;
+        } else
+        {
+        	$reqParams[ 'q' ] = $query;
+        	$post = false;
         }
-        elseif (is_string($query)) {
-            /**
-             * String based search means http query string search
-             */
-            $url = $this->buildUrl(array(
-                $this->type, "_search?q=" . $query
-            ));
-            $result = $this->call($url, "GET");
-        }
+        $url = $this->buildUrl($path, $reqParams);
+        $result = $this->call($url, $method, $post);
         return $result;
     }
     
@@ -89,30 +86,25 @@ class HTTPTransport extends AbstractTransport {
      * Search
      *
      * @return array
+     * @param mixed $query Query string or DSL array
+     * @param array $reqParams Parameters to pass in URI
+     */
+    public function search($query, array $reqParams = array()) {
+        return $this->requestWithQuery($query, '_search', 'GET', $reqParams);
+    }
+    
+    /**
+     * Search
+     *
+     * @return array
      * @param mixed $id Optional
+     * @param array $reqParams Parameters to pass in URI
      * @param array $options Parameters to pass to delete action
      */
-    public function deleteByQuery($query, array $options = array()) {
-        $options += array(
-            'refresh' => true
-        );
-        if (is_array($query)) {
-            /**
-             * Array implies using the JSON query DSL
-             */
-            $url = $this->buildUrl(array($this->type, "_query"));
-            $result = $this->call($url, "DELETE", $query);
-        }
-        elseif (is_string($query)) {
-            /**
-             * String based search means http query string search
-             */
-            $url = $this->buildUrl(array($this->type, "_query"), array('q' => $query));
-            $result = $this->call($url, "DELETE");
-        }
-        if ($options['refresh']) {
-            $this->request('_refresh', "POST");
-        }
+    public function deleteByQuery($query, array $reqParams = array())
+    {
+        $result =
+        	$this->requestWithQuery($query, '_query', 'DELETE', $reqParams);
         return !isset($result['error']) && $result['ok'];
     }
     
@@ -126,8 +118,10 @@ class HTTPTransport extends AbstractTransport {
      * @param array|false $payload
      * @return array
      */
-    public function request($path, $method="GET", $payload=false) {
-        $url = $this->buildUrl($path);
+    public function request($path, $method="GET", array $reqParams = array(),
+    	$payload=false)
+    {
+        $url = $this->buildUrl($path, $reqParams);
         $result = $this->call($url, $method, $payload);
         return $result;
     }
@@ -140,10 +134,7 @@ class HTTPTransport extends AbstractTransport {
      * @param array $options Parameters to pass to delete action
      */
     public function delete($id=false, array $options = array()) {
-        if ($id)
-            return $this->request(array($this->type, $id), "DELETE");
-        else
-            return $this->request(false, "DELETE");
+        return $this->request($id, "DELETE", $options);
     }
     
     /**

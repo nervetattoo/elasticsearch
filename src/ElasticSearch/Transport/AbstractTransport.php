@@ -65,19 +65,20 @@ abstract class AbstractTransport {
      * @param string $method
      * @param array|false $payload
      */
-    abstract public function request($path, $method="GET", $payload=false);
+    abstract public function request($path, $method="GET",
+    	array $reqParams = array(), $payload=false);
 
     /**
      * Delete a document by its id
      * @param mixed $id
      */
-    abstract public function delete($id=false);
+    abstract public function delete($id=false, array $reqParams = array());
 
     /**
      * Perform a search based on query
      * @param array|string $query
      */
-    abstract public function search($query);
+    abstract public function search($query, array $reqParams = array());
     
     /**
      * Search
@@ -86,7 +87,7 @@ abstract class AbstractTransport {
      * @param mixed $query String or array to use as criteria for delete
      * @param array $options Parameters to pass to delete action
      */
-    public function deleteByQuery($query, array $options = array()) {
+    public function deleteByQuery($query, array $reqParams = array()) {
         throw new Exception(__FUNCTION__ . ' not implemented for ' . __CLASS__);
     }
 
@@ -110,16 +111,21 @@ abstract class AbstractTransport {
      * Build a callable url
      *
      * @return string
-     * @param array $path
+     * @param string $path
      * @param array $options Query parameter options to pass
      */
     protected function buildUrl($path=false, array $options = array()) {
-        $url = "/" . $this->index;
-        if ($path && is_array($path) && count($path) > 0)
-            $url .= "/" . implode("/", array_filter($path));
-        if (substr($url, -1) == "/")
-            $url = substr($url, 0, -1);
-        if (count($options) > 0)
+    	$url = '';
+        if ( false === $this->type )
+        {
+            ( false !== $this->index ) && $url .= '/' . $this->index;
+        } else
+        {
+            $url .= '/' . ( false !== $this->index ? $this->index : '_all' );
+            $url .= '/' . $this->type;
+        }
+        (false !== $path) && $url .= '/' . $path;
+        if (count($options))
             $url .= "?" . http_build_query($options);
         return $url;
     }
