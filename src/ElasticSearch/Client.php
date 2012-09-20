@@ -94,11 +94,12 @@ class Client {
      * @return void
      * @param mixed $index
      */
-    public function setIndex($index) {
+    public function setIndex($index, $type = false) {
         if (is_array($index))
             $index = implode(",", array_filter($index));
         $this->index = $index;
         $this->transport->setIndex($index);
+        true === $type || $this->setType( $type );
         return $this;
     }
 

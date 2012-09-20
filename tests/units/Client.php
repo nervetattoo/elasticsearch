@@ -143,13 +143,13 @@ class Client extends \ElasticSearch\tests\Base
         $secondaryIndex = 'test-index2';
         $doc = array('title' => $tag);
         $options = array('refresh' => true);
-        $client->setIndex($secondaryIndex)->index($doc, false, $options);
-        $client->setIndex($primaryIndex)->index($doc, false, $options);
+        $client->setIndex($secondaryIndex, true)->index($doc, false, $options);
+        $client->setIndex($primaryIndex, true)->index($doc, false, $options);
 
         $indexes = array($primaryIndex, $secondaryIndex);
 
         // Use both indexes when searching
-        $resp = $client->setIndex($indexes)->search("title:$tag");
+        $resp = $client->setIndex($indexes, true)->search("title:$tag");
 
         $this->assert->array($resp)->hasKey('hits')
             ->array($resp['hits'])->hasKey('total')
