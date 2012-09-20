@@ -14,8 +14,8 @@ namespace ElasticSearch;
 class Client {
     const DEFAULT_PROTOCOL = 'http';
     const DEFAULT_SERVER = '127.0.0.1:9200';
-    const DEFAULT_INDEX = 'default-index';
-    const DEFAULT_TYPE = 'default-type';
+    const DEFAULT_INDEX = false;
+    const DEFAULT_TYPE = false;
 
     protected $_config = array();
 
@@ -41,7 +41,7 @@ class Client {
      * @param string $index
      * @param string $type
      */
-    public function __construct($transport, $index = null, $type = null) {
+    public function __construct($transport, $index = false, $type = false) {
         $this->transport = $transport;
         $this->setIndex($index)->setType($type);
     }
@@ -120,8 +120,8 @@ class Client {
      * @return array
      * @param mixed $id Optional
      */
-    public function get($id, $verbose=false) {
-        return $this->request(array($this->type, $id), "GET");
+    public function get($id, array $options = array(), $verbose=false) {
+        return $this->request($id, "GET", $options);
     }
 
     /**
@@ -141,7 +141,7 @@ class Client {
             throw new Exception("Cant create mapping due to type constraint mismatch");
         }
 
-        return $this->request(array('_mapping'), 'PUT', $mapping->export(), true);
+        return $this->request('_mapping', 'PUT', array(), $mapping->export(), true);
     }
 
     protected function passesTypeConstraint($constraint) {
@@ -162,10 +162,12 @@ class Client {
      * @param bool $verbose Controls response data, if `false`
      *     only `_source` of response is returned
      */
-    public function request($path, $method, $payload = false, $verbose=false) {
-        $path = array_merge((array) $this->type, (array) $path);
+    public function request($path, $method, array $reqParams = array(),
+        $payload = false, $verbose=false)
+    {
 
-        $response = $this->transport->request($path, $method, $payload);
+        $response = $this->transport->request($path, $method, $reqParams,
+        	$payload);
         return ($verbose || !isset($response['_source']))
             ? $response
             : $response['_source'];
@@ -190,9 +192,9 @@ class Client {
      * @return array
      * @param array $document
      */
-    public function search($query) {
+    public function search($query, array $options = array()) {
         $start = microtime(true);
-        $result = $this->transport->search($query);
+        $result = $this->transport->search($query, $options);
         $result['time'] = microtime(true) - $start;
         return $result;
     }
