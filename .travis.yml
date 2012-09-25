@@ -8,4 +8,8 @@ before_install:
   - sleep 3
 before_script:
   - sh tests/install-php-memcache.sh
+  
+services:
+  - elasticsearch
+  
 script: ./runtests.sh
