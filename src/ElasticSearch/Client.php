@@ -131,8 +131,8 @@ class Client {
      *
      * @param array|object $mapping
      */
-    public function map($mapping, array $config = array()) {
-        if (is_array($mapping)) $mapping = new Mapping($mapping);
+    public function map($mapping, array $config = []) {
+        /*if (is_array($mapping)) $mapping = new Mapping($mapping);
         $mapping->config($config);
 
         try {
@@ -141,9 +141,8 @@ class Client {
         catch (\Exception $e) {} // No type is cool
         if (isset($type) && !$this->passesTypeConstraint($type)) {
             throw new Exception("Cant create mapping due to type constraint mismatch");
-        }
-
-        return $this->request('_mapping', 'PUT', array(), $mapping->export(), true);
+        }*/
+        return $this->request('_mapping', 'PUT', [], [ $this->type => $mapping ], true);
     }
 
     protected function passesTypeConstraint($constraint) {
