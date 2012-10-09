@@ -121,7 +121,7 @@ class Client {
      * @param mixed $id Optional
      */
     public function get($id, $verbose=false) {
-        return $this->request(array($this->type, $id), "GET");
+        return $this->request($id), "GET");
     }
 
     /**
