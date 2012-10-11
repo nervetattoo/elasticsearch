@@ -27,13 +27,18 @@ class Client extends \ElasticSearch\tests\Base
      * Test indexing a new document
      */
     public function testIndexingDocument() {
+        $tag = $this->getTag();
         $doc = array(
-            'title' => 'One cool ' . $this->getTag()
+            'title' => 'One cool ' . $tag
         );
-        $resp = \ElasticSearch\Client::connection()->index($doc, 1, array('refresh' => true));
+        $client = \ElasticSearch\Client::connection();
+        $resp = $client->index($doc, $tag, array('refresh' => true));
 
         $this->assert->array($resp)->hasKey('ok')
             ->boolean($resp['ok'])->isTrue(1);
+
+        $fetchedDoc = $client->get($tag);
+        $this->assert->array($fetchedDoc)->isEqualTo($doc);
     }
 
     /**
