@@ -163,7 +163,7 @@ class Client {
      * @param bool $verbose Controls response data, if `false`
      *     only `_source` of response is returned
      */
-    public function request($path, $method, array $reqParams = array(),
+    public function request($path, $method = 'GET', array $reqParams = array(),
         $payload = false, $verbose=false)
     {
 
