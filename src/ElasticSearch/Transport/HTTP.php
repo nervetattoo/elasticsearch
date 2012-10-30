@@ -15,7 +15,7 @@ if (!defined('CURLE_OPERATION_TIMEDOUT'))
     define('CURLE_OPERATION_TIMEDOUT', 28);
 
 
-class HTTPTransport extends AbstractTransport {
+class HTTP extends AbstractTransport {
     
     /**
      * How long before timing out CURL call
@@ -155,13 +155,15 @@ class HTTPTransport extends AbstractTransport {
         if (false !== $payload)
             curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
         else
-        	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
+        	curl_setopt($conn, CURLOPT_POSTFIELDS, '{}');
 
         $response = curl_exec($conn);
         if ($response !== false) {
             $data = json_decode($response, true);
             if (false === $data)
-                throw new Exception( 'ElasticSearch responded invalid JSON' );
+                throw new \ElasticSearch\Exception( 'ElasticSearch responded invalid JSON' );
+            if ( isset( $data[ 'error' ] ) )
+            	throw new \ElasticSearch\Exception( $data[ 'error' ], $data[ 'status' ] );
         }
         else {
             /**
@@ -198,7 +200,7 @@ class HTTPTransport extends AbstractTransport {
                         $error .= ". Non-cUrl error";
                     break;
             }
-            $exception = new HTTPTransportException($error);
+            $exception = new HTTPException($error);
             $exception->payload = $payload;
             $exception->port = $this->port;
             $exception->protocol = $protocol;

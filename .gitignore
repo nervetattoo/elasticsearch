@@ -1,1 +1,4 @@
+/composer.*
+!/composer.json
+/vendor
 *.swp

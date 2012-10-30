@@ -27,8 +27,8 @@ class Client {
     );
 
     protected static $_protocols = array(
-        'http' => 'ElasticSearch\\Transport\\HTTPTransport',
-        'memcached' => 'ElasticSearch\\Transport\\MemcachedTransport',
+        'http' => 'ElasticSearch\\Transport\\HTTP',
+        'memcached' => 'ElasticSearch\\Transport\\Memcached',
     );
 
     private $transport, $index, $type;
@@ -69,7 +69,7 @@ class Client {
 
         $protocol = $config['protocol'];
         if (!isset(self::$_protocols[$protocol])) {
-            throw new \Exception("Tried to use unknown protocol: $protocol");
+            throw new Exception("Tried to use unknown protocol: $protocol");
         }
         $class = self::$_protocols[$protocol];
 
