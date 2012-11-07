@@ -11,7 +11,7 @@ namespace ElasticSearch\Transport;
  * file that was distributed with this source code.
  */
 
-class HTTPTransportException extends \Exception {
+class HTTPException extends \Exception {
     /**
      * Exception data
      * @var array

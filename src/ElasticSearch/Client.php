@@ -27,8 +27,8 @@ class Client {
     );
 
     protected static $_protocols = array(
-        'http' => 'ElasticSearch\\Transport\\HTTPTransport',
-        'memcached' => 'ElasticSearch\\Transport\\MemcachedTransport',
+        'http' => 'ElasticSearch\\Transport\\HTTP',
+        'memcached' => 'ElasticSearch\\Transport\\Memcached',
     );
 
     private $transport, $index, $type;

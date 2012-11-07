@@ -11,7 +11,7 @@ namespace ElasticSearch\Transport;
  * file that was distributed with this source code.
  */
 
-abstract class AbstractTransport {
+abstract class Base {
 
     /**
      * What host to connect to for server

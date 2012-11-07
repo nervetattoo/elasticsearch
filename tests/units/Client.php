@@ -157,7 +157,7 @@ class Client extends \ElasticSearch\tests\Base
     }
 
     /**
-     * @expectedException ElasticSearch\Transport\HTTPTransportException
+     * @expectedException ElasticSearch\Transport\HTTPException
      */
     public function testSearchThrowExceptionWhenServerDown() {
         $client = \ElasticSearch\Client::connection(array(
@@ -168,7 +168,7 @@ class Client extends \ElasticSearch\tests\Base
 
         $this->assert->exception(function()use($client) {
                 $client->search("title:cool");
-            })->isInstanceOf('ElasticSearch\\Transport\\HTTPTransportException');
+            })->isInstanceOf('ElasticSearch\\Transport\\HTTPException');
     }
 
     /**

@@ -14,7 +14,7 @@ use \ElasticSearch\DSL\Stringify;
  * file that was distributed with this source code.
  */
 
-class MemcachedTransport extends AbstractTransport {
+class Memcached extends Base {
     public function __construct($host="127.0.0.1", $port=11311) {
         parent::__construct($host, $port);
         $this->conn = new Memcache;
