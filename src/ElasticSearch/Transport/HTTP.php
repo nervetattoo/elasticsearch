@@ -162,7 +162,7 @@ class HTTP extends Base {
         if ($response !== false) {
             $data = json_decode($response, true);
             if (!$data) {
-                $data = array('error' => $response);
+                $data = array('error' => $response, "code" => curl_getinfo($conn, CURLINFO_HTTP_CODE));
             }
         }
         else {
