@@ -120,7 +120,7 @@ abstract class Base {
         if (substr($url, -1) == "/")
             $url = substr($url, 0, -1);
         if (count($options) > 0)
-            $url .= "?" . http_build_query($options);
+          $url .= "?" . http_build_query($options, '', '&');
         return $url;
     }
 }
