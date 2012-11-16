@@ -53,7 +53,7 @@ class HTTP extends Base {
      * @return array
      * @param mixed $id Optional
      */
-    public function search($query) {
+    public function search($query, array $options = array()) {
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
@@ -70,7 +70,7 @@ class HTTP extends Base {
             $url = $this->buildUrl(array(
                 $this->type, "_search?q=" . $query
             ));
-            $result = $this->call($url, "GET");
+            $result = $this->call($url, "POST", $options);
         }
         return $result;
     }
@@ -162,7 +162,7 @@ class HTTP extends Base {
         if ($response !== false) {
             $data = json_decode($response, true);
             if (!$data) {
-                $data = array('error' => $response);
+                $data = array('error' => $response, "code" => curl_getinfo($conn, CURLINFO_HTTP_CODE));
             }
         }
         else {
