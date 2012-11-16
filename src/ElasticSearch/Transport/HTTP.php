@@ -53,7 +53,7 @@ class HTTP extends Base {
      * @return array
      * @param mixed $id Optional
      */
-    public function search($query, $options=array()) {
+    public function search($query, array $options = array()) {
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL

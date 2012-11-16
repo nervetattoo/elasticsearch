@@ -190,7 +190,7 @@ class Client {
      * @return array
      * @param array $document
      */
-    public function search($query, $options= array()) {
+    public function search($query, array $options = array()) {
         $start = microtime(true);
         $result = $this->transport->search($query, $options);
         $result['time'] = microtime(true) - $start;
