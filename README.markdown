@@ -89,9 +89,9 @@ $es = Client::connection(array(
 ```php
 <?php
 $document = array(
-					'title' => 'My routed document',
-					'user_id' => '42' 
-				);
+    'title' => 'My routed document',
+    'user_id' => '42' 
+);
 $es->index($document, $id, array('routing' => $document['user_id']));
 $es->search('title:routed', array('routing' => '42'));
 ```
