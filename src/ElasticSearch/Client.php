@@ -152,7 +152,11 @@ class Client {
     }
 
     /**
-     * Perform a request
+     * Perform a raw request
+     *
+     * Usage example
+     *
+     *     $response = $client->request('_status', 'GET');
      *
      * @return array
      * @param mixed $path Request path to use.
@@ -162,7 +166,7 @@ class Client {
      * @param bool $verbose Controls response data, if `false`
      *     only `_source` of response is returned
      */
-    public function request($path, $method, $payload = false, $verbose=false) {
+    public function request($path, $method = 'GET', $payload = false, $verbose=false) {
         $path = array_merge((array) $this->type, (array) $path);
 
         $response = $this->transport->request($path, $method, $payload);
