@@ -113,14 +113,17 @@ abstract class Base {
      * @param array $path
      * @param array $options Query parameter options to pass
      */
-    protected function buildUrl($path=false, array $options = array()) {
-        $url = "/" . $this->index;
+    protected function buildUrl($path = false, array $options = array()) {
+        $isAbsolute = (is_array($path) ? $path[0][0] : $path[0]) === '/';
+        $url = $isAbsolute ? '' : "/" . $this->index;
+
         if ($path && is_array($path) && count($path) > 0)
             $url .= "/" . implode("/", array_filter($path));
         if (substr($url, -1) == "/")
             $url = substr($url, 0, -1);
         if (count($options) > 0)
           $url .= "?" . http_build_query($options, '', '&');
+
         return $url;
     }
 }

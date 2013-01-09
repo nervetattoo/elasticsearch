@@ -23,6 +23,13 @@ class Client extends \ElasticSearch\tests\Base
             ->isEqualTo($config);
     }
 
+    public function testAbsoluteRequest() {
+        $client = \ElasticSearch\Client::connection();
+        $resp = $client->request('/');
+        $this->assert->array($resp)->hasKey('ok')
+            ->string($resp['tagline'])->isEqualTo('You Know, for Search');
+    }
+
     /**
      * Test indexing a new document
      */

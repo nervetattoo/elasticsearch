@@ -141,7 +141,7 @@ class Client {
             throw new Exception("Cant create mapping due to type constraint mismatch");
         }
 
-        return $this->request(array('_mapping'), 'PUT', $mapping->export(), true);
+        return $this->request('_mapping', 'PUT', $mapping->export(), true);
     }
 
     protected function passesTypeConstraint($constraint) {
@@ -167,9 +167,7 @@ class Client {
      *     only `_source` of response is returned
      */
     public function request($path, $method = 'GET', $payload = false, $verbose=false) {
-        $path = array_merge((array) $this->type, (array) $path);
-
-        $response = $this->transport->request($path, $method, $payload);
+        $response = $this->transport->request($this->expandPath($path), $method, $payload);
         return ($verbose || !isset($response['_source']))
             ? $response
             : $response['_source'];
@@ -233,6 +231,29 @@ class Client {
         return $this->request('_refresh', "POST");
     }
 
+    /**
+     * Expand a given path (array or string)
+     * If this is not an absolute path index + type will be prepended
+     * If it is an absolute path it will be used as is
+     *
+     * @param mixed $path
+     * @return array
+     */
+    protected function expandPath($path) {
+        $path = (array) $path;
+        $isAbsolute = $path[0][0] === '/';
+
+        return $isAbsolute
+            ? $path
+            : array_merge((array) $this->type, $path);
+    }
+
+    /**
+     * Parse a DSN string into an associative array
+     *
+     * @param string $dsn
+     * @return array
+     */
     protected static function parseDsn($dsn) {
         $parts = parse_url($dsn);
         $protocol = $parts['scheme'];
