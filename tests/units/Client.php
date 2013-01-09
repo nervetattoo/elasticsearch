@@ -60,6 +60,9 @@ class Client extends \ElasticSearch\tests\Base
         $options = array('type' => self::TYPE);
         Helper::addDocuments($client, 3, $tag, $options);
         $resp = $client->search("title:$tag", $options);
+
+        $client->refresh();
+
         $this->assert->array($resp)->hasKey('hits')
             ->array($resp['hits'])->hasKey('total')
             ->integer($resp['hits']['total'])->isEqualTo(3);
@@ -149,20 +152,25 @@ class Client extends \ElasticSearch\tests\Base
      */
     public function testSearchMultipleIndexes()
     {
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(array(
+            'type' => self::TYPE
+        ));
         $tag = $this->getTag();
 
-        $primaryIndex = 'test-index';
-        $secondaryIndex = 'test-index2';
+        $primaryIndex = 'first-index';
+        $secondaryIndex = 'second-index';
         $doc = array('title' => $tag);
-        $options = array('refresh' => true, 'type' => self::TYPE);
+        $options = array('refresh' => true);
+
         $client->setIndex($secondaryIndex)->index($doc, false, $options);
         $client->setIndex($primaryIndex)->index($doc, false, $options);
 
-        $indexes = array($primaryIndex, $secondaryIndex);
+        $client->refresh();
 
         // Use both indexes when searching
-        $resp = $client->setIndex($indexes)->search("title:$tag");
+        $resp = $client
+            ->setIndex(array($primaryIndex, $secondaryIndex))
+            ->search("title:$tag");
 
         $this->assert->array($resp)->hasKey('hits')
             ->array($resp['hits'])->hasKey('total')
@@ -190,12 +198,18 @@ class Client extends \ElasticSearch\tests\Base
      * Test highlighting
      */
     public function testHighlightedSearch() {
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(array(
+            'index' => 'highlight-search'
+        ));
         $ind = $client->index(array( 
             'title' => 'One cool document',
             'body' => 'Lorem ipsum dolor sit amet',
             'tag' => array('cool', "stuff", "2k")
-        ), 1, array('refresh' => true, 'type' => self::TYPE));
+        ), 1, array(
+            'refresh' => true,
+            'type' => self::TYPE
+        ));
+
         $client->refresh();
 
         $results = $client->search(array(
