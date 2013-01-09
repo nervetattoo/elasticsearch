@@ -85,6 +85,7 @@ class Client extends \ElasticSearch\tests\Base
     public function testDeleteByQuery() {
         $options = array('refresh' => true, 'type' => self::TYPE);
         $client = \ElasticSearch\Client::connection();
+        $client->setType(self::TYPE);
         $word = $this->getTag();
         $resp = $client->index(array('title' => $word), 1, $options);
 
@@ -94,11 +95,14 @@ class Client extends \ElasticSearch\tests\Base
             'term' => array('title' => $word)
         ));
 
+        $client->refresh();
+
         $hits = $client->search(array(
             'query' => array(
                 'term' => array('title' => $word)
             )
         ));
+
         $this->assert->array($hits)->hasKey('hits')
             ->array($hits['hits'])->hasKey('total')
             ->integer($hits['hits']['total'])->isEqualTo(0);
