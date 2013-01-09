@@ -42,7 +42,14 @@ class HTTP extends Base {
      * @param mixed $id Optional
      */
     public function index($document, $id=false, array $options = array()) {
-        $url = $this->buildUrl(array($this->type, $id), $options);
+        $type = $this->type;
+        if (isset($options['type'])) {
+            $type = $options['type'];
+            unset($options['type']);
+        }
+        if (!$type) throw new \Exception('Cant index without type set');
+
+        $url = $this->buildUrl($this->expandPath($id, $type), $options);
         $method = ($id == false) ? "POST" : "PUT";
         return $this->call($url, $method, $document);
     }
@@ -54,22 +61,25 @@ class HTTP extends Base {
      * @param mixed $id Optional
      */
     public function search($query, array $options = array()) {
+        $type = $this->type;
+        if (isset($options['type'])) {
+            $type = $options['type'];
+            unset($options['type']);
+        }
+
+        $path = $this->expandPath('_search', $type);
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
              */
-            $url = $this->buildUrl(array(
-                $this->type, "_search"
-            ));
+            $url = $this->buildUrl($path);
             $result = $this->call($url, "GET", $query);
         }
         elseif (is_string($query)) {
             /**
              * String based search means http query string search
              */
-            $url = $this->buildUrl(array(
-                $this->type, "_search?q=" . $query
-            ));
+            $url = $this->buildUrl($path, array('q' => $query));
             $result = $this->call($url, "POST", $options);
         }
         return $result;
@@ -86,18 +96,19 @@ class HTTP extends Base {
         $options += array(
             'refresh' => true
         );
+        $path = $this->buildUrl('_query');
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
              */
-            $url = $this->buildUrl(array($this->type, "_query"));
+            $url = $this->buildUrl($path);
             $result = $this->call($url, "DELETE", $query);
         }
         elseif (is_string($query)) {
             /**
              * String based search means http query string search
              */
-            $url = $this->buildUrl(array($this->type, "_query"), array('q' => $query));
+            $url = $this->buildUrl($path, array('q' => $query));
             $result = $this->call($url, "DELETE");
         }
         if ($options['refresh']) {
@@ -129,7 +140,7 @@ class HTTP extends Base {
      */
     public function delete($id=false, array $options = array()) {
         if ($id)
-            return $this->request(array($this->type, $id), "DELETE");
+            return $this->request($this->expandPath($id, $this->type), "DELETE");
         else
             return $this->request(false, "DELETE");
     }

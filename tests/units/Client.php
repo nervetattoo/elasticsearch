@@ -7,6 +7,8 @@ use ElasticSearch\tests\Helper;
 
 class Client extends \ElasticSearch\tests\Base
 {
+    const TYPE = 'test-type';
+
     public function tearDown() {
         \ElasticSearch\Client::connection()->delete();
     }
@@ -39,6 +41,7 @@ class Client extends \ElasticSearch\tests\Base
             'title' => 'One cool ' . $tag
         );
         $client = \ElasticSearch\Client::connection();
+        $client->setType(self::TYPE);
         $resp = $client->index($doc, $tag, array('refresh' => true));
 
         $this->assert->array($resp)->hasKey('ok')
@@ -54,8 +57,9 @@ class Client extends \ElasticSearch\tests\Base
     public function testStringSearch() {
         $client = \ElasticSearch\Client::connection();
         $tag = $this->getTag();
-        Helper::addDocuments($client, 3, $tag);
-        $resp = $client->search("title:$tag");
+        $options = array('type' => self::TYPE);
+        Helper::addDocuments($client, 3, $tag, $options);
+        $resp = $client->search("title:$tag", $options);
         $this->assert->array($resp)->hasKey('hits')
             ->array($resp['hits'])->hasKey('total')
             ->integer($resp['hits']['total'])->isEqualTo(3);
@@ -70,7 +74,7 @@ class Client extends \ElasticSearch\tests\Base
             'title' => 'One cool ' . $this->getTag()
         );
         $client = \ElasticSearch\Client::connection();
-        $resp = $client->index($doc, false, array('refresh' => true));
+        $resp = $client->index($doc, false, array('refresh' => true, 'type' => self::TYPE));
         $this->assert->array($resp)->hasKey('ok')
             ->boolean($resp['ok'])->isTrue(1);
     }
@@ -79,7 +83,7 @@ class Client extends \ElasticSearch\tests\Base
      * Test delete by query
      */
     public function testDeleteByQuery() {
-        $options = array('refresh' => true);
+        $options = array('refresh' => true, 'type' => self::TYPE);
         $client = \ElasticSearch\Client::connection();
         $word = $this->getTag();
         $resp = $client->index(array('title' => $word), 1, $options);
@@ -113,7 +117,7 @@ class Client extends \ElasticSearch\tests\Base
             'tag' => array('cool', "stuff", "2k")
         );
         while ($docs-- > 0) {
-            $resp = $client->index($doc, false, array('refresh' => true));
+            $resp = $client->index($doc, false, array('refresh' => true, 'type' => self::TYPE));
         }
 
         $hits = $client->search(array(
@@ -147,7 +151,7 @@ class Client extends \ElasticSearch\tests\Base
         $primaryIndex = 'test-index';
         $secondaryIndex = 'test-index2';
         $doc = array('title' => $tag);
-        $options = array('refresh' => true);
+        $options = array('refresh' => true, 'type' => self::TYPE);
         $client->setIndex($secondaryIndex)->index($doc, false, $options);
         $client->setIndex($primaryIndex)->index($doc, false, $options);
 
@@ -187,7 +191,7 @@ class Client extends \ElasticSearch\tests\Base
             'title' => 'One cool document',
             'body' => 'Lorem ipsum dolor sit amet',
             'tag' => array('cool', "stuff", "2k")
-        ), 1, array('refresh' => true));
+        ), 1, array('refresh' => true, 'type' => self::TYPE));
         $client->refresh();
 
         $results = $client->search(array(

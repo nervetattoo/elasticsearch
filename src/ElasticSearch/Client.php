@@ -15,7 +15,7 @@ class Client {
     const DEFAULT_PROTOCOL = 'http';
     const DEFAULT_SERVER = '127.0.0.1:9200';
     const DEFAULT_INDEX = 'default-index';
-    const DEFAULT_TYPE = 'default-type';
+    const DEFAULT_TYPE = false;
 
     protected $_config = array();
 
@@ -167,7 +167,8 @@ class Client {
      *     only `_source` of response is returned
      */
     public function request($path, $method = 'GET', $payload = false, $verbose=false) {
-        $response = $this->transport->request($this->expandPath($path), $method, $payload);
+        $path = $this->transport->expandPath($path, $this->type);
+        $response = $this->transport->request($path, $method, $payload);
         return ($verbose || !isset($response['_source']))
             ? $response
             : $response['_source'];
@@ -229,23 +230,6 @@ class Client {
      */
     public function refresh() {
         return $this->request('_refresh', "POST");
-    }
-
-    /**
-     * Expand a given path (array or string)
-     * If this is not an absolute path index + type will be prepended
-     * If it is an absolute path it will be used as is
-     *
-     * @param mixed $path
-     * @return array
-     */
-    protected function expandPath($path) {
-        $path = (array) $path;
-        $isAbsolute = $path[0][0] === '/';
-
-        return $isAbsolute
-            ? $path
-            : array_merge((array) $this->type, $path);
     }
 
     /**

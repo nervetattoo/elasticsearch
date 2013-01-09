@@ -126,4 +126,19 @@ abstract class Base {
 
         return $url;
     }
+
+    /**
+     * Expand a given path (array or string)
+     * If this is not an absolute path index + type will be prepended
+     * If it is an absolute path it will be used as is
+     *
+     * @param mixed $path
+     * @return array
+     */
+    public function expandPath($path, $type = false) {
+        $path = (array) $path;
+        if (!$type || $path[0][0] === '/') return $path;
+
+        return array_merge((array) $type, $path);
+    }
 }
