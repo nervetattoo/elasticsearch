@@ -7,6 +7,8 @@ use ElasticSearch\tests\Helper;
 
 class Client extends \ElasticSearch\tests\Base
 {
+    const TYPE = 'test-type';
+
     public function tearDown() {
         \ElasticSearch\Client::connection()->delete();
     }
@@ -38,7 +40,10 @@ class Client extends \ElasticSearch\tests\Base
         $doc = array(
             'title' => 'One cool ' . $tag
         );
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(array(
+            'type' => self::TYPE
+        ));
+
         $resp = $client->index($doc, $tag, array('refresh' => true));
 
         $this->assert->array($resp)->hasKey('ok')
@@ -54,8 +59,12 @@ class Client extends \ElasticSearch\tests\Base
     public function testStringSearch() {
         $client = \ElasticSearch\Client::connection();
         $tag = $this->getTag();
-        Helper::addDocuments($client, 3, $tag);
-        $resp = $client->search("title:$tag");
+        $options = array('type' => self::TYPE);
+        Helper::addDocuments($client, 3, $tag, $options);
+        $resp = $client->search("title:$tag", $options);
+
+        $client->refresh();
+
         $this->assert->array($resp)->hasKey('hits')
             ->array($resp['hits'])->hasKey('total')
             ->integer($resp['hits']['total'])->isEqualTo(3);
@@ -70,7 +79,7 @@ class Client extends \ElasticSearch\tests\Base
             'title' => 'One cool ' . $this->getTag()
         );
         $client = \ElasticSearch\Client::connection();
-        $resp = $client->index($doc, false, array('refresh' => true));
+        $resp = $client->index($doc, false, array('refresh' => true, 'type' => self::TYPE));
         $this->assert->array($resp)->hasKey('ok')
             ->boolean($resp['ok'])->isTrue(1);
     }
@@ -79,8 +88,9 @@ class Client extends \ElasticSearch\tests\Base
      * Test delete by query
      */
     public function testDeleteByQuery() {
-        $options = array('refresh' => true);
+        $options = array('refresh' => true, 'type' => self::TYPE);
         $client = \ElasticSearch\Client::connection();
+        $client->setType(self::TYPE);
         $word = $this->getTag();
         $resp = $client->index(array('title' => $word), 1, $options);
 
@@ -90,11 +100,14 @@ class Client extends \ElasticSearch\tests\Base
             'term' => array('title' => $word)
         ));
 
+        $client->refresh();
+
         $hits = $client->search(array(
             'query' => array(
                 'term' => array('title' => $word)
             )
         ));
+
         $this->assert->array($hits)->hasKey('hits')
             ->array($hits['hits'])->hasKey('total')
             ->integer($hits['hits']['total'])->isEqualTo(0);
@@ -113,7 +126,7 @@ class Client extends \ElasticSearch\tests\Base
             'tag' => array('cool', "stuff", "2k")
         );
         while ($docs-- > 0) {
-            $resp = $client->index($doc, false, array('refresh' => true));
+            $resp = $client->index($doc, false, array('refresh' => true, 'type' => self::TYPE));
         }
 
         $hits = $client->search(array(
@@ -137,24 +150,49 @@ class Client extends \ElasticSearch\tests\Base
     }
 
     /**
+     * Test doing a count query
+     */
+    public function testCount()
+    {
+        $client = \ElasticSearch\Client::connection(array(
+            'type' => self::TYPE
+        ));
+        $tag = $this->getTag();
+
+        $resp = $client->index(compact('tag'), false, array('refresh' => true));
+        $query = array('term' => compact('tag'));
+
+        $count = $client->count($query);
+
+        $this->assert->integer($count)->isEqualTo(1);
+
+        $client->delete();
+    }
+
+    /**
      * Test multi index search
      */
     public function testSearchMultipleIndexes()
     {
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(array(
+            'type' => self::TYPE
+        ));
         $tag = $this->getTag();
 
-        $primaryIndex = 'test-index';
-        $secondaryIndex = 'test-index2';
+        $primaryIndex = 'first-index';
+        $secondaryIndex = 'second-index';
         $doc = array('title' => $tag);
         $options = array('refresh' => true);
+
         $client->setIndex($secondaryIndex)->index($doc, false, $options);
         $client->setIndex($primaryIndex)->index($doc, false, $options);
 
-        $indexes = array($primaryIndex, $secondaryIndex);
+        $client->refresh();
 
         // Use both indexes when searching
-        $resp = $client->setIndex($indexes)->search("title:$tag");
+        $resp = $client
+            ->setIndex(array($primaryIndex, $secondaryIndex))
+            ->search("title:$tag");
 
         $this->assert->array($resp)->hasKey('hits')
             ->array($resp['hits'])->hasKey('total')
@@ -182,12 +220,18 @@ class Client extends \ElasticSearch\tests\Base
      * Test highlighting
      */
     public function testHighlightedSearch() {
-        $client = \ElasticSearch\Client::connection();
+        $client = \ElasticSearch\Client::connection(array(
+            'index' => 'highlight-search'
+        ));
         $ind = $client->index(array( 
             'title' => 'One cool document',
             'body' => 'Lorem ipsum dolor sit amet',
             'tag' => array('cool', "stuff", "2k")
-        ), 1, array('refresh' => true));
+        ), 1, array(
+            'refresh' => true,
+            'type' => self::TYPE
+        ));
+
         $client->refresh();
 
         $results = $client->search(array(

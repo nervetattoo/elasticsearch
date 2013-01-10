@@ -14,9 +14,9 @@ class Helper
         return array('title' => $sentence, 'rank' => rand(1, 10));
     }
 
-    public static function addDocuments(\ElasticSearch\Client $client, $num = 3, $tag = 'cool')
+    public static function addDocuments(\ElasticSearch\Client $client, $num = 3, $tag = 'cool', array $options = array())
     {
-        $options = array('refresh' => true);
+        $options += array('refresh' => true);
         while ($num-- > 0) {
             $doc = array('title' => "One cool document $tag", 'rank' => rand(1,10));
             $client->index($doc, $num + 1, $options);
