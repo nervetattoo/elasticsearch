@@ -40,8 +40,10 @@ class Client extends \ElasticSearch\tests\Base
         $doc = array(
             'title' => 'One cool ' . $tag
         );
-        $client = \ElasticSearch\Client::connection();
-        $client->setType(self::TYPE);
+        $client = \ElasticSearch\Client::connection(array(
+            'type' => self::TYPE
+        ));
+
         $resp = $client->index($doc, $tag, array('refresh' => true));
 
         $this->assert->array($resp)->hasKey('ok')
@@ -145,6 +147,26 @@ class Client extends \ElasticSearch\tests\Base
         $this->assert->array($hits)->hasKey('hits')
             ->array($hits['hits'])->hasKey('total')
             ->integer($hits['hits']['total'])->isEqualTo(3);
+    }
+
+    /**
+     * Test doing a count query
+     */
+    public function testCount()
+    {
+        $client = \ElasticSearch\Client::connection(array(
+            'type' => self::TYPE
+        ));
+        $tag = $this->getTag();
+
+        $resp = $client->index(compact('tag'), false, array('refresh' => true));
+        $query = array('term' => compact('tag'));
+
+        $count = $client->count($query);
+
+        $this->assert->integer($count)->isEqualTo(1);
+
+        $client->delete();
     }
 
     /**
