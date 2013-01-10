@@ -121,7 +121,7 @@ class Client {
      * @param mixed $id Optional
      */
     public function get($id, $verbose=false) {
-        return $this->request($id, "GET");
+        return $this->request($id);
     }
 
     /**
@@ -175,6 +175,17 @@ class Client {
     }
 
     /**
+     * Perform a count on a query
+     *
+     * @param array $query Query DSL array
+     * @return int
+     */
+    public function count(array $query = array()) {
+        $result = $this->request(array('_count'), 'GET', $query);
+        return $result['count'];
+    }
+
+    /**
      * Index a new document or update it if existing
      *
      * @return array
@@ -184,6 +195,9 @@ class Client {
      *        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
      */
     public function index($document, $id=false, array $options = array()) {
+        $options += array(
+            'refresh' => false
+        );
         return $this->transport->index($document, $id, $options);
     }
 
