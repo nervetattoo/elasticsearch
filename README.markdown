@@ -77,7 +77,7 @@ Using an array for configuration also works
 ```php
 <?php
 $es = Client::connection(array(
-    'server' => '127.0.0.1:9200',
+    'servers' => '127.0.0.1:9200',
     'protocol' => 'http',
     'index' => 'myindex',
     'type' => 'mytype'
