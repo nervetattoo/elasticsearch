@@ -21,7 +21,10 @@ namespace ElasticSearch\DSL;
  */
 class Query {
     protected $term = null;
-    protected $range = null;
+    /**
+     * @var RangeQuery
+     */
+    protected $range;
     protected $prefix = null;
     protected $wildcard = null;
     protected $matchAll = null;
@@ -33,13 +36,13 @@ class Query {
 
     public function __construct(array $options=array()) {
     }
-    
+
     /**
      * Add a term to this query
      *
-     * @return ElasticSearchDSL
+     * @return \ElasticSearch\DSL\Query
      * @param string $term
-     * @param string $field
+     * @param bool|string $field
      */
     public function term($term, $field=false) {
         $this->term = ($field)
@@ -47,13 +50,13 @@ class Query {
             : $term;
         return $this;
     }
-    
+
     /**
      * Add a wildcard to this query
      *
-     * @return ElasticSearchDSL
-     * @param string $term
-     * @param string $field
+     * @return \ElasticSearch\DSL\Query
+     * @param $val
+     * @param bool|string $field
      */
     public function wildcard($val, $field=false) {
         $this->wildcard = ($field)
@@ -65,7 +68,7 @@ class Query {
     /**
      * Add a range query
      *
-     * @return ElasticSearchDSLBuilderRangeQuery
+     * @return \ElasticSearch\DSL\RangeQuery
      * @param array $options
      */
     public function range(array $options=array()) {
