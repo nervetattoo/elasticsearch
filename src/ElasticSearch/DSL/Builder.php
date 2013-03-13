@@ -32,11 +32,11 @@ class Builder {
     private $query = null;
     private $facets = null;
     private $sort = null;
-    
+
     /**
      * Construct DSL object
      *
-     * @return ElasticSearchDSL
+     * @return \ElasticSearch\DSL\Builder
      * @param array $options
      */
     public function __construct(array $options=array()) {
@@ -47,11 +47,11 @@ class Builder {
     /**
      * Add array clause, can only be one
      *
-     * @return ElasticSearchDSLBuilderQuery
+     * @return \ElasticSearch\DSL\Query
      * @param array $options
      */
     public function query(array $options=array()) {
-        if (!($this->query instanceof ElasticSearchDSLBuilderQuery))
+        if (!($this->query instanceof Query))
             $this->query = new Query($options);
         return $this->query;
     }
@@ -59,6 +59,7 @@ class Builder {
     /**
      * Build the DSL as array
      *
+     * @throws \ElasticSearch\Exception
      * @return array
      */
     public function build() {
@@ -68,7 +69,7 @@ class Builder {
         if ($this->size != null)
             $built['size'] = $this->size;
         if (!$this->query)
-            throw new Exception("Query must be specified");
+            throw new \ElasticSearch\Exception("Query must be specified");
         else
             $built['query'] = $this->query->build();
         return $built;

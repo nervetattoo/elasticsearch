@@ -63,7 +63,8 @@ abstract class Base {
      *
      * @param string|array $path
      * @param string $method
-     * @param array|false $payload
+     * @param array|bool $payload
+     * @return
      */
     abstract public function request($path, $method="GET", $payload=false);
 
@@ -78,16 +79,17 @@ abstract class Base {
      * @param array|string $query
      */
     abstract public function search($query);
-    
+
     /**
      * Search
      *
      * @return array
      * @param mixed $query String or array to use as criteria for delete
      * @param array $options Parameters to pass to delete action
+     * @throws \Elasticsearch\Exception
      */
     public function deleteByQuery($query, array $options = array()) {
-        throw new Exception(__FUNCTION__ . ' not implemented for ' . __CLASS__);
+        throw new \Elasticsearch\Exception(__FUNCTION__ . ' not implemented for ' . __CLASS__);
     }
 
     /**
@@ -110,7 +112,7 @@ abstract class Base {
      * Build a callable url
      *
      * @return string
-     * @param array $path
+     * @param array|bool $path
      * @param array $options Query parameter options to pass
      */
     protected function buildUrl($path = false, array $options = array()) {

@@ -19,7 +19,9 @@ class Mapping {
     /**
      * Build mapping data
      *
-     * @return ElasticSearch\Mapping
+     * @param array $properties
+     * @param array $config
+     * @return \ElasticSearch\Mapping
      */
     public function __construct(array $properties = array(), array $config = array()) {
         $this->properties = $properties;
@@ -52,9 +54,11 @@ class Mapping {
 
     /**
      * Get or set a config
-     * 
+     *
      * @param string $key
      * @param mixed $value
+     * @throws \Exception
+     * @return array|void
      */
     public function config($key, $value = null) {
         if (is_array($key))

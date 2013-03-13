@@ -36,8 +36,8 @@ class Client {
     /**
      * Construct search client
      *
-     * @return ElasticSearch\Client
-     * @param ElasticSearch\Transport\Transport $transport
+     * @return \ElasticSearch\Client
+     * @param \ElasticSearch\Transport\Base $transport
      * @param string $index
      * @param string $type
      */
@@ -56,7 +56,8 @@ class Client {
      *   - _port_
      *   - _index_
      *   - _type_
-     * @return ElasticSearch\Client
+     * @throws \Exception
+     * @return \ElasticSearch\Client
      */
     public static function connection($config = array()) {
         if (!$config && ($url = getenv('ELASTICSEARCH_URL'))) {
@@ -81,6 +82,10 @@ class Client {
         return $client;
     }
 
+    /**
+     * @param array|null $config
+     * @return array|void
+     */
     public function config($config = null) {
         if (!$config)
             return $this->_config;
@@ -90,7 +95,7 @@ class Client {
 
     /**
      * Change what index to go against
-     * @return void
+     * @return \ElasticSearch\Client
      * @param mixed $index
      */
     public function setIndex($index) {
@@ -103,7 +108,7 @@ class Client {
 
     /**
      * Change what types to act against
-     * @return void
+     * @return \ElasticSearch\Client
      * @param mixed $type
      */
     public function setType($type) {
@@ -119,6 +124,7 @@ class Client {
      *
      * @return array
      * @param mixed $id Optional
+     * @param bool $verbose
      */
     public function get($id, $verbose=false) {
         return $this->request($id, "GET");
@@ -128,6 +134,9 @@ class Client {
      * Puts a mapping on index
      *
      * @param array|object $mapping
+     * @param array $config
+     * @throws Exception
+     * @return array
      */
     public function map($mapping, array $config = array()) {
         if (is_array($mapping)) $mapping = new Mapping($mapping);
@@ -190,7 +199,8 @@ class Client {
      * Perform search, this is the sweet spot
      *
      * @return array
-     * @param array $document
+     * @param $query
+     * @param array $options
      */
     public function search($query, array $options = array()) {
         $start = microtime(true);

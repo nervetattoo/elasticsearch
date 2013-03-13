@@ -31,7 +31,7 @@ class RangeQuery {
     /**
      * Construct new RangeQuery component
      *
-     * @return ElasticSearchDSLBuilderRangeQuery
+     * @return \ElasticSearch\DSL\RangeQuery
      * @param array $options
      */
     public function __construct(array $options=array()) {
@@ -46,37 +46,59 @@ class RangeQuery {
     /**
      * Setters
      *
-     * @return ElasticSearchDSLBuilderRangeQuery 
+     * @return \ElasticSearch\DSL\RangeQuery
      * @param mixed $value
      */
     public function fieldname($value) {
         $this->fieldname = $value;
         return $this;
     }
+
+    /**
+     * @param $value
+     * @return \ElasticSearch\DSL\RangeQuery $this
+     */
     public function from($value) {
         $this->from = $value;
         return $this;
     }
+    /**
+     * @param $value
+     * @return \ElasticSearch\DSL\RangeQuery $this
+     */
     public function to($value) {
         $this->to = $value;
         return $this;
     }
+    /**
+     * @param $value
+     * @return \ElasticSearch\DSL\RangeQuery $this
+     */
     public function includeLower($value) {
         $this->includeLower = $value;
         return $this;
     }
+    /**
+     * @param $value
+     * @return \ElasticSearch\DSL\RangeQuery $this
+     */
     public function includeUpper($value) {
         $this->includeUpper = $value;
         return $this;
     }
+    /**
+     * @param $value
+     * @return \ElasticSearch\DSL\RangeQuery $this
+     */
     public function boost($value) {
         $this->boost = $value;
         return $this;
     }
-    
+
     /**
      * Build to array
      *
+     * @throws \ElasticSearch\Exception
      * @return array
      */
     public function build() {
@@ -88,7 +110,7 @@ class RangeQuery {
                     $built[$this->fieldname][$opt] = $this->$opt;
             }
             if (count($built[$this->fieldname]) == 0)
-                throw new Exception("Empty RangeQuery cant be created");
+                throw new \ElasticSearch\Exception("Empty RangeQuery cant be created");
         }
         return $built;
     }

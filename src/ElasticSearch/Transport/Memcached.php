@@ -20,17 +20,19 @@ class Memcached extends Base {
         $this->conn = new Memcache;
         $this->conn->connect($host, $port);
     }
-    
+
     /**
      * Index a new document or update it if existing
      *
      * @return array
      * @param array $document
      * @param mixed $id Optional
+     * @param array $options
+     * @throws \ElasticSearch\Exception
      */
     public function index($document, $id=false, array $options = array()) {
         if ($id === false)
-            throw new Exception("Memcached transport requires id when indexing");
+            throw new \ElasticSearch\Exception("Memcached transport requires id when indexing");
 
         $document = json_encode($document);
         $url = $this->buildUrl(array($this->type, $id));
@@ -39,12 +41,13 @@ class Memcached extends Base {
             'ok' => $response
         );
     }
-    
+
     /**
      * Search
      *
      * @return array
-     * @param mixed $id Optional
+     * @param array|string $query
+     * @throws \ElasticSearch\Exception
      */
     public function search($query) {
         if (is_array($query)) {
@@ -57,7 +60,7 @@ class Memcached extends Base {
                 $result = json_decode($this->conn->get($url), true);
                 return $result;
             }
-            throw new Exception("Memcached protocol doesnt support the full DSL, only query");
+            throw new \ElasticSearch\Exception("Memcached protocol doesnt support the full DSL, only query");
         }
         elseif (is_string($query)) {
             /**
@@ -70,7 +73,7 @@ class Memcached extends Base {
             return $result;
         }
     }
-    
+
     /**
      * Perform a request against the given path/method/payload combination
      * Example:
@@ -78,7 +81,7 @@ class Memcached extends Base {
      *
      * @param string|array $path
      * @param string $method
-     * @param array|false $payload
+     * @param array|bool $payload
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
@@ -93,11 +96,12 @@ class Memcached extends Base {
         }
         return json_decode($result);
     }
-    
+
     /**
      * Flush this index/type combination
      *
      * @return array
+     * @param mixed $id
      * @param array $options Parameters to pass to delete action
      */
     public function delete($id=false, array $options = array()) {
