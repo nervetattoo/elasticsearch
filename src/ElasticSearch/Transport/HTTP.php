@@ -158,6 +158,8 @@ class HTTP extends Base {
 
         if (is_array($payload) && count($payload) > 0)
             curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
+        elseif ($payload)
+            curl_setopt($conn, CURLOPT_POSTFIELDS, $payload) ;
         else
         	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
 
