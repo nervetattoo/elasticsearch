@@ -274,4 +274,16 @@ class Client {
         }
         return compact('protocol', 'servers', 'index', 'type');
     }
+
+    /**
+     * Add a handler called every time a request is made to ElasticSearch
+     *
+     * @param callable $cb
+     * @return void
+     */
+    public function addOnCallHandler($cb)
+    {
+        $this->transport->onCall[] = $cb;
+    }
+
 }
