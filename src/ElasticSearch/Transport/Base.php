@@ -38,6 +38,13 @@ abstract class Base {
     protected $type;
 
     /**
+     * called on each request
+     * @var array f(url, method, payload, return)
+     */
+    public $onCall;
+
+
+    /**
      * Default constructor, just set host and port
      * @param string $host
      * @param int $port
