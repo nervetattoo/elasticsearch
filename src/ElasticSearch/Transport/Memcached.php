@@ -79,9 +79,12 @@ class Memcached extends Base {
      * Example:
      * $es->request('/_status');
      *
+     * It does only support GET and DELETE requests and silently ignores the
+     * payload.
+     *
      * @param string|array $path
      * @param string $method
-     * @param array|bool $payload
+     * @param array|string|bool $payload
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
@@ -93,6 +96,8 @@ class Memcached extends Base {
             case 'DELETE':
                 $result = $this->conn->delete($url);
                 break;
+            default:
+                throw new Exception("Memcached (or this implementation) does not support $method-requests.");
         }
         return json_decode($result);
     }

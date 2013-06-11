@@ -115,7 +115,7 @@ class HTTP extends Base {
      *
      * @param string|array $path
      * @param string $method
-     * @param array|bool $payload
+     * @param array|string|bool $payload
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
@@ -142,7 +142,7 @@ class HTTP extends Base {
      * @return array
      * @param string $url
      * @param string $method (GET/POST/PUT/DELETE)
-     * @param array|bool $payload The document/instructions to pass along
+     * @param array|string|bool $payload The document/instructions to pass along
      * @throws HTTPException
      */
     protected function call($url, $method="GET", $payload=false) {
@@ -156,10 +156,10 @@ class HTTP extends Base {
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
         curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
-        if (is_array($payload) && count($payload) > 0)
-            curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
+        if ((is_array($payload) && count($payload) > 0) || is_string($payload) && $payload !== "")
+            curl_setopt($conn, CURLOPT_POSTFIELDS, is_string($payload) ? $payload : json_encode($payload));
         else
-        	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
+        	  curl_setopt($conn, CURLOPT_POSTFIELDS, null);
 
         $response = curl_exec($conn);
         if ($response !== false) {

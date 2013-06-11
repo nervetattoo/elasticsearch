@@ -153,6 +153,14 @@ class Client {
         return $this->request('_mapping', 'PUT', $mapping->export(), true);
     }
 
+    /**
+     * @return mixed A new bulk object to collect operations.
+     * @param int $chunksize the batch size when commiting
+     */
+    public function bulk($chunksize=0) {
+        return new \ElasticSearch\Bulk($this->transport, $this->index, $this->type, $chunksize);
+    }
+
     protected function passesTypeConstraint($constraint) {
         if (is_string($constraint)) $constraint = array($constraint);
         $currentType = explode(',', $this->type);
@@ -208,7 +216,7 @@ class Client {
         $result['time'] = microtime(true) - $start;
         return $result;
     }
-    
+
     /**
      * Flush this index/type combination
      *
