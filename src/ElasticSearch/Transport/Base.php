@@ -14,23 +14,23 @@ namespace ElasticSearch\Transport;
 abstract class Base {
 
     /**
-     * What host to connect to for server
+     * Which hosts to connect to for server (for failover)
      * @var string
      */
-    protected $host = "";
-    
+    protected $connections = [];
+
     /**
-     * Port to connect on
-     * @var int
+     * Which connection index is active
+     * @var integer
      */
-    protected $port = 9200;
+    protected $connectionIndex = 0;
 
     /**
      * ElasticSearch index
      * @var string
      */
     protected $index;
-    
+
     /**
      * ElasticSearch document type
      * @var string
@@ -39,13 +39,52 @@ abstract class Base {
 
     /**
      * Default constructor, just set host and port
-     * @param string $host
-     * @param int $port
+     * @param string $connections
      */
-    public function __construct($host, $port) {
-        $this->host = $host;
-        $this->port = $port;
+    public function __construct($connections) {
+        if (isset($connections['host'])) {
+            $connections = [$connections];
+        }
+        $this->connections = $connections;
+        $this->selectActiveConnection();
     }
+
+    /**
+     * Selects a connection from the list of available connections to be the active connection
+     */
+    public function selectActiveConnection() {
+        $this->activeConnection = rand(0, count($connections)-1);
+    }
+
+    /**
+     * Returns the host and port of the active connection
+     */
+    public function getActiveConnection() {
+        return $this->connections[$this->activeConnection];
+    }
+
+    /**
+     * Returns a formatted string for the active connection that can be used in URL generation for cURL requests
+     */
+    public function getActiveConnectionString() {
+        return $this->connections[$this->activeConnection]['host'].":".$this->connections[$this->activeConnection]['port'];
+    }
+
+    /**
+     * Removes the active connection and selects a new connection
+     */
+    public function rolloverActiveConnection() {
+        unset($this->connections[$this->activeConnection]);
+        $this->selectActiveConnection();
+    }
+
+    /**
+     * Checks to see if there are atleast x connections available
+     */
+    public function atleastConnectionsAvailable($neededConnections=1) {
+        return (count($this->connections) >= $neededConnections);
+    }
+
 
     /**
      * Method for indexing a new document

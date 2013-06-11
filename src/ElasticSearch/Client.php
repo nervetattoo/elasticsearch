@@ -74,9 +74,7 @@ class Client {
         }
         $class = self::$_protocols[$protocol];
 
-        $server = is_array($config['servers']) ? $config['servers'][0] : $config['servers'];
-        list($host, $port) = explode(':', $server);
-        $transport = new $class($host, $port);
+        $transport = new $class($config['servers']);
         $client = new self($transport, $config['index'], $config['type']);
         $client->config($config);
         return $client;
@@ -208,7 +206,7 @@ class Client {
         $result['time'] = microtime(true) - $start;
         return $result;
     }
-    
+
     /**
      * Flush this index/type combination
      *
