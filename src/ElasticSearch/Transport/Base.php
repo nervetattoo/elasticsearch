@@ -64,7 +64,6 @@ abstract class Base {
      * @param string|array $path
      * @param string $method
      * @param array|bool $payload
-     * @return
      */
     abstract public function request($path, $method="GET", $payload=false);
 

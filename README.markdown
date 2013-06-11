@@ -96,3 +96,15 @@ $es->index($document, $id, array('routing' => $document['user_id']));
 $es->search('title:routed', array('routing' => '42'));
 ```
 
+### Using the bulk API
+```php
+<?php
+$bulk = $es->bulk(array('chunk' => 100));
+
+foreach ($items as $item)
+    $bulk->index($item->indexable());
+foreach ($delete as $item)
+    $bulk->delete($item->id);
+$bulk->commit();
+```
+
