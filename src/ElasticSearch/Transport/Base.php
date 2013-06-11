@@ -53,7 +53,7 @@ abstract class Base {
      * Selects a connection from the list of available connections to be the active connection
      */
     public function selectActiveConnection() {
-        $this->activeConnection = rand(0, count($connections)-1);
+        $this->activeConnection = rand(0, count($this->connections)-1);
     }
 
     /**

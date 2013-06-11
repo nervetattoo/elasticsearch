@@ -110,6 +110,7 @@ class Bulk {
     public function commit($options = array()) {
         $chunksize = $this->chunksize? $this->chunksize: count($this->chunks);
 
+        $ret = [];
         foreach (array_chunk($this->chunks, $chunksize) as $chunks)
             $ret += $this->transport->request('/_bulk', 'POST', join("\n", $chunks) . "\n");
 

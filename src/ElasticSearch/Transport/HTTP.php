@@ -148,10 +148,10 @@ class HTTP extends Base {
     protected function call($url, $method="GET", $payload=false) {
         $conn = $this->ch;
         $protocol = "http";
-        $requestURL = $protocol . "://" . $this->getConnectionString() . $url;
+        $requestURL = $protocol . "://" . $this->getActiveConnectionString() . $url;
         curl_setopt($conn, CURLOPT_URL, $requestURL);
         curl_setopt($conn, CURLOPT_TIMEOUT, self::TIMEOUT);
-        curl_setopt($conn, CURLOPT_PORT, $this->port);
+        curl_setopt($conn, CURLOPT_PORT, $this->getActiveConnection()['port']);
         curl_setopt($conn, CURLOPT_RETURNTRANSFER, 1) ;
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
         curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
