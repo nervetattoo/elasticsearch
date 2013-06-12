@@ -155,7 +155,7 @@ abstract class Base {
      */
     protected function buildUrl($path = false, array $options = array()) {
         $isAbsolute = (is_array($path) ? $path[0][0] : $path[0]) === '/';
-        $url = $isAbsolute ? '' : "/" . $this->index;
+        $url = $isAbsolute ? $path : "/" . $this->index;
 
         if ($path && is_array($path) && count($path) > 0)
             $url .= "/" . implode("/", array_filter($path));
