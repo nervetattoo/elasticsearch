@@ -16,21 +16,21 @@ if (!defined('CURLE_OPERATION_TIMEDOUT'))
 
 
 class HTTP extends Base {
-    
+
     /**
      * How long before timing out CURL call
      */
     const TIMEOUT = 5;
-	
+
     /**
      * curl handler which is needed for reusing existing http connection to the server
      * @var resource
      */
     protected $ch;
-	
-	
-    public function __construct($host='localhost', $port=9200) {
-        parent::__construct($host, $port);
+
+
+    public function __construct($connections) {
+        parent::__construct($connections);
         $this->ch = curl_init();
     }
 
@@ -115,13 +115,13 @@ class HTTP extends Base {
      *
      * @param string|array $path
      * @param string $method
-     * @param array|bool $payload
+     * @param array|string|bool $payload
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
         return $this->call($this->buildUrl($path), $method, $payload);
     }
-    
+
     /**
      * Flush this index/type combination
      *
@@ -142,24 +142,24 @@ class HTTP extends Base {
      * @return array
      * @param string $url
      * @param string $method (GET/POST/PUT/DELETE)
-     * @param array|bool $payload The document/instructions to pass along
+     * @param array|string|bool $payload The document/instructions to pass along
      * @throws HTTPException
      */
     protected function call($url, $method="GET", $payload=false) {
         $conn = $this->ch;
         $protocol = "http";
-        $requestURL = $protocol . "://" . $this->host . $url;
+        $requestURL = $protocol . "://" . $this->getActiveConnectionString() . $url;
         curl_setopt($conn, CURLOPT_URL, $requestURL);
         curl_setopt($conn, CURLOPT_TIMEOUT, self::TIMEOUT);
-        curl_setopt($conn, CURLOPT_PORT, $this->port);
+        curl_setopt($conn, CURLOPT_PORT, $this->getActiveConnection()['port']);
         curl_setopt($conn, CURLOPT_RETURNTRANSFER, 1) ;
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
         curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
-        if (is_array($payload) && count($payload) > 0)
-            curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
+        if ((is_array($payload) && count($payload) > 0) || is_string($payload) && $payload !== "")
+            curl_setopt($conn, CURLOPT_POSTFIELDS, is_string($payload) ? $payload : json_encode($payload));
         else
-        	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
+        	  curl_setopt($conn, CURLOPT_POSTFIELDS, null);
 
         $response = curl_exec($conn);
         if ($response !== false) {
@@ -173,6 +173,7 @@ class HTTP extends Base {
              * cUrl error code reference can be found here:
              * http://curl.haxx.se/libcurl/c/libcurl-errors.html
              */
+            $retry = false;
             $errno = curl_errno($conn);
             switch ($errno)
             {
@@ -192,9 +193,11 @@ class HTTP extends Base {
                     $error = "Couldnt resolve host";
                     break;
                 case CURLE_COULDNT_CONNECT:
+                    $retry = true;
                     $error = "Couldnt connect to host [{$this->host}], ElasticSearch down?";
                     break;
                 case CURLE_OPERATION_TIMEDOUT:
+                    $retry = true;
                     $error = "Operation timed out on [$requestURL]";
                     break;
                 default:
@@ -203,13 +206,16 @@ class HTTP extends Base {
                         $error .= ". Non-cUrl error";
                     break;
             }
-            $exception = new HTTPException($error);
-            $exception->payload = $payload;
-            $exception->port = $this->port;
-            $exception->protocol = $protocol;
-            $exception->host = $this->host;
-            $exception->method = $method;
-            throw $exception;
+            if ($retry && $this->atleastConnectionsAvailable(2)) {
+                $this->rolloverActiveConnection();
+                return $this->call($url, $method, $payload);
+            } else {
+                $exception = new HTTPException($error);
+                $exception->payload = $payload;
+                $exception->protocol = $protocol;
+                $exception->method = $method;
+                throw $exception;
+            }
         }
 
         return $data;

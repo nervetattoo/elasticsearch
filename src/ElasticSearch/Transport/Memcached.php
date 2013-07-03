@@ -16,7 +16,7 @@ use \ElasticSearch\DSL\Stringify;
 
 class Memcached extends Base {
     public function __construct($host="127.0.0.1", $port=11311) {
-        parent::__construct($host, $port);
+        parent::__construct(['host' => $host, 'port' => $port]);
         $this->conn = new Memcache;
         $this->conn->connect($host, $port);
     }
@@ -79,9 +79,12 @@ class Memcached extends Base {
      * Example:
      * $es->request('/_status');
      *
+     * It does only support GET and DELETE requests and silently ignores the
+     * payload.
+     *
      * @param string|array $path
      * @param string $method
-     * @param array|bool $payload
+     * @param array|string|bool $payload
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
@@ -93,6 +96,8 @@ class Memcached extends Base {
             case 'DELETE':
                 $result = $this->conn->delete($url);
                 break;
+            default:
+                throw new Exception("Memcached (or this implementation) does not support $method-requests.");
         }
         return json_decode($result);
     }
