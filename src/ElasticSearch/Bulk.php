@@ -40,6 +40,7 @@ class Bulk {
      * @param string $type Type
      * @param array $options Allow sending query parameters to control indexing further
      *        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
+     * @return \Elasticsearch\Bulk
      */
 	public function index($document, $id=false, $index, $type, array $options = array()) {
 		$params = array( '_id' => $id, 
@@ -55,6 +56,7 @@ class Bulk {
 			$document 
 		);
 		$this->operations[] = $operation;
+		return $this;
 	}
 
 	 /**
@@ -64,6 +66,7 @@ class Bulk {
      * @param string $index Index
      * @param string $type Type
      * @param array $options Parameters to pass to delete action
+     * @return \Elasticsearch\Bulk
      */
 	public function delete($id=false, $index, $type, array $options = array()) {
 		$params = array( '_id' => $id, 
@@ -78,6 +81,7 @@ class Bulk {
 			array('delete' => $params)
 		);
 		$this->operations[] = $operation;
+		return $this;
 
 	}
 
