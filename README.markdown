@@ -96,3 +96,28 @@ $es->index($document, $id, array('routing' => $document['user_id']));
 $es->search('title:routed', array('routing' => '42'));
 ```
 
+
+### Support for Bulking
+
+```php
+<?php
+$document = array(
+    'title' => 'My bulked entry',
+    'user_id' => '43' 
+);
+$es->beginBulk();
+$es->index($document, $id, array('routing' => $document['user_id']));
+$es->delete(2);
+$es->delete(3);
+$es->commitBulk();
+
+
+$es->createBulk()
+    ->delete(4)
+    ->index($document, $id, 'myIndex', 'myType', array('parent' => $parentId));
+    ->delete(5)
+    ->delete(6)
+    ->commit();
+
+```
+

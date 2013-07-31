@@ -145,7 +145,7 @@ class HTTP extends Base {
      * @param array|bool $payload The document/instructions to pass along
      * @throws HTTPException
      */
-    protected function call($url, $method="GET", $payload=false) {
+    protected function call($url, $method="GET", $payload=null) {
         $conn = $this->ch;
         $protocol = "http";
         $requestURL = $protocol . "://" . $this->host . $url;
@@ -159,7 +159,7 @@ class HTTP extends Base {
         if (is_array($payload) && count($payload) > 0)
             curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
         else
-        	curl_setopt($conn, CURLOPT_POSTFIELDS, null);
+	       	curl_setopt($conn, CURLOPT_POSTFIELDS, $payload);
 
         $response = curl_exec($conn);
         if ($response !== false) {

@@ -31,7 +31,7 @@ class Client {
         'memcached' => 'ElasticSearch\\Transport\\Memcached',
     );
 
-    private $transport, $index, $type;
+    private $transport, $index, $type, $bulk;
 
     /**
      * Construct search client
@@ -192,6 +192,9 @@ class Client {
      *        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
      */
     public function index($document, $id=false, array $options = array()) {
+        if ($this->bulk) {
+            return $this->bulk->index($document, $id, $this->index, $this->type, $options);
+        }
         return $this->transport->index($document, $id, $options);
     }
 
@@ -218,6 +221,9 @@ class Client {
      * @param array $options Parameters to pass to delete action
      */
     public function delete($id=false, array $options = array()) {
+        if ($this->bulk) {
+            return $this->bulk->delete($id, $this->index, $this->type, $options);
+        }
         return $this->transport->delete($id, $options);
     }
 
@@ -273,5 +279,42 @@ class Client {
             list($index, $type) = array_values(array_filter($path));
         }
         return compact('protocol', 'servers', 'index', 'type');
+    }
+
+    /**
+     * Begin a transparent bulk-transaction
+     * if one is already running, return its handle
+     * @return \Elasticsearch\Bulk
+     */
+
+    public function beginBulk() {
+        if (!$this->bulk) {
+            $this->bulk = $this->createBulk($this);
+        }
+        return $this->bulk;
+    }
+
+    /**
+     * Create a bulk-transaction
+     *
+     * @return \Elasticsearch\Bulk
+     */
+
+    public function createBulk() {
+        return new Bulk($this);
+    }
+
+
+    /**
+     * commit a bulk-transaction
+     * @return array 
+     */
+
+    public function commitBulk() {
+        if ($this->bulk) {
+            $result = $this->bulk->commit();
+            unset ($this->bulk);
+            return $result;
+        }
     }
 }
