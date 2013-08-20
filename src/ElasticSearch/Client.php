@@ -282,6 +282,17 @@ class Client {
     }
 
     /**
+     * Create a bulk-transaction
+     *
+     * @return \Elasticsearch\Bulk
+     */
+
+    public function createBulk() {
+        return new Bulk($this);
+    }
+
+
+    /**
      * Begin a transparent bulk-transaction
      * if one is already running, return its handle
      * @return \Elasticsearch\Bulk
@@ -295,15 +306,11 @@ class Client {
     }
 
     /**
-     * Create a bulk-transaction
-     *
-     * @return \Elasticsearch\Bulk
-     */
-
-    public function createBulk() {
-        return new Bulk($this);
+    * @see beginBulk
+    */
+    public function begin() {
+        return $this->beginBulk();
     }
-
 
     /**
      * commit a bulk-transaction
@@ -317,4 +324,12 @@ class Client {
             return $result;
         }
     }
+
+    /**
+    * @see commitBulk
+    */
+    public function commit() {
+        return $this->commitBulk();
+    }
+    
 }
