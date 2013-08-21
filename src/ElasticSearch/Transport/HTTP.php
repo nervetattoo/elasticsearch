@@ -131,7 +131,7 @@ class HTTP extends Base {
      */
     public function delete($id=false, array $options = array()) {
         if ($id)
-            return $this->call($this->buildUrl(array($this->type, $id), $options), "DELETE") );
+            return $this->call($this->buildUrl(array($this->type, $id), $options), "DELETE");
         else
             return $this->request(false, "DELETE");
     }
