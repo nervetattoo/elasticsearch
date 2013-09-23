@@ -68,6 +68,8 @@ class Builder {
             $built['from'] = $this->from;
         if ($this->size != null)
             $built['size'] = $this->size;
+        if ($this->sort && is_array($this->sort))
+            $built['sort'] = $this->sort;
         if (!$this->query)
             throw new \ElasticSearch\Exception("Query must be specified");
         else

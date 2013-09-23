@@ -90,4 +90,18 @@ class Builder extends \ElasticSearch\tests\Base
 
         $this->assert->array($dsl->build())->isEqualTo($arr);
     }
+
+    public function testSortClause() {
+        $sort = array('title' => 'desc');
+        $dsl = new \ElasticSearch\DSL\Builder(compact('sort'));
+        $dsl->query()->term("cool", "title");
+
+        $this->assert->array($dsl->build())
+            ->isEqualTo(array(
+                'query' => array(
+                    'term' => array('title' => 'cool')
+                ),
+                'sort' => $sort
+            ));
+    }
 }
