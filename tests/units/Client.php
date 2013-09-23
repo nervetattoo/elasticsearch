@@ -224,4 +224,54 @@ class Client extends \ElasticSearch\tests\Base
         $this->assert->string($config['type'])->isEqualTo('type');
         putenv("ELASTICSEARCH_URL");
     }
+
+    public function testBulk() {
+        $esURL = 'http://127.0.0.1:9200/index/type';
+        putenv("ELASTICSEARCH_URL={$esURL}");
+
+        $client = \ElasticSearch\Client::connection();
+        $bulk = $client->beginBulk();
+
+        $doc = array(
+            'title' => 'First in Line' 
+        );
+
+        $client->index($doc, false, array('refresh' => true));
+
+        $doc2 = array(
+            'title' => 'Second in Line' 
+        );
+        $client->setType('type2');
+        $client->index($doc2, false);
+
+        $client->setIndex('index2');
+
+        $client->delete(55);
+
+        $operations = $bulk-> getOperations();
+        $this->assert->integer($bulk->count())->isEqualTo(3)
+                     ->array($operations[1])
+                     ->hasSize(2)
+                     ->array($operations[0])
+                     ->hasSize(2)
+                     ->array($operations[0][0])->hasKey('index')
+                     ->array($operations[0][0]['index'])->hasKey('_refresh')
+                     ->boolean($operations[0][0]['index']['_refresh'])->isEqualTo(true)
+                     ->array($operations[1][1])->isEqualTo($doc2)
+                     ->array($operations[2][0])->hasKey('delete')
+                     ->array($operations[2][0]['delete'])->hasKey('_id')
+                     ->integer($operations[2][0]['delete']['_id'])->isEqualTo(55)
+;
+
+        $payload = '{"index":{"_id":false,"_index":"index","_type":"type","_refresh":true}}'
+        ."\n".'{"title":"First in Line"}'
+        ."\n".'{"index":{"_id":false,"_index":"index","_type":"type2"}}'
+        ."\n".'{"title":"Second in Line"}'
+        ."\n".'{"delete":{"_id":55,"_index":"index2","_type":"type2"}}'
+;
+
+        $this->assert->string($bulk->createPayload())->isEqualTo($payload);
+
+        putenv("ELASTICSEARCH_URL");
+    }
 }
