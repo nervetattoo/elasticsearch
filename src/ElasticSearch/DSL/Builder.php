@@ -15,7 +15,7 @@ namespace ElasticSearch\DSL;
  * How to build a mildly complex query:
  * $dsl = new ElasticSearchDSL;
  * $bool = $dsl->bool(); // Return a new bool structure
- *
+ *  
  * @author Raymond Julin <raymond.julin@gmail.com>
  * @package ElasticSearchClient
  * @since 0.1
@@ -68,6 +68,10 @@ class Builder {
             $built['from'] = $this->from;
         if ($this->size != null)
             $built['size'] = $this->size;
+        if($this->sort != null && is_array($this->sort))   
+            $built['sort']=$this->sort;
+            
+            
         if (!$this->query)
             throw new \ElasticSearch\Exception("Query must be specified");
         else
