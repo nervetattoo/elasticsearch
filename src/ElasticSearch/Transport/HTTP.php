@@ -73,6 +73,8 @@ class HTTP extends Base {
                 $this->type, "_search?q=" . $query
             ));
             $result = $this->call($url, "POST", $options);
+        }else {
+            $result = FALSE;
         }
         return $result;
     }
