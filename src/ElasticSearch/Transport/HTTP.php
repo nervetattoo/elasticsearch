@@ -56,6 +56,7 @@ class HTTP extends Base {
      * @param array $options
      */
     public function search($query, array $options = array()) {
+        $result = false;
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
