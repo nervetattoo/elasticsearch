@@ -60,9 +60,15 @@ class HTTP extends Base {
             /**
              * Array implies using the JSON query DSL
              */
+            $arg = "_search";
+            if(isset($options['routing'])) {
+                $arg = "_search?routing=" . $options['routing'];
+            }
+            
             $url = $this->buildUrl(array(
-                $this->type, "_search"
+                $this->type, $arg
             ));
+            
             $result = $this->call($url, "GET", $query);
         }
         elseif (is_string($query)) {
