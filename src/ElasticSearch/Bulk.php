@@ -113,6 +113,6 @@ class Bulk {
 				$payloads[] = json_encode($partial);
 			}
 		}
-		return join("\n", $payloads);
+		return join("\n", $payloads)."\n";
 	}
 }
