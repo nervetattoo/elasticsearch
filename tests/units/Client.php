@@ -26,7 +26,8 @@ class Client extends \ElasticSearch\tests\Base
     public function testAbsoluteRequest() {
         $client = \ElasticSearch\Client::connection();
         $resp = $client->request('/');
-        $this->assert->array($resp)->hasKey('ok')
+        $this->assert->array($resp)
+            ->integer($resp['status'])->isEqualTo(200)
             ->string($resp['tagline'])->isEqualTo('You Know, for Search');
     }
 
@@ -40,9 +41,7 @@ class Client extends \ElasticSearch\tests\Base
         );
         $client = \ElasticSearch\Client::connection();
         $resp = $client->index($doc, $tag, array('refresh' => true));
-
-        $this->assert->array($resp)->hasKey('ok')
-            ->boolean($resp['ok'])->isTrue(1);
+        $this->assert->array($resp)->boolean($resp['created'])->isTrue(1);
 
         $fetchedDoc = $client->get($tag);
         $this->assert->array($fetchedDoc)->isEqualTo($doc);
@@ -71,8 +70,8 @@ class Client extends \ElasticSearch\tests\Base
         );
         $client = \ElasticSearch\Client::connection();
         $resp = $client->index($doc, false, array('refresh' => true));
-        $this->assert->array($resp)->hasKey('ok')
-            ->boolean($resp['ok'])->isTrue(1);
+        $this->assert->array($resp)
+            ->boolean($resp['created'])->isTrue(1);
     }
 
     /**
@@ -123,7 +122,7 @@ class Client extends \ElasticSearch\tests\Base
                         'term' => array('title' => $uniqueWord)
                     ),
                     'should' => array(
-                        'field' => array(
+                        'term' => array(
                             'tag' => 'stuff'
                         )
                     )
@@ -267,7 +266,7 @@ class Client extends \ElasticSearch\tests\Base
         ."\n".'{"title":"First in Line"}'
         ."\n".'{"index":{"_id":false,"_index":"index","_type":"type2"}}'
         ."\n".'{"title":"Second in Line"}'
-        ."\n".'{"delete":{"_id":55,"_index":"index2","_type":"type2"}}'
+        ."\n".'{"delete":{"_id":55,"_index":"index2","_type":"type2"}}'."\n"
 ;
 
         $this->assert->string($bulk->createPayload())->isEqualTo($payload);

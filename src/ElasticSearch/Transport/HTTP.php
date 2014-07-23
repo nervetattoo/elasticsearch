@@ -112,7 +112,7 @@ class HTTP extends Base {
         if ($options['refresh']) {
             $this->request('_refresh', "POST");
         }
-        return !isset($result['error']) && $result['ok'];
+        return !isset($result['error']);
     }
 
     /**
