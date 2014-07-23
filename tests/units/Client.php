@@ -267,7 +267,7 @@ class Client extends \ElasticSearch\tests\Base
         ."\n".'{"title":"First in Line"}'
         ."\n".'{"index":{"_id":false,"_index":"index","_type":"type2"}}'
         ."\n".'{"title":"Second in Line"}'
-        ."\n".'{"delete":{"_id":55,"_index":"index2","_type":"type2"}}'
+        ."\n".'{"delete":{"_id":55,"_index":"index2","_type":"type2"}}'."\n"
 ;
 
         $this->assert->string($bulk->createPayload())->isEqualTo($payload);
