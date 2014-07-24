@@ -271,6 +271,21 @@ class Client extends \ElasticSearch\tests\Base
 
         $this->assert->string($bulk->createPayload())->isEqualTo($payload);
 
+        // Run multiple bulks and make sure all documents are stored
+        $client->beginBulk();
+        $client->index(array('title' => 'Bulk1'), 1);
+        $client->index(array('title' => 'Bulk2'), 2);
+        $client->commitBulk();
+        $client->beginBulk();
+        $client->index(array('title' => 'Bulk3'), 3);
+        $client->index(array('title' => 'Bulk4'), 4);
+        $client->commitBulk();
+        sleep(1);
+        $resp = $client->search('title:Bulk*');
+        $this->assert->array($resp)->hasKey('hits')
+            ->array($resp['hits'])->hasKey('total')
+            ->integer($resp['hits']['total'])->isEqualTo(4);
+
         putenv("ELASTICSEARCH_URL");
     }
 }
