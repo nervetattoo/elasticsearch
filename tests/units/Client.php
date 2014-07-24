@@ -8,6 +8,9 @@ use ElasticSearch\tests\Helper;
 class Client extends \ElasticSearch\tests\Base
 {
     public function tearDown() {
+        \ElasticSearch\Client::connection()->setIndex('index')->delete();
+        \ElasticSearch\Client::connection()->setIndex('index2')->delete();
+        \ElasticSearch\Client::connection()->setIndex('test-index')->delete();
         \ElasticSearch\Client::connection()->delete();
     }
 
