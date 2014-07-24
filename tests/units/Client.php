@@ -86,7 +86,9 @@ class Client extends \ElasticSearch\tests\Base
         $client->refresh();
 
         $del = $client->deleteByQuery(array(
-            'term' => array('title' => $word)
+            'query' => array(
+                             'term' => array('title' => $word)
+                             )
         ));
 
         $hits = $client->search(array(
