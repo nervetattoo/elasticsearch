@@ -16,19 +16,19 @@ if (!defined('CURLE_OPERATION_TIMEDOUT'))
 
 
 class HTTP extends Base {
-    
+
     /**
      * How long before timing out CURL call
      */
     const TIMEOUT = 5;
-	
+
     /**
      * curl handler which is needed for reusing existing http connection to the server
      * @var resource
      */
     protected $ch;
-	
-	
+
+
     public function __construct($host='localhost', $port=9200) {
         parent::__construct($host, $port);
         $this->ch = curl_init();
@@ -128,7 +128,7 @@ class HTTP extends Base {
     public function request($path, $method="GET", $payload=false) {
         return $this->call($this->buildUrl($path), $method, $payload);
     }
-    
+
     /**
      * Flush this index/type combination
      *
