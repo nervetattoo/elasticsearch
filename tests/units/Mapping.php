@@ -8,6 +8,11 @@ use \mageekguy\atoum;
 
 class Mapping extends atoum\test
 {
+    public function tearDown() {
+        \ElasticSearch\Client::connection()->setIndex('test-index')->delete();
+        \ElasticSearch\Client::connection()->delete();
+    }
+
     public function testMapCreate() {
         $mapping = new \ElasticSearch\Mapping(array(
             'tweet' => array(

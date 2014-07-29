@@ -8,6 +8,9 @@ use ElasticSearch\tests\Helper;
 class Client extends \ElasticSearch\tests\Base
 {
     public function tearDown() {
+        \ElasticSearch\Client::connection()->setIndex('index')->delete();
+        \ElasticSearch\Client::connection()->setIndex('index2')->delete();
+        \ElasticSearch\Client::connection()->setIndex('test-index')->delete();
         \ElasticSearch\Client::connection()->delete();
     }
 
@@ -86,7 +89,9 @@ class Client extends \ElasticSearch\tests\Base
         $client->refresh();
 
         $del = $client->deleteByQuery(array(
-            'term' => array('title' => $word)
+            'query' => array(
+                             'term' => array('title' => $word)
+                             )
         ));
 
         $hits = $client->search(array(
@@ -270,6 +275,21 @@ class Client extends \ElasticSearch\tests\Base
 ;
 
         $this->assert->string($bulk->createPayload())->isEqualTo($payload);
+
+        // Run multiple bulks and make sure all documents are stored
+        $client->beginBulk();
+        $client->index(array('title' => 'Bulk1'), 1);
+        $client->index(array('title' => 'Bulk2'), 2);
+        $client->commitBulk();
+        $client->beginBulk();
+        $client->index(array('title' => 'Bulk3'), 3);
+        $client->index(array('title' => 'Bulk4'), 4);
+        $client->commitBulk();
+        sleep(1);
+        $resp = $client->search('title:Bulk*');
+        $this->assert->array($resp)->hasKey('hits')
+            ->array($resp['hits'])->hasKey('total')
+            ->integer($resp['hits']['total'])->isEqualTo(4);
 
         putenv("ELASTICSEARCH_URL");
     }

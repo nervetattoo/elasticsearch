@@ -320,7 +320,7 @@ class Client {
     public function commitBulk() {
         if ($this->bulk) {
             $result = $this->bulk->commit();
-            unset ($this->bulk);
+            $this->bulk = null;
             return $result;
         }
     }
