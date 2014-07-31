@@ -29,9 +29,11 @@ class HTTP extends Base {
     protected $ch;
 	
 	
-    public function __construct($host='localhost', $port=9200, $httpTimeout=5) {
+    public function __construct($host='localhost', $port=9200, $timeout=null) {
         parent::__construct($host, $port);
-        $this->setTimeout($httpTimeout);
+        if(null !== $timeout) {
+            $this->setTimeout($timeout);
+        }    
         $this->ch = curl_init();
     }
 

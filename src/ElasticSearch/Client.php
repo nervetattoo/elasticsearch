@@ -23,7 +23,8 @@ class Client {
         'protocol' => Client::DEFAULT_PROTOCOL,
         'servers' => Client::DEFAULT_SERVER,
         'index' => Client::DEFAULT_INDEX,
-        'type' => Client::DEFAULT_TYPE
+        'type' => Client::DEFAULT_TYPE,
+        'timeout' => null,
     );
 
     protected static $_protocols = array(
@@ -66,6 +67,7 @@ class Client {
         if (is_string($config)) {
             $config = self::parseDsn($config);
         }
+
         $config += self::$_defaults;
 
         $protocol = $config['protocol'];
@@ -74,9 +76,15 @@ class Client {
         }
         $class = self::$_protocols[$protocol];
 
+        if (null !== $config['timeout'] && !is_numeric($config['timeout'])) {
+            throw new \Exception("HTTP timeout should have a numeric value when specified.");
+        }
+
         $server = is_array($config['servers']) ? $config['servers'][0] : $config['servers'];
         list($host, $port) = explode(':', $server);
-        $transport = new $class($host, $port);
+        
+        $transport = new $class($host, $port, $config['timeout']);
+        
         $client = new self($transport, $config['index'], $config['type']);
         $client->config($config);
         return $client;
