@@ -121,3 +121,51 @@ $es->createBulk()
 
 ```
 
+### Usage as a service in Symfony2
+
+In order to use the Dependency Injection to inject the client as a service, you'll have to define it before.
+So in your bundle's services.yml file you can put something like this :
+```yml
+    your_bundle.elastic_transport:
+        class: ElasticSearch\Transport\HTTP
+        arguments:
+            - localhost
+            - 9200
+            - 60
+
+    your_bundle.elastic_client:
+        class: ElasticSearch\Client
+        arguments:
+            - @your_bundle.elastic_transport
+```
+To make Symfony2 recognize the `ElasticSearch` namespace, you'll have to register it. So in your `app/autoload.php` make sure your have :
+```php
+<?php
+// ...
+    
+$loader->registerNamespaces(array(
+    // ...
+    'ElasticSearch' => __DIR__.'/path/to/your/vendor/nervetattoo/elasticsearch/src',
+));
+```
+Then, you can get your client via the service container and use it like usual. For example, in your controller you can do this :
+```php
+<?php
+class FooController extends Controller
+{
+    // ...
+    
+    public function barAction()
+    {
+        // ...
+        $es = $this->get('your_bundle.elastic_client');
+        $results = $es
+            ->setIndex(array("one", "two"))
+            ->setType(array("mytype", "other-type"))
+            ->search('title:cool');
+    }
+}
+```
+
+
+

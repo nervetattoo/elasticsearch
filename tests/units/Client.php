@@ -20,7 +20,8 @@ class Client extends \ElasticSearch\tests\Base
             'protocol' => 'http',
             'servers' => 'test.com:9100',
             'index' => 'index',
-            'type' => 'type'
+            'type' => 'type',
+            'timeout' => null,
         );
         $this->assert->array($search->config())
             ->isEqualTo($config);
