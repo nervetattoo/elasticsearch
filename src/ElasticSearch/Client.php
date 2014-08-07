@@ -252,7 +252,7 @@ class Client {
      * @return array
      */
     public function refresh() {
-        return $this->request('_refresh', "POST");
+        return $this->transport->request(array('_refresh'), 'GET');
     }
 
     /**
