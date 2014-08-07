@@ -174,7 +174,7 @@ class Client extends \ElasticSearch\tests\Base
     public function testSearchThrowExceptionWhenServerDown() {
         $client = \ElasticSearch\Client::connection(array(
             'servers' => array(
-                '127.0.0.1:9300'
+                '127.0.0.1:9201'
             )
         ));
 
