@@ -42,7 +42,7 @@ class Bulk {
      *        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
      * @return \Elasticsearch\Bulk
      */
-	public function index($document, $id=false, $index, $type, array $options = array()) {
+	public function index($document, $id=null, $index, $type, array $options = array()) {
 		$params = array( '_id' => $id, 
    					     '_index' => $index, 
 					     '_type' => $type);
