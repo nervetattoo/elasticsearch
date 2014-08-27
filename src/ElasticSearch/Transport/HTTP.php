@@ -84,6 +84,15 @@ class HTTP extends Base {
             ));
             $result = $this->call($url, "POST", $options);
         }
+        else {
+            /**
+             * no http query string search
+             */
+            $url = $this->buildUrl(array(
+                $this->type, "_search?"
+            ));
+            $result = $this->call($url, "POST", $options);
+        }
         return $result;
     }
 
