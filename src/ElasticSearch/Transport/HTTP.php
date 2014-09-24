@@ -65,14 +65,14 @@ class HTTP extends Base {
              * Array implies using the JSON query DSL
              */
             $arg = "_search";
-            if(isset($options['routing'])) {
-                $arg = "_search?routing=" . $options['routing'];
-            }
-            
-            $url = $this->buildUrl(array(
-                $this->type, $arg
-            ));
-            
+            /**
+             * $options may contain values like:
+             * $options['routing'] = 'user123'
+             * or
+             * $options['preference'] = 'xyzabc123'
+             */
+            $url = $this->buildUrl(array($this->type, $arg), $options);
+
             $result = $this->call($url, "GET", $query);
         }
         elseif (is_string($query)) {
