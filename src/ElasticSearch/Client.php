@@ -207,6 +207,23 @@ class Client {
     }
 
     /**
+     * Update a part of a document
+     *
+     * @return array
+     *
+     * @param array $partialDocument
+     * @param mixed $id
+     * @param array $options  Allow sending query parameters to control indexing further
+     *                        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
+     */
+    public function update($partialDocument, $id, array $options = array()) {
+        if ($this->bulk) {
+            return $this->bulk->update($partialDocument, $id, $this->index, $this->type, $options);
+        }
+        return $this->transport->update($partialDocument, $id, $options);
+    }
+
+    /**
      * Perform search, this is the sweet spot
      *
      * @return array

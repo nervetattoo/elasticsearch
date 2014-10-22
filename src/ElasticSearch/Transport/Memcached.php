@@ -43,6 +43,24 @@ class Memcached extends Base {
     }
 
     /**
+     * Update a part of a document
+     *
+     * @return array
+     * @param  array                    $partialDocument
+     * @param  mixed                    $id
+     * @param  array                    $options
+     */
+    public function update($partialDocument, $id, array $options = array()) {
+        $document = json_encode(array('doc' => $partialDocument));
+        $url = $this->buildUrl(array($this->type, $id));
+        $response = $this->conn->set($url, $document);
+
+        return array(
+            'ok' => $response,
+        );
+    }
+
+    /**
      * Search
      *
      * @return array
