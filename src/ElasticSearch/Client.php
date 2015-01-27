@@ -326,7 +326,7 @@ class Client {
      */
 
     public function commitBulk() {
-        if ($this->bulk) {
+        if ($this->bulk && $this->bulk->count()) {
             $result = $this->bulk->commit();
             $this->bulk = null;
             return $result;
