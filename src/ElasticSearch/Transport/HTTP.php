@@ -218,8 +218,12 @@ class HTTP extends Base {
                     break;
                 default:
                     $error = "Unknown error";
-                    if ($errno == 0)
+                    if ($errno == 0) {
                         $error .= ". Non-cUrl error";
+                    } else {
+                        $errstr = curl_error($conn);
+                        $error .= " ($errstr)";
+                    }
                     break;
             }
             $exception = new HTTPException($error);
