@@ -1,4 +1,7 @@
 *.swp
 vendor
 .DS_Store
+composer.phar
 composer.lock
+.vagrant/
+Vagrantfile
