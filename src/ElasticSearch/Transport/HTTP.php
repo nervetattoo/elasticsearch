@@ -124,7 +124,7 @@ class HTTP extends Base {
         if ($options['refresh']) {
             $this->request('_refresh', "POST");
         }
-        return !isset($result['error']);
+        return !isset($result->error);
     }
 
     /**
@@ -182,9 +182,12 @@ class HTTP extends Base {
 
         $response = curl_exec($conn);
         if ($response !== false) {
-            $data = json_decode($response, true);
+            $data = json_decode($response);
             if (!$data) {
-                $data = array('error' => $response, "code" => curl_getinfo($conn, CURLINFO_HTTP_CODE));
+              $data = new \stdClass();
+              $data->error = $response;
+              $data->code = curl_getinfo($conn, CURLINFO_HTTP_CODE);
+                //$data = array('error' => $response, "code" => curl_getinfo($conn, CURLINFO_HTTP_CODE));
             }
         }
         else {
