@@ -4,7 +4,7 @@ ElasticSearch is a distributed lucene powered search indexing, this is a PHP cli
 
 ## Usage
 
-### Initial setup 
+### Initial setup
 
 1. Install composer. `curl -s http://getcomposer.org/installer | php`
 2. Create `composer.json` containing:
@@ -22,7 +22,6 @@ ElasticSearch is a distributed lucene powered search indexing, this is a PHP cli
 ### Indexing and searching
 
 ```php
-<?php
 require_once __DIR__ . '/vendor/autoload.php';
 
 use \ElasticSearch\Client;
@@ -40,7 +39,6 @@ $es->search('title:cool');
 ### Creating mapping
 
 ```php
-<?php
 $es->map(array(
     'title' => array(
         'type' => 'string',
@@ -52,7 +50,6 @@ $es->map(array(
 ### Search multiple indexes or types
 
 ```php
-<?php
 $results = $es
     ->setIndex(array("one", "two"))
     ->setType(array("mytype", "other-type"))
@@ -62,7 +59,6 @@ $results = $es
 ### Using the Query DSL
 
 ```php
-<?php
 $es->search(array(
     'query' => array(
         'term' => array('title' => 'cool')
@@ -75,7 +71,6 @@ $es->search(array(
 Using an array for configuration also works
 
 ```php
-<?php
 $es = Client::connection(array(
     'servers' => '127.0.0.1:9200',
     'protocol' => 'http',
@@ -87,10 +82,9 @@ $es = Client::connection(array(
 ### Support for Routing
 
 ```php
-<?php
 $document = array(
     'title' => 'My routed document',
-    'user_id' => '42' 
+    'user_id' => '42'
 );
 $es->index($document, $id, array('routing' => $document['user_id']));
 $es->search('title:routed', array('routing' => '42'));
@@ -100,10 +94,9 @@ $es->search('title:routed', array('routing' => '42'));
 ### Support for Bulking
 
 ```php
-<?php
 $document = array(
     'title' => 'My bulked entry',
-    'user_id' => '43' 
+    'user_id' => '43'
 );
 $es->beginBulk();
 $es->index($document, $id, array('routing' => $document['user_id']));
@@ -140,9 +133,8 @@ So in your bundle's services.yml file you can put something like this :
 ```
 To make Symfony2 recognize the `ElasticSearch` namespace, you'll have to register it. So in your `app/autoload.php` make sure your have :
 ```php
-<?php
 // ...
-    
+
 $loader->registerNamespaces(array(
     // ...
     'ElasticSearch' => __DIR__.'/path/to/your/vendor/nervetattoo/elasticsearch/src',
@@ -150,11 +142,10 @@ $loader->registerNamespaces(array(
 ```
 Then, you can get your client via the service container and use it like usual. For example, in your controller you can do this :
 ```php
-<?php
 class FooController extends Controller
 {
     // ...
-    
+
     public function barAction()
     {
         // ...

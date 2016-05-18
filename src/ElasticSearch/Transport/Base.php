@@ -57,6 +57,15 @@ abstract class Base {
     abstract public function index($document, $id=false, array $options = array());
 
     /**
+     * Method for updating a document
+     *
+     * @param array|object $partialDocument
+     * @param mixed        $id
+     * @param array        $options
+     */
+    abstract public function update($partialDocument, $id, array $options = array());
+
+    /**
      * Perform a request against the given path/method/payload combination
      * Example:
      * $es->request('/_status');

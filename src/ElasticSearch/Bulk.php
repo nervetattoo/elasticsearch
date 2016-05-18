@@ -59,6 +59,38 @@ class Bulk {
 		return $this;
 	}
 
+    /**
+     * Update a part of a document
+     *
+     * @param array  $partialDocument
+     * @param mixed  $id
+     * @param string $index    Index
+     * @param string $type     Type
+     * @param array  $options  Allow sending query parameters to control indexing further
+     *                         _refresh_ *bool* If set to true, immediately refresh the shard after indexing
+     *
+     * @return \Elasticsearch\Bulk
+     */
+    public function update($partialDocument, $id, $index, $type, array $options = array()) {
+        $params = array(
+            '_id'    => $id,
+            '_index' => $index,
+            '_type'  => $type,
+        );
+
+        foreach ($options as $key => $value) {
+            $params['_'.$key] = $value;
+        }
+
+        $operation = array(
+            array('update' => $params),
+            array('doc'    => $partialDocument),
+        );
+        $this->operations[] = $operation;
+
+        return $this;
+    }
+
 	 /**
      * delete a document
      *

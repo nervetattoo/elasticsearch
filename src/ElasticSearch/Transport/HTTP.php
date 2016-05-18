@@ -52,6 +52,21 @@ class HTTP extends Base {
     }
 
     /**
+     * Update a part of a document
+     *
+     * @return array
+     *
+     * @param array $partialDocument
+     * @param mixed $id
+     * @param array $options
+     */
+    public function update($partialDocument, $id, array $options = array()) {
+        $url = $this->buildUrl(array($this->type, $id), $options);
+
+        return $this->call($url, "POST", array('doc' => $partialDocument));
+    }
+
+    /**
      * Search
      *
      * @return array
