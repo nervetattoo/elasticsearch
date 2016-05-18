@@ -52,6 +52,31 @@ class Client extends \ElasticSearch\tests\Base
     }
 
     /**
+     * Test updating an existing document
+     */
+    public function testUpdatingDocument() {
+        $tag = $this->getTag();
+        $doc = array(
+            'title' => 'One cool ' . $tag,
+            'body'  => 'Second cool ' . $tag,
+        );
+        $client = \ElasticSearch\Client::connection();
+        $resp = $client->index($doc, $tag, array('refresh' => true));
+        $this->assert->array($resp)->boolean($resp['created'])->isTrue();
+        $this->assert->array($resp)->notHasKey('error');
+
+        $fetchedDoc = $client->get($tag);
+        $this->assert->array($fetchedDoc)->isEqualTo($doc);
+
+        $partialDoc = array(
+            'body'  => 'Updated cool ' . $tag,
+        );
+        $resp = $client->update($doc, $tag, array('refresh' => true));
+        $this->assert->array($resp)->boolean($resp['created'])->isFalse();
+        $this->assert->array($resp)->notHasKey('error');
+    }
+
+    /**
      * Test regular string search
      */
     public function testStringSearch() {
