@@ -2,14 +2,15 @@
 
 namespace ElasticSearch\DSL;
 
-/**
- * This file is part of the ElasticSearch PHP client
- *
- * (c) Raymond Julin <raymond.julin@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+    /**
+     * This file is part of the ElasticSearch PHP client
+     *
+     * (c) Raymond Julin <raymond.julin@gmail.com>
+     *
+     * For the full copyright and license information, please view the LICENSE
+     * file that was distributed with this source code.
+     */
+use ElasticSearch\Exception;
 
 /**
  * Range queries
@@ -19,7 +20,8 @@ namespace ElasticSearch\DSL;
  * @since 0.1
  * Created: 2010-07-24
  */
-class RangeQuery {
+class RangeQuery
+{
     protected $fieldname = null;
     protected $from = null;
     protected $to = null;
@@ -27,14 +29,15 @@ class RangeQuery {
     protected $includeUpper = null;
     protected $boost = null;
 
-    
+
     /**
      * Construct new RangeQuery component
      *
      * @return \ElasticSearch\DSL\RangeQuery
      * @param array $options
      */
-    public function __construct(array $options=array()) {
+    public function __construct(array $options = array())
+    {
         $this->fieldname = key($options);
         $values = current($options);
         if (is_array($values)) {
@@ -42,14 +45,15 @@ class RangeQuery {
                 $this->$key = $val;
         }
     }
-    
+
     /**
      * Setters
      *
      * @return \ElasticSearch\DSL\RangeQuery
      * @param mixed $value
      */
-    public function fieldname($value) {
+    public function fieldname($value)
+    {
         $this->fieldname = $value;
         return $this;
     }
@@ -58,39 +62,48 @@ class RangeQuery {
      * @param $value
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function from($value) {
+    public function from($value)
+    {
         $this->from = $value;
         return $this;
     }
+
     /**
      * @param $value
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function to($value) {
+    public function to($value)
+    {
         $this->to = $value;
         return $this;
     }
+
     /**
      * @param $value
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function includeLower($value) {
+    public function includeLower($value)
+    {
         $this->includeLower = $value;
         return $this;
     }
+
     /**
      * @param $value
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function includeUpper($value) {
+    public function includeUpper($value)
+    {
         $this->includeUpper = $value;
         return $this;
     }
+
     /**
      * @param $value
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function boost($value) {
+    public function boost($value)
+    {
         $this->boost = $value;
         return $this;
     }
@@ -101,16 +114,17 @@ class RangeQuery {
      * @throws \ElasticSearch\Exception
      * @return array
      */
-    public function build() {
+    public function build()
+    {
         $built = array();
         if ($this->fieldname) {
             $built[$this->fieldname] = array();
-            foreach (array("from","to","includeLower","includeUpper", "boost") as $opt) {
+            foreach (array("from", "to", "includeLower", "includeUpper", "boost") as $opt) {
                 if ($this->$opt !== null)
                     $built[$this->fieldname][$opt] = $this->$opt;
             }
             if (count($built[$this->fieldname]) == 0)
-                throw new \ElasticSearch\Exception("Empty RangeQuery cant be created");
+                throw new Exception("Empty RangeQuery cant be created");
         }
         return $built;
     }
