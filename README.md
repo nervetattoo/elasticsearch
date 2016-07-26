@@ -1,5 +1,6 @@
-[![Build Status](https://secure.travis-ci.org/nervetattoo/elasticsearch.png?branch=master)](http://travis-ci.org/nervetattoo/elasticsearch)
 # ElasticSearch PHP client
+---
+[![Build Status](https://secure.travis-ci.org/nervetattoo/elasticsearch.png?branch=master)](http://travis-ci.org/nervetattoo/elasticsearch)
 ElasticSearch is a distributed lucene powered search indexing, this is a PHP client for it
 
 ## Usage
@@ -12,7 +13,7 @@ ElasticSearch is a distributed lucene powered search indexing, this is a PHP cli
     ```js
     {
         "require" : {
-            "nervetattoo/elasticsearch" : ">=2.0"
+            "xhinliang/elasticsearch" : ">=2.0"
         }
     }
     ```
