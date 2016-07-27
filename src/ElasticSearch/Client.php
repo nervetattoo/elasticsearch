@@ -11,7 +11,8 @@ namespace ElasticSearch;
  * file that was distributed with this source code.
  */
 
-class Client {
+class Client
+{
     const DEFAULT_PROTOCOL = 'http';
     const DEFAULT_SERVER = '127.0.0.1:9200';
     const DEFAULT_INDEX = 'default-index';
@@ -32,7 +33,17 @@ class Client {
         'memcached' => 'ElasticSearch\\Transport\\Memcached',
     );
 
-    private $transport, $index, $type, $bulk;
+    /**
+     * @var Transport\Base
+     */
+    private $transport;
+
+    private $index, $type;
+
+    /**
+     * @var \ElasticSearch\Bulk
+     */
+    private $bulk;
 
     /**
      * Construct search client
@@ -42,7 +53,8 @@ class Client {
      * @param string $index
      * @param string $type
      */
-    public function __construct($transport, $index = null, $type = null) {
+    public function __construct($transport, $index = null, $type = null)
+    {
         $this->transport = $transport;
         $this->setIndex($index)->setType($type);
     }
@@ -60,7 +72,8 @@ class Client {
      * @throws \Exception
      * @return \ElasticSearch\Client
      */
-    public static function connection($config = array()) {
+    public static function connection($config = array())
+    {
         if (!$config && ($url = getenv('ELASTICSEARCH_URL'))) {
             $config = $url;
         }
@@ -82,9 +95,9 @@ class Client {
 
         $server = is_array($config['servers']) ? $config['servers'][0] : $config['servers'];
         list($host, $port) = explode(':', $server);
-        
+
         $transport = new $class($host, $port, $config['timeout']);
-        
+
         $client = new self($transport, $config['index'], $config['type']);
         $client->config($config);
         return $client;
@@ -94,11 +107,13 @@ class Client {
      * @param array|null $config
      * @return array|void
      */
-    public function config($config = null) {
+    public function config($config = null)
+    {
         if (!$config)
             return $this->_config;
         if (is_array($config))
             $this->_config = $config + $this->_config;
+        return null;
     }
 
     /**
@@ -106,7 +121,8 @@ class Client {
      * @return \ElasticSearch\Client
      * @param mixed $index
      */
-    public function setIndex($index) {
+    public function setIndex($index)
+    {
         if (is_array($index))
             $index = implode(",", array_filter($index));
         $this->index = $index;
@@ -119,7 +135,8 @@ class Client {
      * @return \ElasticSearch\Client
      * @param mixed $type
      */
-    public function setType($type) {
+    public function setType($type)
+    {
         if (is_array($type))
             $type = implode(",", array_filter($type));
         $this->type = $type;
@@ -134,8 +151,9 @@ class Client {
      * @param mixed $id Optional
      * @param bool $verbose
      */
-    public function get($id, $verbose=false) {
-        return $this->request($id, "GET");
+    public function get($id, $verbose = false)
+    {
+        return $this->request($id, "GET", $payload = false, $verbose);
     }
 
     /**
@@ -146,14 +164,15 @@ class Client {
      * @throws Exception
      * @return array
      */
-    public function map($mapping, array $config = array()) {
+    public function map($mapping, $config = array())
+    {
         if (is_array($mapping)) $mapping = new Mapping($mapping);
         $mapping->config($config);
 
         try {
             $type = $mapping->config('type');
-        }
-        catch (\Exception $e) {} // No type is cool
+        } catch (\Exception $e) {
+        } // No type is cool
         if (isset($type) && !$this->passesTypeConstraint($type)) {
             throw new Exception("Cant create mapping due to type constraint mismatch");
         }
@@ -161,7 +180,8 @@ class Client {
         return $this->request('_mapping', 'PUT', $mapping->export(), true);
     }
 
-    protected function passesTypeConstraint($constraint) {
+    protected function passesTypeConstraint($constraint)
+    {
         if (is_string($constraint)) $constraint = array($constraint);
         $currentType = explode(',', $this->type);
         $includeTypes = array_intersect($constraint, $currentType);
@@ -183,7 +203,8 @@ class Client {
      * @param bool $verbose Controls response data, if `false`
      *     only `_source` of response is returned
      */
-    public function request($path, $method = 'GET', $payload = false, $verbose=false) {
+    public function request($path, $method = 'GET', $payload = false, $verbose = false)
+    {
         $response = $this->transport->request($this->expandPath($path), $method, $payload);
         return ($verbose || !isset($response['_source']))
             ? $response
@@ -199,7 +220,8 @@ class Client {
      * @param array $options Allow sending query parameters to control indexing further
      *        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
      */
-    public function index($document, $id=false, array $options = array()) {
+    public function index($document, $id = false, $options = array())
+    {
         if ($this->bulk) {
             return $this->bulk->index($document, $id, $this->index, $this->type, $options);
         }
@@ -213,10 +235,11 @@ class Client {
      *
      * @param array $partialDocument
      * @param mixed $id
-     * @param array $options  Allow sending query parameters to control indexing further
+     * @param array $options Allow sending query parameters to control indexing further
      *                        _refresh_ *bool* If set to true, immediately refresh the shard after indexing
      */
-    public function update($partialDocument, $id, array $options = array()) {
+    public function update($partialDocument, $id, $options = array())
+    {
         if ($this->bulk) {
             return $this->bulk->update($partialDocument, $id, $this->index, $this->type, $options);
         }
@@ -230,13 +253,14 @@ class Client {
      * @param $query
      * @param array $options
      */
-    public function search($query, array $options = array()) {
+    public function search($query, $options = array())
+    {
         $start = microtime(true);
         $result = $this->transport->search($query, $options);
         $result['time'] = microtime(true) - $start;
         return $result;
     }
-    
+
     /**
      * Flush this index/type combination
      *
@@ -245,7 +269,8 @@ class Client {
      *                  if not wipe the entire index
      * @param array $options Parameters to pass to delete action
      */
-    public function delete($id=false, array $options = array()) {
+    public function delete($id = false, $options = array())
+    {
         if ($this->bulk) {
             return $this->bulk->delete($id, $this->index, $this->type, $options);
         }
@@ -259,7 +284,8 @@ class Client {
      * @param mixed $query Text or array based query to delete everything that matches
      * @param array $options Parameters to pass to delete action
      */
-    public function deleteByQuery($query, array $options = array()) {
+    public function deleteByQuery($query, $options = array())
+    {
         return $this->transport->deleteByQuery($query, $options);
     }
 
@@ -268,7 +294,8 @@ class Client {
      *
      * @return array
      */
-    public function refresh() {
+    public function refresh()
+    {
         return $this->transport->request(array('_refresh'), 'GET');
     }
 
@@ -280,13 +307,14 @@ class Client {
      * @param mixed $path
      * @return array
      */
-    protected function expandPath($path) {
-        $path = (array) $path;
+    protected function expandPath($path)
+    {
+        $path = (array)$path;
         $isAbsolute = $path[0][0] === '/';
 
         return $isAbsolute
             ? $path
-            : array_merge((array) $this->type, $path);
+            : array_merge((array)$this->type, $path);
     }
 
     /**
@@ -295,7 +323,8 @@ class Client {
      * @param string $dsn
      * @return array
      */
-    protected static function parseDsn($dsn) {
+    protected static function parseDsn($dsn)
+    {
         $parts = parse_url($dsn);
         $protocol = $parts['scheme'];
         $servers = $parts['host'] . ':' . $parts['port'];
@@ -309,10 +338,11 @@ class Client {
     /**
      * Create a bulk-transaction
      *
-     * @return \Elasticsearch\Bulk
+     * @return \ElasticSearch\Bulk
      */
 
-    public function createBulk() {
+    public function createBulk()
+    {
         return new Bulk($this);
     }
 
@@ -320,41 +350,47 @@ class Client {
     /**
      * Begin a transparent bulk-transaction
      * if one is already running, return its handle
-     * @return \Elasticsearch\Bulk
+     * @return \ElasticSearch\Bulk
      */
 
-    public function beginBulk() {
+    public function beginBulk()
+    {
         if (!$this->bulk) {
-            $this->bulk = $this->createBulk($this);
+            $this->bulk = $this->createBulk();
         }
         return $this->bulk;
     }
 
     /**
-    * @see beginBulk
-    */
-    public function begin() {
+     * @see beginBulk
+     */
+    public function begin()
+    {
         return $this->beginBulk();
     }
 
     /**
      * commit a bulk-transaction
-     * @return array 
+     * @return array
+     * @throws Exception
      */
 
-    public function commitBulk() {
+    public function commitBulk()
+    {
         if ($this->bulk && $this->bulk->count()) {
             $result = $this->bulk->commit();
             $this->bulk = null;
             return $result;
         }
+        throw  new Exception('bulk error!');
     }
 
     /**
-    * @see commitBulk
-    */
-    public function commit() {
+     * @see commitBulk
+     */
+    public function commit()
+    {
         return $this->commitBulk();
     }
-    
+
 }

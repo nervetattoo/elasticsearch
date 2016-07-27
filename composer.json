@@ -1,15 +1,20 @@
 {
-    "name" : "nervetattoo/elasticsearch",
+    "name" : "xhinliang/elasticsearch",
     "type" : "library",
     "description" : "ElasticSearch client for PHP 5.3",
     "keywords" : ["elasticsearch", "client"],
-    "homepage" : "http://github.com/nervetattoo/elasticsearch",
+    "homepage" : "http://github.com/xhinliang/elasticsearch",
     "license" : "MIT",
     "authors" : [
         {
             "name" : "Raymond Julin",
             "email" : "raymond.julin@gmail.com",
             "homepage" : "http://raymondjulin.com"
+        },
+        {
+            "name" : "Xhin Liang",
+            "email" : "xhinliang@gmail.com",
+            "homepage" : "http://xhinliang.win"
         }
     ],
     "require" : {

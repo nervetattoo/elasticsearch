@@ -9,9 +9,16 @@ namespace ElasticSearch\Transport;
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
+ * 
+ * @property array|bool|null payload
+ * @property int port
+ * @property string protocol
+ * @property string host
+ * @property string method
  */
 
-class HTTPException extends \Exception {
+class HTTPException extends \Exception
+{
     /**
      * Exception data
      * @var array
@@ -30,7 +37,8 @@ class HTTPException extends \Exception {
      * @param mixed $key
      * @param mixed $value
      */
-    public function __set($key, $value) {
+    public function __set($key, $value)
+    {
         if (array_key_exists($key, $this->data))
             $this->data[$key] = $value;
     }
@@ -40,7 +48,8 @@ class HTTPException extends \Exception {
      * @param mixed $key
      * @return mixed
      */
-    public function __get($key) {
+    public function __get($key)
+    {
         if (array_key_exists($key, $this->data))
             return $this->data[$key];
         else
@@ -51,7 +60,8 @@ class HTTPException extends \Exception {
      * Rebuild CLI command using curl to further investigate the failure
      * @return string
      */
-    public function getCLICommand() {
+    public function getCLICommand()
+    {
         $postData = json_encode($this->payload);
         $curlCall = "curl -X{$method} 'http://{$this->host}:{$this->port}$this->url' -d '$postData'";
         return $curlCall;

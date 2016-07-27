@@ -2,6 +2,7 @@
 
 namespace ElasticSearch;
 
+
 /**
  * This file is part of the ElasticSearch PHP client
  *
@@ -11,7 +12,8 @@ namespace ElasticSearch;
  * file that was distributed with this source code.
  */
 
-class Mapping {
+class Mapping
+{
 
     protected $properties = array();
     protected $config = array();
@@ -23,7 +25,8 @@ class Mapping {
      * @param array $config
      * @return \ElasticSearch\Mapping
      */
-    public function __construct(array $properties = array(), array $config = array()) {
+    public function __construct(array $properties = array(), array $config = array())
+    {
         $this->properties = $properties;
         $this->config = $config;
     }
@@ -33,7 +36,8 @@ class Mapping {
      *
      * @return string
      */
-    public function export() {
+    public function export()
+    {
         return array(
             'properties' => $this->properties
         );
@@ -46,7 +50,8 @@ class Mapping {
      * @param string|array $config
      * @return $this
      */
-    public function field($field, $config = array()) {
+    public function field($field, $config = array())
+    {
         if (is_string($config)) $config = array('type' => $config);
         $this->properties[$field] = $config;
         return $this;
@@ -57,17 +62,17 @@ class Mapping {
      *
      * @param string $key
      * @param mixed $value
-     * @throws \Exception
      * @return array|void
+     * @throws \ElasticSearch\Exception
      */
-    public function config($key, $value = null) {
+    public function config($key, $value = null)
+    {
         if (is_array($key))
             $this->config = $key + $this->config;
-        else {
-            if ($value !== null) $this->config[$key] = $value;
-            if (!isset($this->config[$key]))
-                throw new \Exception("Configuration key `type` is not set");
-            return $this->config[$key];
-        }
+        if ($value !== null)
+            $this->config[$key] = $value;
+        if (!isset($this->config[$key]))
+            throw new Exception("Configuration key `type` is not set");
+        return $this->config[$key];
     }
 }
