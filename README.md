@@ -1,6 +1,11 @@
 # ElasticSearch PHP client
 ---
-[![Build Status](https://secure.travis-ci.org/nervetattoo/elasticsearch.png?branch=master)](http://travis-ci.org/nervetattoo/elasticsearch)
+[![Latest Stable Version](https://poser.pugx.org/xhinliang/elasticsearch/v/stable)](https://packagist.org/packages/xhinliang/elasticsearch)
+[![Total Downloads](https://poser.pugx.org/xhinliang/elasticsearch/downloads)](https://packagist.org/packages/xhinliang/elasticsearch)
+[![Latest Unstable Version](https://poser.pugx.org/xhinliang/elasticsearch/v/unstable)](https://packagist.org/packages/xhinliang/elasticsearch)
+[![License](https://poser.pugx.org/xhinliang/elasticsearch/license)](https://packagist.org/packages/xhinliang/elasticsearch)
+[![composer.lock](https://poser.pugx.org/xhinliang/elasticsearch/composerlock)](https://packagist.org/packages/xhinliang/elasticsearch)
+
 ElasticSearch is a distributed lucene powered search indexing, this is a PHP client for it
 
 ## Usage
