@@ -324,7 +324,9 @@ class Client {
      */
 
     public function beginBulk() {
-        if (!$this->bulk) {
+        if ($this->bulk) {
+            $this->bulk->reset();
+        } else {
             $this->bulk = $this->createBulk($this);
         }
         return $this->bulk;
