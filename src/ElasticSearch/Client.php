@@ -32,7 +32,7 @@ class Client {
         'memcached' => 'ElasticSearch\\Transport\\Memcached',
     );
 
-    private $transport, $index, $type, $bulk;
+    protected $transport, $index, $type, $bulk;
 
     /**
      * Construct search client
@@ -65,16 +65,16 @@ class Client {
             $config = $url;
         }
         if (is_string($config)) {
-            $config = self::parseDsn($config);
+            $config = static::parseDsn($config);
         }
 
-        $config += self::$_defaults;
+        $config += static::$_defaults;
 
         $protocol = $config['protocol'];
-        if (!isset(self::$_protocols[$protocol])) {
+        if (!isset(static::$_protocols[$protocol])) {
             throw new \Exception("Tried to use unknown protocol: $protocol");
         }
-        $class = self::$_protocols[$protocol];
+        $class = static::$_protocols[$protocol];
 
         if (null !== $config['timeout'] && !is_numeric($config['timeout'])) {
             throw new \Exception("HTTP timeout should have a numeric value when specified.");
@@ -85,7 +85,7 @@ class Client {
         
         $transport = new $class($host, $port, $config['timeout']);
         
-        $client = new self($transport, $config['index'], $config['type']);
+        $client = new static($transport, $config['index'], $config['type']);
         $client->config($config);
         return $client;
     }
