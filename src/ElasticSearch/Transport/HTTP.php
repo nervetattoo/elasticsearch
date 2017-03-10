@@ -191,7 +191,7 @@ class HTTP extends Base {
         curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 
         if (is_array($payload) && count($payload) > 0)
-            curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
+            curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload, JSON_FORCE_OBJECT)) ;
         else
 	       	curl_setopt($conn, CURLOPT_POSTFIELDS, $payload);
 
