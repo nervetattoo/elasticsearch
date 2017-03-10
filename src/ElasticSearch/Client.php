@@ -185,9 +185,9 @@ class Client {
      */
     public function request($path, $method = 'GET', $payload = false, $verbose=false) {
         $response = $this->transport->request($this->expandPath($path), $method, $payload);
-        return ($verbose || !isset($response['_source']))
+        return ($verbose || !isset($response->_source))
             ? $response
-            : $response['_source'];
+            : $response->_source;
     }
 
     /**
@@ -233,7 +233,7 @@ class Client {
     public function search($query, array $options = array()) {
         $start = microtime(true);
         $result = $this->transport->search($query, $options);
-        $result['time'] = microtime(true) - $start;
+        $result->time = microtime(true) - $start;
         return $result;
     }
     
