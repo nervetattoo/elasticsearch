@@ -2,7 +2,7 @@
 
 namespace ElasticSearch\Transport;
 
-use \Memcache;
+use \Memcached;
 use \ElasticSearch\DSL\Stringify;
 
 /**
@@ -17,8 +17,8 @@ use \ElasticSearch\DSL\Stringify;
 class Memcached extends Base {
     public function __construct($host="127.0.0.1", $port=11311, $timeout=null) {
         parent::__construct($host, $port);
-        $this->conn = new Memcache;
-        $this->conn->connect($host, $port, $timeout);
+        $this->conn = new Memcached;
+        $this->conn->connect($host, $port);
     }
 
     /**
