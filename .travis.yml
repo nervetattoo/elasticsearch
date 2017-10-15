@@ -4,7 +4,7 @@ php:
   - '7.0'
 before_install:
   - pecl channel-update pecl.php.net
-  - echo yes | pecl install memcache
+  - echo yes | pecl install memcached
   - composer install --dev
   - sudo service elasticsearch start
   - sleep 3
