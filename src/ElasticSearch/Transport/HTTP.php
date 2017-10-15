@@ -186,7 +186,6 @@ class HTTP extends Base {
         curl_setopt($conn, CURLOPT_URL, $requestURL);
         curl_setopt($conn, CURLOPT_TIMEOUT, $this->timeout);
         curl_setopt($conn, CURLOPT_PORT, $this->port);
-        curl_setopt($conn, CURLOPT_RETURNTRANSFER, 1) ;
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
         curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
 	
@@ -201,7 +200,10 @@ class HTTP extends Base {
         else
 	       	curl_setopt($conn, CURLOPT_POSTFIELDS, $payload);
 
-        $response = curl_exec($conn);
+        // cURL opt returntransfer leaks memory, therefore OB instead.
+        ob_start();
+        curl_exec($conn);
+        $response = ob_get_clean();
         if ($response !== false) {
             $data = json_decode($response, true);
             if (!$data) {
