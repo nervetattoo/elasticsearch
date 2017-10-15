@@ -5,7 +5,7 @@ php:
 before_install:
   - composer install --dev
   - sudo service elasticsearch start
-  - sleep 3
+  - sleep 10
   
 services:
   - elasticsearch
