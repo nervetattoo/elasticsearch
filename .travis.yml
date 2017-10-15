@@ -1,14 +1,13 @@
 language: php
 php:
-  - '5.4'
   - '5.6'
   - '7.0'
 before_install:
+  - pecl channel-update pecl.php.net
+  - pecl install memcache
   - composer install --dev
   - sudo service elasticsearch start
   - sleep 3
-before_script:
-  - sh tests/install-php-memcache.sh
   
 services:
   - elasticsearch
