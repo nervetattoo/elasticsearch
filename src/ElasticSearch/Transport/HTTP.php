@@ -204,7 +204,7 @@ class HTTP extends Base {
         ob_start();
         curl_exec($conn);
         $response = ob_get_clean();
-        if ($response !== false) {
+        if (curl_errno($conn) === 0) {
             $data = json_decode($response, true);
             if (!$data) {
                 $data = array('error' => $response, "code" => curl_getinfo($conn, CURLINFO_HTTP_CODE));
@@ -234,7 +234,7 @@ class HTTP extends Base {
                     $error = "Couldnt resolve host";
                     break;
                 case CURLE_COULDNT_CONNECT:
-                    $error = "Couldnt connect to host [{$this->host}], ElasticSearch down?";
+                    $error = "Couldnt connect to host [{$this->host}:{$this->port}], ElasticSearch down?";
                     break;
                 case CURLE_OPERATION_TIMEDOUT:
                     $error = "Operation timed out on [$requestURL]";
