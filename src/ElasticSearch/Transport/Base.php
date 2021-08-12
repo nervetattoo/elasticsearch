@@ -128,12 +128,16 @@ abstract class Base {
         $isAbsolute = (is_array($path) ? $path[0][0] : $path[0]) === '/';
         $url = $isAbsolute || null === $this->index ? '' : "/" . $this->index;
 
-        if ($path && is_array($path) && count($path) > 0)
-            $url .= "/" . implode("/", array_filter($path));
-        if (substr($url, -1) == "/")
+        if ($path && is_array($path) && count($path) > 0) {
+            $path = implode("/", array_filter($path));
+            $url .= "/" . ltrim($path, '/');
+        }
+        if (substr($url, -1) === "/") {
             $url = substr($url, 0, -1);
-        if (count($options) > 0)
-          $url .= "?" . http_build_query($options, '', '&');
+        }
+        if (count($options) > 0) {
+            $url .= "?" . http_build_query($options, '', '&');
+        }
 
         return $url;
     }
