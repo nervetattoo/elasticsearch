@@ -61,7 +61,7 @@ class HTTP extends Base {
      * @param array $options
      */
     public function update($partialDocument, $id, array $options = array()) {
-        $url = $this->buildUrl(array($this->type, $id), $options);
+        $url = $this->buildUrl(array($this->type, $id, '_update'), $options);
 
         return $this->call($url, "POST", array('doc' => $partialDocument));
     }
