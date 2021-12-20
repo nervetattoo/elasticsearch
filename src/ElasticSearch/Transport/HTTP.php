@@ -204,7 +204,7 @@ class HTTP extends Base {
         ob_start();
         curl_exec($conn);
         $response = ob_get_clean();
-        if ($response !== false) {
+        if (!empty($response)) {
             $data = json_decode($response, true);
             if (!$data) {
                 $data = array('error' => $response, "code" => curl_getinfo($conn, CURLINFO_HTTP_CODE));
