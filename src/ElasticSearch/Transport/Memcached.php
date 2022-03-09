@@ -13,83 +13,99 @@ use \ElasticSearch\DSL\Stringify;
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+class Memcached
+    extends Base
+{
+    /** @var Memcache */
+    protected $conn;
 
-class Memcached extends Base {
-    public function __construct($host="127.0.0.1", $port=11311, $timeout=null) {
+    /** @var int */
+    protected $timeout = 1;
+
+    public function __construct($host = "127.0.0.1", $port = 11311, $timeout = 1)
+    {
         parent::__construct($host, $port);
-        $this->conn = new Memcache;
-        $this->conn->connect($host, $port, $timeout);
+        $this->timeout = $timeout;
+
+        $this->conn = new Memcache();
+        $this->conn->connect($this->host, $this->port, $this->timeout);
     }
 
     /**
      * Index a new document or update it if existing
      *
+     * @param array       $document
+     * @param string|null $id Optional
+     * @param array       $options
+     *
      * @return array
-     * @param array $document
-     * @param mixed $id Optional
-     * @param array $options
      * @throws \ElasticSearch\Exception
      */
-    public function index($document, $id=false, array $options = array()) {
-        if ($id === false)
+    public function index(array $document, ?string $id = null, array $options = []): array
+    {
+        if (!$id) {
             throw new \ElasticSearch\Exception("Memcached transport requires id when indexing");
+        }
 
         $document = json_encode($document);
-        $url = $this->buildUrl(array($this->type, $id));
+        $url = $this->buildUrl([ $this->type, $id ]);
         $response = $this->conn->set($url, $document);
-        return array(
-            'ok' => $response
-        );
+
+        return [
+            'ok' => $response,
+        ];
     }
 
     /**
      * Update a part of a document
      *
+     * @param array $partialDocument
+     * @param string $id
+     * @param array $options
+     *
      * @return array
-     * @param  array                    $partialDocument
-     * @param  mixed                    $id
-     * @param  array                    $options
      */
-    public function update($partialDocument, $id, array $options = array()) {
-        $document = json_encode(array('doc' => $partialDocument));
-        $url = $this->buildUrl(array($this->type, $id));
+    public function update(array $partialDocument, string $id, array $options = []): array
+    {
+        $document = json_encode([ 'doc' => $partialDocument ]);
+        $url = $this->buildUrl([ $this->type, $id ]);
         $response = $this->conn->set($url, $document);
 
-        return array(
+        return [
             'ok' => $response,
-        );
+        ];
     }
 
     /**
      * Search
      *
-     * @return array
      * @param array|string $query
+     *
+     * @return array
      * @throws \ElasticSearch\Exception
      */
-    public function search($query) {
+    public function search($query): array
+    {
         if (is_array($query)) {
-            if (array_key_exists("query", $query)) {
-                $dsl = new Stringify($query);
-                $q = (string) $dsl;
-                $url = $this->buildUrl(array(
-                    $this->type, "_search?q=" . $q
-                ));
-                $result = json_decode($this->conn->get($url), true);
-                return $result;
+            if (!array_key_exists('query', $query)) {
+                throw new \ElasticSearch\Exception("Memcached protocol doesnt support the full DSL, only query");
             }
-            throw new \ElasticSearch\Exception("Memcached protocol doesnt support the full DSL, only query");
-        }
-        elseif (is_string($query)) {
+
+            $dsl = new Stringify($query);
+            $q = (string)$dsl;
+            $url = $this->buildUrl([
+                $this->type, "_search?q=" . $q,
+            ]);
+        } else {
             /**
              * String based search means http query string search
              */
-            $url = $this->buildUrl(array(
-                $this->type, "_search?q=" . $query
-            ));
-            $result = json_decode($this->conn->get($url), true);
-            return $result;
+            $url = $this->buildUrl([
+                $this->type, "_search?q={$query}",
+            ]);
         }
+
+        return json_decode($this->conn->get($url), true);
     }
 
     /**
@@ -98,12 +114,16 @@ class Memcached extends Base {
      * $es->request('/_status');
      *
      * @param string|array $path
-     * @param string $method
-     * @param array|bool $payload
+     * @param string       $method
+     * @param mixed        $payload
+     * @param array        $options
+     *
      * @return array
+     * @throws \ElasticSearch\Exception
      */
-    public function request($path, $method="GET", $payload=false) {
-        $url = $this->buildUrl($path);
+    public function request($path, string $method = 'GET', $payload = false, array $options = []): array
+    {
+        $url = $this->buildUrl($path, $options);
         switch ($method) {
             case 'GET':
                 $result = $this->conn->get($url);
@@ -111,21 +131,41 @@ class Memcached extends Base {
             case 'DELETE':
                 $result = $this->conn->delete($url);
                 break;
+            default:
+                throw new \ElasticSearch\Exception("Memcached protocol support only GET and DELETE methods");
         }
-        return json_decode($result);
+
+        return json_decode($result, true);
     }
 
     /**
      * Flush this index/type combination
      *
-     * @return array
      * @param mixed $id
      * @param array $options Parameters to pass to delete action
+     *
+     * @return array
+     * @throws \ElasticSearch\Exception
      */
-    public function delete($id=false, array $options = array()) {
-        if ($id)
-            return $this->request(array($this->type, $id), "DELETE");
-        else
-            return $this->request(false, "DELETE");
+    public function delete($id = false, array $options = []): array
+    {
+        if ($id) {
+            return $this->request([ $this->type, $id ], 'DELETE');
+        } else {
+            return $this->request(false, 'DELETE');
+        }
+    }
+
+    public function setTimeout(int $timeout)
+    {
+        // TODO: Implement setTimeout() method.
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimeout(): int
+    {
+        return $this->timeout;
     }
 }

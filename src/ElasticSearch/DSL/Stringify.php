@@ -17,32 +17,40 @@ namespace ElasticSearch\DSL;
  * This will remove certain fields that are not supported
  * in a string representation
  *
- * @author Raymond Julin <raymond.julin@gmail.com>
+ * @author  Raymond Julin <raymond.julin@gmail.com>
  * @package ElasticSearch
- * @since 0.1
+ * @since   0.1
  * Created: 2010-07-24
  */
-class Stringify {
+class Stringify
+{
 
-    protected $dsl = array();
-    
-    public function __construct(array $dsl) {
+    protected $dsl = [];
+
+    public function __construct(array $dsl)
+    {
         $this->dsl = $dsl;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         $dsl = $this->dsl;
         $query = $dsl['query'];
 
-        $string = "";
-        if (array_key_exists("term", $query))
+        $string = '';
+        if (array_key_exists('term', $query)) {
             $string .= $this->transformDSLTermToString($query['term']);
-        if (array_key_exists("wildcard", $query))
+        }
+        if (array_key_exists('wildcard', $query)) {
             $string .= $this->transformDSLTermToString($query['wildcard']);
-        if (array_key_exists("sort", $dsl))
+        }
+        if (array_key_exists('sort', $dsl)) {
             $string .= $this->transformDSLSortToString($dsl['sort']);
-        if (array_key_exists("fields", $dsl))
+        }
+        if (array_key_exists('fields', $dsl)) {
             $string .= $this->transformDSLFieldsToString($dsl['fields']);
+        }
+
         return $string;
     }
 
@@ -50,68 +58,81 @@ class Stringify {
      * A naive transformation of possible term and wildcard arrays in a DSL
      * query
      *
-     * @return string
      * @param mixed $dslTerm
+     *
+     * @return string
      */
-    protected function transformDSLTermToString($dslTerm) {
-        $string = "";
+    protected function transformDSLTermToString($dslTerm): string
+    {
+        $string = '';
         if (is_array($dslTerm)) {
             $key = key($dslTerm);
             $value = $dslTerm[$key];
-            if (is_string($key))
+            if (is_string($key)) {
                 $string .= "$key:";
-        }
-        else
+            }
+        } else {
             $value = $dslTerm;
+        }
         /**
          * If a specific key is used as key in the array
          * this should translate to searching in a specific field (field:term)
          */
-        if (strpos($value, " ") !== false)
+        if (strpos($value, ' ') !== false) {
             $string .= '"' . $value . '"';
-        else
+        } else {
             $string .= $value;
+        }
+
         return $string;
     }
 
     /**
      * Transform search parameters to string
      *
-     * @return string
      * @param mixed $dslSort
+     *
+     * @return string
      */
-    protected function transformDSLSortToString($dslSort) {
-        $string = "";
+    protected function transformDSLSortToString($dslSort): string
+    {
+        $string = '';
         if (is_array($dslSort)) {
             foreach ($dslSort as $sort) {
                 if (is_array($sort)) {
                     $field = key($sort);
                     $info = current($sort);
-                }
-                else
+                } else {
                     $field = $sort;
-                $string .= "&sort=" . $field;
+                }
+                $string .= '&sort=' . $field;
                 if (isset($info)) {
-                    if (is_string($info) && $info == "desc")
-                        $string .= ":reverse";
-                    elseif (is_array($info) && array_key_exists("reverse", $info) && $info['reverse'])
-                        $string .= ":reverse";
+                    if (is_string($info) && $info == 'desc') {
+                        $string .= ':reverse';
+                    } elseif (is_array($info) && array_key_exists('reverse', $info) && $info['reverse']) {
+                        $string .= ':reverse';
+                    }
                 }
             }
         }
+
         return $string;
     }
 
     /**
      * Transform a selection of fields to return to string form
      *
-     * @return string
      * @param mixed $dslFields
+     *
+     * @return string
      */
-    protected function transformDSLFieldsToString($dslFields) {
-        $string = "";
-        if (is_array($dslFields))
-            $string .= "&fields=" . join(",", $dslFields);
+    protected function transformDSLFieldsToString($dslFields): string
+    {
+        $string = '';
+        if (is_array($dslFields)) {
+            $string .= '&fields=' . join(',', $dslFields);
+        }
+
         return $string;
     }
 }
