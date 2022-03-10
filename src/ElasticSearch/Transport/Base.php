@@ -61,7 +61,7 @@ abstract class Base
      *
      * @return array
      */
-    abstract public function index(array $document, ?string $id = null, array $options = []): array;
+    abstract public function index(array $document, string $id = null, array $options = []): array;
 
     /**
      * Method for updating a document
@@ -168,7 +168,7 @@ abstract class Base
     protected function buildUrl($path, array $options = []): string
     {
         $isAbsolute = (is_array($path) ? $path[0][0] : $path[0]) === '/';
-        $url = $isAbsolute || null === $this->index ? '' : "/{$this->index}";
+        $url = $isAbsolute || $this->index === null ? '' : "/{$this->index}";
 
         if ($path && is_array($path) && count($path) > 0) {
             $path = implode('/', array_filter($path));

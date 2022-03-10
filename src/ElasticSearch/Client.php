@@ -3,6 +3,8 @@
 namespace ElasticSearch;
 
 use ElasticSearch\Transport\Base;
+use ElasticSearch\Transport\HTTP;
+use ElasticSearch\Transport\Memcached;
 
 /**
  * This file is part of the ElasticSearch PHP client
@@ -30,8 +32,8 @@ class Client
     ];
 
     protected static $_protocols = [
-        'http' => 'ElasticSearch\\Transport\\HTTP',
-        'memcached' => 'ElasticSearch\\Transport\\Memcached',
+        'http' => HTTP::class,
+        'memcached' => Memcached::class,
     ];
 
     /** @var Base */
@@ -53,7 +55,7 @@ class Client
      * @param string|null $index
      * @param string|null $type
      */
-    public function __construct(Base $transport, ?string $index = null, ?string $type = null)
+    public function __construct(Base $transport, string $index = null, string $type = null)
     {
         $this->transport = $transport;
         $this->setIndex($index)->setType($type);
@@ -142,7 +144,7 @@ class Client
      *
      * @return array|void
      */
-    public function config(?array $config = null): array
+    public function config(array $config = null): array
     {
         if (is_array($config)) {
             $this->_config = array_merge($this->_config, $config);
@@ -208,7 +210,7 @@ class Client
      * @param array        $config
      *
      * @return array
-     * @throws Exception
+     * @throws \Elasticsearch\Exception
      * @throws \Exception
      */
     public function map($mapping, array $config = [])
@@ -382,7 +384,7 @@ class Client
      * @param array $options Parameters to pass to delete action
      *
      * @return bool
-     * @throws Exception
+     * @throws \Elasticsearch\Exception
      */
     public function deleteByQuery($query, array $options = []): bool
     {

@@ -41,7 +41,7 @@ class Memcached
      * @return array
      * @throws \ElasticSearch\Exception
      */
-    public function index(array $document, ?string $id = null, array $options = []): array
+    public function index(array $document, string $id = null, array $options = []): array
     {
         if (!$id) {
             throw new \ElasticSearch\Exception("Memcached transport requires id when indexing");

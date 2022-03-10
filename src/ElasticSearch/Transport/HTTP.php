@@ -40,7 +40,7 @@ class HTTP
      */
     protected $ch;
 
-    public function __construct($host = 'localhost', $port = 9200, $timeout = null)
+    public function __construct(string $host = 'localhost', int $port = 9200, int $timeout = null)
     {
         parent::__construct($host, $port);
         if (null !== $timeout) {
@@ -70,7 +70,7 @@ class HTTP
      * @return array
      * @throws HTTPException
      */
-    public function index(array $document, ?string $id = null, array $options = []): array
+    public function index(array $document, string $id = null, array $options = []): array
     {
         $url = $this->buildUrl([ $this->type, $id ], $options);
         $method = ($id == false) ? 'POST' : 'PUT';

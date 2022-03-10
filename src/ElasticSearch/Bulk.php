@@ -49,9 +49,11 @@ class Bulk
      */
     public function index(array $document, ?string $id, string $index, string $type, array $options = []): self
     {
-        $params = [ '_id' => $id,
+        $params = [
+            '_id' => $id,
             '_index' => $index,
-            '_type' => $type ];
+            '_type' => $type
+        ];
 
         foreach ($options as $key => $value) {
             $params['_' . $key] = $value;
@@ -111,9 +113,11 @@ class Bulk
      */
     public function delete(string $id, string $index, string $type, array $options = []): Bulk
     {
-        $params = [ '_id' => $id,
+        $params = [
+            '_id' => $id,
             '_index' => $index,
-            '_type' => $type ];
+            '_type' => $type
+        ];
 
         foreach ($options as $key => $value) {
             $params['_' . $key] = $value;

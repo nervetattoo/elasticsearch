@@ -96,22 +96,24 @@ class Stringify
      */
     protected function transformDSLSortToString($dslSort): string
     {
+        if (!is_array($dslSort)) {
+            return '';
+        }
         $string = '';
-        if (is_array($dslSort)) {
-            foreach ($dslSort as $sort) {
-                if (is_array($sort)) {
-                    $field = key($sort);
-                    $info = current($sort);
-                } else {
-                    $field = $sort;
-                }
-                $string .= '&sort=' . $field;
-                if (isset($info)) {
-                    if (is_string($info) && $info == 'desc') {
-                        $string .= ':reverse';
-                    } elseif (is_array($info) && array_key_exists('reverse', $info) && $info['reverse']) {
-                        $string .= ':reverse';
-                    }
+
+        foreach ($dslSort as $sort) {
+            if (is_array($sort)) {
+                $field = key($sort);
+                $info = current($sort);
+            } else {
+                $field = $sort;
+            }
+            $string .= '&sort=' . $field;
+            if (isset($info)) {
+                if (is_string($info) && $info == 'desc') {
+                    $string .= ':reverse';
+                } elseif (is_array($info) && array_key_exists('reverse', $info) && $info['reverse']) {
+                    $string .= ':reverse';
                 }
             }
         }
