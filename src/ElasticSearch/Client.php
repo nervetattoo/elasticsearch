@@ -33,7 +33,6 @@ class Client
 
     protected static $_protocols = [
         'http' => HTTP::class,
-        'memcached' => Memcached::class,
     ];
 
     /** @var Base */
