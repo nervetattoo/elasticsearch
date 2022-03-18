@@ -19,10 +19,6 @@ if (!defined('CURLE_OPERATION_TIMEDOUT')) {
 class HTTP
     extends Base
 {
-    /**
-     * @var int
-     */
-    protected $pid;
 
     /** @var forkManager */
     protected $forkManager;
@@ -46,8 +42,6 @@ class HTTP
         if (null !== $timeout) {
             $this->setTimeout($timeout);
         }
-        $this->ch = curl_init();
-        $this->pid = getmypid();
     }
 
     /**
@@ -328,18 +322,13 @@ class HTTP
     private function getConnection()
     {
         if ($this->forkManager) {
-            if (!$this->forkManager->isContextAlive()) {
+            if ($this->ch === null || !$this->forkManager->isContextAlive()) {
                 $this->ch = curl_init();
             }
 
             return $this->ch;
         }
 
-        if ($this->pid !== getmypid()) {
-            $this->ch = curl_init();
-            $this->pid = getmypid();
-        }
-
-        return $this->ch;
+        return curl_init();
     }
 }
