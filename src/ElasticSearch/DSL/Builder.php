@@ -16,14 +16,15 @@ namespace ElasticSearch\DSL;
  * $dsl = new ElasticSearchDSL;
  * $bool = $dsl->bool(); // Return a new bool structure
  *
- * @author Raymond Julin <raymond.julin@gmail.com>
+ * @author  Raymond Julin <raymond.julin@gmail.com>
  * @package ElasticSearchClient
- * @since 0.1
+ * @since   0.1
  * Created: 2010-07-23
  */
-class Builder {
+class Builder
+{
 
-    protected $dsl = array();
+    protected $dsl = [];
 
     private $explain = null;
     private $from = null;
@@ -36,44 +37,55 @@ class Builder {
     /**
      * Construct DSL object
      *
-     * @return \ElasticSearch\DSL\Builder
      * @param array $options
      */
-    public function __construct(array $options=array()) {
-        foreach ($options as $key => $value)
+    public function __construct(array $options = [])
+    {
+        foreach ($options as $key => $value) {
             $this->$key = $value;
+        }
     }
 
     /**
      * Add array clause, can only be one
      *
-     * @return \ElasticSearch\DSL\Query
      * @param array $options
+     *
+     * @return \ElasticSearch\DSL\Query
      */
-    public function query(array $options=array()) {
-        if (!($this->query instanceof Query))
+    public function query(array $options = []): Query
+    {
+        if (!($this->query instanceof Query)) {
             $this->query = new Query($options);
+        }
+
         return $this->query;
     }
 
     /**
      * Build the DSL as array
      *
-     * @throws \ElasticSearch\Exception
      * @return array
+     * @throws \ElasticSearch\Exception
      */
-    public function build() {
-        $built = array();
-        if ($this->from != null)
+    public function build(): array
+    {
+        $built = [];
+        if ($this->from != null) {
             $built['from'] = $this->from;
-        if ($this->size != null)
+        }
+        if ($this->size != null) {
             $built['size'] = $this->size;
-        if ($this->sort && is_array($this->sort))
+        }
+        if ($this->sort && is_array($this->sort)) {
             $built['sort'] = $this->sort;
-        if (!$this->query)
+        }
+        if (!$this->query) {
             throw new \ElasticSearch\Exception("Query must be specified");
-        else
+        } else {
             $built['query'] = $this->query->build();
+        }
+
         return $built;
     }
 }
