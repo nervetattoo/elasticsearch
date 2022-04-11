@@ -1,7 +1,7 @@
 {
     "name" : "nervetattoo/elasticsearch",
     "type" : "library",
-    "description" : "ElasticSearch client for PHP 5.3",
+    "description" : "ElasticSearch client for PHP 7.1+",
     "keywords" : ["elasticsearch", "client"],
     "homepage" : "http://github.com/nervetattoo/elasticsearch",
     "license" : "MIT",
@@ -13,7 +13,9 @@
         }
     ],
     "require" : {
-        "php" : ">=5.3.0"
+        "php" : ">=7.1",
+        "ext-curl": "*",
+        "ext-json": "*"
     },
     "require-dev" : {
         "atoum/atoum" : "^2.9"

@@ -9,6 +9,12 @@ namespace ElasticSearch\Transport;
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
+ * @property mixed $payload
+ * @property mixed $port
+ * @property mixed $protocol
+ * @property mixed $host
+ * @property mixed $method
+ * @property mixed $url
  */
 
 class HTTPException extends \Exception {
@@ -27,33 +33,41 @@ class HTTPException extends \Exception {
 
     /**
      * Setter
+     *
      * @param mixed $key
      * @param mixed $value
      */
-    public function __set($key, $value) {
-        if (array_key_exists($key, $this->data))
+    public function __set($key, $value): void
+    {
+        if (array_key_exists($key, $this->data)) {
             $this->data[$key] = $value;
+        }
     }
 
     /**
      * Getter
+     *
      * @param mixed $key
+     *
      * @return mixed
      */
-    public function __get($key) {
-        if (array_key_exists($key, $this->data))
+    public function __get($key)
+    {
+        if (array_key_exists($key, $this->data)) {
             return $this->data[$key];
-        else
-            return false;
+        }
+
+        return false;
     }
 
     /**
      * Rebuild CLI command using curl to further investigate the failure
      * @return string
      */
-    public function getCLICommand() {
+    public function getCLICommand(): string
+    {
         $postData = json_encode($this->payload);
-        $curlCall = "curl -X{$method} 'http://{$this->host}:{$this->port}$this->url' -d '$postData'";
-        return $curlCall;
+
+        return "curl -X{$this->method} '{$this->protocol}://{$this->host}:{$this->port}{$this->url}' -d '{$postData}'";
     }
 }

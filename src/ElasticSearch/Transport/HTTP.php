@@ -11,70 +11,82 @@ namespace ElasticSearch\Transport;
  * file that was distributed with this source code.
  */
 
-if (!defined('CURLE_OPERATION_TIMEDOUT'))
+if (!defined('CURLE_OPERATION_TIMEDOUT')) {
     define('CURLE_OPERATION_TIMEDOUT', 28);
+}
 
 
-class HTTP extends Base {
-    
+class HTTP
+    extends Base
+{
+
     /**
      * How long before timing out CURL call
+     * @var int
      */
     private $timeout = 5;
-	
+
     /**
      * curl handler which is needed for reusing existing http connection to the server
+     *
      * @var resource
      */
     protected $ch;
-	
-	
-    public function __construct($host='localhost', $port=9200, $timeout=null) {
+
+    public function __construct(string $host = 'localhost', int $port = 9200, int $timeout = null)
+    {
         parent::__construct($host, $port);
-        if(null !== $timeout) {
+        if (null !== $timeout) {
             $this->setTimeout($timeout);
-        }    
-        $this->ch = curl_init();
+        }
     }
 
     /**
      * Index a new document or update it if existing
      *
+     * @param array       $document
+     * @param string|null $id Optional
+     * @param array       $options
+     *
      * @return array
-     * @param array $document
-     * @param mixed $id Optional
-     * @param array $options
+     * @throws HTTPException
      */
-    public function index($document, $id=false, array $options = array()) {
-        $url = $this->buildUrl(array($this->type, $id), $options);
-        $method = ($id == false) ? "POST" : "PUT";
+    public function index(array $document, string $id = null, array $options = []): array
+    {
+        $url = $this->buildUrl([ $this->type, $id ], $options);
+        $method = ($id == false) ? 'POST' : 'PUT';
+
         return $this->call($url, $method, $document);
     }
 
     /**
      * Update a part of a document
      *
-     * @return array
+     * @param array  $partialDocument
+     * @param string $id
+     * @param array  $options
      *
-     * @param array $partialDocument
-     * @param mixed $id
-     * @param array $options
+     * @return array
+     * @throws HTTPException
      */
-    public function update($partialDocument, $id, array $options = array()) {
-        $url = $this->buildUrl(array($this->type, $id, '_update'), $options);
+    public function update(array $partialDocument, string $id, array $options = []): array
+    {
+        $url = $this->buildUrl([ $this->type, $id, '_update' ], $options);
 
-        return $this->call($url, "POST", array('doc' => $partialDocument));
+        return $this->call($url, "POST", [ 'doc' => $partialDocument ]);
     }
 
     /**
      * Search
      *
-     * @return array
      * @param array|string $query
-     * @param array $options
+     * @param array        $options
+     *
+     * @return array
+     * @throws HTTPException
      */
-    public function search($query, array $options = array()) {
-        $result = false;
+    public function search($query, array $options = []): array
+    {
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
@@ -86,59 +98,63 @@ class HTTP extends Base {
              * or
              * $options['preference'] = 'xyzabc123'
              */
-            $url = $this->buildUrl(array($this->type, $arg), $options);
+            $url = $this->buildUrl([ $this->type, $arg ], $options);
 
-            $result = $this->call($url, "GET", $query);
-        }
-        elseif (is_string($query)) {
+            $result = $this->call($url, 'GET', $query);
+        } elseif (is_string($query)) {
             /**
              * String based search means http query string search
              */
-            $url = $this->buildUrl(array(
-                $this->type, "_search?q=" . $query
-            ));
-            $result = $this->call($url, "POST", $options);
-        }
-        else {
+            $url = $this->buildUrl([
+                $this->type, "_search?q=" . $query,
+            ]);
+            $result = $this->call($url, 'POST', $options);
+        } else {
             /**
              * no http query string search
              */
-            $url = $this->buildUrl(array(
-                $this->type, "_search?"
-            ));
-            $result = $this->call($url, "POST", $options);
+            $url = $this->buildUrl([
+                $this->type, '_search?',
+            ]);
+            $result = $this->call($url, 'POST', $options);
         }
+
         return $result;
     }
 
     /**
      * Search
      *
-     * @return array
      * @param mixed $query
      * @param array $options Parameters to pass to delete action
+     *
+     * @return bool
+     * @throws HTTPException
      */
-    public function deleteByQuery($query, array $options = array()) {
-        $options += array(
-            'refresh' => true
-        );
+    public function deleteByQuery($query, array $options = []): bool
+    {
+        $options = array_merge($options, [
+            'refresh' => true,
+        ]);
+
         if (is_array($query)) {
             /**
              * Array implies using the JSON query DSL
              */
-            $url = $this->buildUrl(array($this->type, "_query"));
-            $result = $this->call($url, "DELETE", $query);
-        }
-        elseif (is_string($query)) {
+            $url = $this->buildUrl([ $this->type, '_query' ]);
+            $result = $this->call($url, 'DELETE', $query);
+        } elseif (is_string($query)) {
             /**
              * String based search means http query string search
              */
-            $url = $this->buildUrl(array($this->type, "_query"), array('q' => $query));
-            $result = $this->call($url, "DELETE");
+            $url = $this->buildUrl([ $this->type, '_query' ], [ 'q' => $query ]);
+            $result = $this->call($url, 'DELETE');
         }
+
         if ($options['refresh']) {
-            $this->request('_refresh', "POST");
+            $this->request('_refresh', 'POST');
         }
+
         return !isset($result['error']);
     }
 
@@ -148,126 +164,151 @@ class HTTP extends Base {
      * $es->request('/_status');
      *
      * @param string|array $path
-     * @param string $method
-     * @param array|bool $payload
+     * @param string       $method
+     * @param mixed        $payload
+     * @param array        $options
+     *
      * @return array
+     * @throws HTTPException
      */
-    public function request($path, $method="GET", $payload=false) {
-        return $this->call($this->buildUrl($path), $method, $payload);
+    public function request($path, string $method = 'GET', $payload = false, array $options = []): array
+    {
+        return $this->call($this->buildUrl($path, $options), $method, $payload);
     }
-    
+
     /**
      * Flush this index/type combination
      *
-     * @return array
-     * @param mixed $id Id of document to delete
+     * @param mixed $id      Id of document to delete
      * @param array $options Parameters to pass to delete action
+     *
+     * @return array
+     * @throws HTTPException
      */
-    public function delete($id=false, array $options = array()) {
-        if ($id)
-            return $this->call($this->buildUrl(array($this->type, $id), $options), "DELETE");
-        else
-            return $this->request(false, "DELETE");
+    public function delete($id = false, array $options = []): array
+    {
+        if ($id) {
+            return $this->call($this->buildUrl([ $this->type, $id ], $options), 'DELETE');
+        }
+
+        return $this->request(false, 'DELETE');
     }
 
     /**
      * Perform a http call against an url with an optional payload
      *
+     * @param string       $url
+     * @param string       $method  (GET/POST/PUT/DELETE)
+     * @param array|string $payload The document/instructions to pass along
+     *
      * @return array
-     * @param string $url
-     * @param string $method (GET/POST/PUT/DELETE)
-     * @param array|bool $payload The document/instructions to pass along
      * @throws HTTPException
      */
-    protected function call($url, $method="GET", $payload=null) {
-        $conn = $this->ch;
-        $protocol = "http";
+    protected function call(string $url, string $method = 'GET', $payload = null): array
+    {
+        $conn = $this->getConnection();
+
+        $protocol = 'http';
         $requestURL = $protocol . "://" . $this->host . $url;
         curl_setopt($conn, CURLOPT_URL, $requestURL);
         curl_setopt($conn, CURLOPT_TIMEOUT, $this->timeout);
         curl_setopt($conn, CURLOPT_PORT, $this->port);
         curl_setopt($conn, CURLOPT_CUSTOMREQUEST, strtoupper($method));
-        curl_setopt($conn, CURLOPT_FORBID_REUSE , 0) ;
-	
-	$headers = array();
-        $headers[] = 'Accept: application/json';
-        $headers[] = 'Content-Type: application/json';
+        curl_setopt($conn, CURLOPT_FORBID_REUSE, 0);
+        curl_setopt($conn, CURLOPT_RETURNTRANSFER, true);
 
-        curl_setopt($conn, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($conn, CURLOPT_HTTPHEADER, [
+            'Accept: application/json',
+            'Content-Type: application/json'
+        ]);
 
-        if (is_array($payload) && count($payload) > 0)
-            curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload)) ;
-        else
-	       	curl_setopt($conn, CURLOPT_POSTFIELDS, $payload);
+        if (is_array($payload) && count($payload) > 0) {
+            curl_setopt($conn, CURLOPT_POSTFIELDS, json_encode($payload));
+        } else {
+            curl_setopt($conn, CURLOPT_POSTFIELDS, $payload);
+        }
 
-        // cURL opt returntransfer leaks memory, therefore OB instead.
-        ob_start();
-        curl_exec($conn);
-        $response = ob_get_clean();
+        $response = curl_exec($conn);
+
         if (!empty($response)) {
             $data = json_decode($response, true);
-            if (!$data) {
-                $data = array('error' => $response, "code" => curl_getinfo($conn, CURLINFO_HTTP_CODE));
+            if (!$data && $this->fixUnicode && json_last_error() === JSON_ERROR_UTF16) {
+                $data = json_decode(preg_replace('/\\\\uD[89A-F][0-9A-F]{2}/i', '', $response), true);
             }
-        }
-        else {
+            if (!$data) {
+                $data = [ 'error' => $response, 'code' => curl_getinfo($conn, CURLINFO_HTTP_CODE) ];
+            }
+        } else {
             /**
              * cUrl error code reference can be found here:
              * http://curl.haxx.se/libcurl/c/libcurl-errors.html
              */
             $errno = curl_errno($conn);
-            switch ($errno)
-            {
+            switch ($errno) {
                 case CURLE_UNSUPPORTED_PROTOCOL:
-                    $error = "Unsupported protocol [$protocol]";
+                    $error = "Unsupported protocol [{$protocol}]";
                     break;
                 case CURLE_FAILED_INIT:
                     $error = "Internal cUrl error?";
                     break;
                 case CURLE_URL_MALFORMAT:
-                    $error = "Malformed URL [$requestURL] -d " . json_encode($payload);
+                    $error = "Malformed URL [{$requestURL}] -d " . json_encode($payload);
                     break;
                 case CURLE_COULDNT_RESOLVE_PROXY:
-                    $error = "Couldnt resolve proxy";
+                    $error = "Couldn't resolve proxy";
                     break;
                 case CURLE_COULDNT_RESOLVE_HOST:
-                    $error = "Couldnt resolve host";
+                    $error = "Couldn't resolve host";
                     break;
                 case CURLE_COULDNT_CONNECT:
-                    $error = "Couldnt connect to host [{$this->host}], ElasticSearch down?";
+                    $error = "Couldn't connect to host [{$this->host}], ElasticSearch down?";
                     break;
                 case CURLE_OPERATION_TIMEDOUT:
-                    $error = "Operation timed out on [$requestURL]";
+                    $error = "Operation timed out on [{$requestURL}]";
                     break;
                 default:
                     $error = "Unknown error";
                     if ($errno == 0) {
                         $error .= ". Non-cUrl error";
                     } else {
-                        $errstr = curl_error($conn);
-                        $error .= " ($errstr)";
+                        $errStr = curl_error($conn);
+                        $error .= " ({$errStr})";
                     }
                     break;
             }
+
             $exception = new HTTPException($error);
             $exception->payload = $payload;
             $exception->port = $this->port;
             $exception->protocol = $protocol;
             $exception->host = $this->host;
             $exception->method = $method;
+            $exception->url = $url;
+
             throw $exception;
         }
 
         return $data;
     }
 
-    public function setTimeout($timeout) 
+    public function setTimeout(int $timeout)
     {
         $this->timeout = $timeout;
     }
 
-    public function getTimeout()
+    public function getTimeout(): int
     {
         return $this->timeout;
+    }
+
+    /**
+     * Get connection
+     *
+     * @return resource
+     */
+    private function getConnection()
+    {
+        // TODO: Now always return new handler. Rewrite to forkManager in future
+        return curl_init();
     }
 }
