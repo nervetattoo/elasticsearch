@@ -20,9 +20,6 @@ class HTTP
     extends Base
 {
 
-    /** @var forkManager */
-    protected $forkManager;
-
     /**
      * How long before timing out CURL call
      * @var int
@@ -42,16 +39,6 @@ class HTTP
         if (null !== $timeout) {
             $this->setTimeout($timeout);
         }
-    }
-
-    /**
-     * @param $forkManager
-     *
-     * @return void
-     */
-    public function setForkManager($forkManager)
-    {
-        $this->forkManager = $forkManager;
     }
 
     /**
@@ -321,14 +308,7 @@ class HTTP
      */
     private function getConnection()
     {
-        if ($this->forkManager) {
-            if ($this->ch === null || !$this->forkManager->isContextAlive()) {
-                $this->ch = curl_init();
-            }
-
-            return $this->ch;
-        }
-
+        // TODO: Now always return new handler. Rewrite to forkManager in future
         return curl_init();
     }
 }
