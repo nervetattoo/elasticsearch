@@ -36,17 +36,6 @@ $es->get($id);
 $es->search('title:cool');
 ```
 
-### Creating mapping
-
-```php
-$es->map(array(
-    'title' => array(
-        'type' => 'string',
-	'index' => 'analyzed'
-    )
-));
-```
-
 ### Search multiple indexes or types
 
 ```php
@@ -157,6 +146,3 @@ class FooController extends Controller
     }
 }
 ```
-
-
-

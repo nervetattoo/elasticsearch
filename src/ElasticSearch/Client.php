@@ -201,34 +201,6 @@ class Client
         return $this->request($id, 'GET');
     }
 
-    /**
-     * Puts a mapping on index
-     *
-     * @param array|object $mapping
-     * @param array        $config
-     *
-     * @return array
-     * @throws \Elasticsearch\Exception
-     * @throws \Exception
-     */
-    public function map($mapping, array $config = [])
-    {
-        if (is_array($mapping)) {
-            $mapping = new Mapping($mapping);
-        }
-        $mapping->config($config);
-
-        try {
-            $type = $mapping->config('type');
-        } catch(\Exception $e) {
-        } // No type is cool
-        if (isset($type) && !$this->passesTypeConstraint($type)) {
-            throw new Exception("Cant create mapping due to type constraint mismatch");
-        }
-
-        return $this->request('_mapping', 'PUT', $mapping->export(), true);
-    }
-
     protected function passesTypeConstraint($constraint): bool
     {
         if (is_string($constraint)) {
