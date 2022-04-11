@@ -4,7 +4,6 @@ namespace ElasticSearch;
 
 use ElasticSearch\Transport\Base;
 use ElasticSearch\Transport\HTTP;
-use ElasticSearch\Transport\Memcached;
 
 /**
  * This file is part of the ElasticSearch PHP client
