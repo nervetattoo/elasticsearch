@@ -168,7 +168,7 @@ abstract class Base
     protected function buildUrl($path, array $options = []): string
     {
         if (is_array($path)) {
-            $first = (string) $path[0];
+            $first = (string) ($path[0] ?? '');
             $firstChar = $first !== '' ? $first[0] : '';
         } else {
             $firstChar = $path[0];
