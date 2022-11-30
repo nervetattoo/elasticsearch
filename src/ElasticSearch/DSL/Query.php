@@ -12,14 +12,15 @@ namespace ElasticSearch\DSL;
  */
 
 /**
- * Handle the query sub dsl 
+ * Handle the query sub dsl
  *
- * @author Raymond Julin <raymond.julin@gmail.com>
+ * @author  Raymond Julin <raymond.julin@gmail.com>
  * @package ElasticSearchClient
- * @since 0.1
+ * @since   0.1
  * Created: 2010-07-24
  */
-class Query {
+class Query
+{
     protected $term = null;
     /**
      * @var RangeQuery
@@ -34,45 +35,55 @@ class Query {
     protected $constantScore = null;
     protected $filteredQuery = null;
 
-    public function __construct(array $options=array()) {
+    public function __construct(array $options = [])
+    {
     }
 
     /**
      * Add a term to this query
      *
-     * @return \ElasticSearch\DSL\Query
-     * @param string $term
+     * @param string      $term
      * @param bool|string $field
+     *
+     * @return \ElasticSearch\DSL\Query
      */
-    public function term($term, $field=false) {
+    public function term(string $term, $field = false): self
+    {
         $this->term = ($field)
-            ? array($field => $term)
+            ? [ $field => $term ]
             : $term;
+
         return $this;
     }
 
     /**
      * Add a wildcard to this query
      *
-     * @return \ElasticSearch\DSL\Query
-     * @param $val
+     * @param             $val
      * @param bool|string $field
+     *
+     * @return \ElasticSearch\DSL\Query
      */
-    public function wildcard($val, $field=false) {
+    public function wildcard($val, $field = false): self
+    {
         $this->wildcard = ($field)
-            ? array($field => $val)
+            ? [ $field => $val ]
             : $val;
+
         return $this;
     }
-    
+
     /**
      * Add a range query
      *
-     * @return \ElasticSearch\DSL\RangeQuery
      * @param array $options
+     *
+     * @return \ElasticSearch\DSL\RangeQuery
      */
-    public function range(array $options=array()) {
+    public function range(array $options = []): RangeQuery
+    {
         $this->range = new RangeQuery($options);
+
         return $this->range;
     }
 
@@ -80,15 +91,20 @@ class Query {
      * Build the DSL as array
      *
      * @return array
+     *
+     * @throws \ElasticSearch\Exception
      */
-    public function build() {
-        $built = array();
-        if ($this->term)
+    public function build(): array
+    {
+        $built = [];
+        if ($this->term) {
             $built['term'] = $this->term;
-        elseif ($this->range)
+        } elseif ($this->range) {
             $built['range'] = $this->range->build();
-        elseif ($this->wildcard)
+        } elseif ($this->wildcard) {
             $built['wildcard'] = $this->wildcard;
+        }
+
         return $built;
     }
 }

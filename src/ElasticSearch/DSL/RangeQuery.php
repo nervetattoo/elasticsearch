@@ -14,104 +14,134 @@ namespace ElasticSearch\DSL;
 /**
  * Range queries
  *
- * @author Raymond Julin <raymond.julin@gmail.com>
+ * @author  Raymond Julin <raymond.julin@gmail.com>
  * @package ElasticSearchClient
- * @since 0.1
+ * @since   0.1
  * Created: 2010-07-24
  */
-class RangeQuery {
-    protected $fieldname = null;
+class RangeQuery
+{
+    protected $fieldName = null;
     protected $from = null;
     protected $to = null;
     protected $includeLower = null;
     protected $includeUpper = null;
     protected $boost = null;
 
-    
+
     /**
      * Construct new RangeQuery component
      *
-     * @return \ElasticSearch\DSL\RangeQuery
      * @param array $options
+     *
+     * @return \ElasticSearch\DSL\RangeQuery
      */
-    public function __construct(array $options=array()) {
-        $this->fieldname = key($options);
+    public function __construct(array $options = [])
+    {
+        $this->fieldName = key($options);
         $values = current($options);
         if (is_array($values)) {
-            foreach ($values as $key => $val)
+            foreach ($values as $key => $val) {
                 $this->$key = $val;
+            }
         }
     }
-    
+
     /**
      * Setters
      *
-     * @return \ElasticSearch\DSL\RangeQuery
      * @param mixed $value
+     *
+     * @return \ElasticSearch\DSL\RangeQuery
      */
-    public function fieldname($value) {
-        $this->fieldname = $value;
+    public function fieldName($value): self
+    {
+        $this->fieldName = $value;
+
         return $this;
     }
 
     /**
      * @param $value
+     *
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function from($value) {
+    public function from($value): self
+    {
         $this->from = $value;
+
         return $this;
     }
+
     /**
      * @param $value
+     *
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function to($value) {
+    public function to($value): self
+    {
         $this->to = $value;
+
         return $this;
     }
+
     /**
      * @param $value
+     *
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function includeLower($value) {
+    public function includeLower($value): self
+    {
         $this->includeLower = $value;
+
         return $this;
     }
+
     /**
      * @param $value
+     *
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function includeUpper($value) {
+    public function includeUpper($value): self
+    {
         $this->includeUpper = $value;
+
         return $this;
     }
+
     /**
      * @param $value
+     *
      * @return \ElasticSearch\DSL\RangeQuery $this
      */
-    public function boost($value) {
+    public function boost($value): self
+    {
         $this->boost = $value;
+
         return $this;
     }
 
     /**
      * Build to array
      *
-     * @throws \ElasticSearch\Exception
      * @return array
+     * @throws \ElasticSearch\Exception
      */
-    public function build() {
-        $built = array();
-        if ($this->fieldname) {
-            $built[$this->fieldname] = array();
-            foreach (array("from","to","includeLower","includeUpper", "boost") as $opt) {
-                if ($this->$opt !== null)
-                    $built[$this->fieldname][$opt] = $this->$opt;
+    public function build(): self
+    {
+        $built = [];
+        if ($this->fieldName) {
+            $built[$this->fieldName] = [];
+            foreach ([ "from", "to", "includeLower", "includeUpper", "boost" ] as $opt) {
+                if ($this->$opt !== null) {
+                    $built[$this->fieldName][$opt] = $this->$opt;
+                }
             }
-            if (count($built[$this->fieldname]) == 0)
+            if (count($built[$this->fieldName]) == 0) {
                 throw new \ElasticSearch\Exception("Empty RangeQuery cant be created");
+            }
         }
+
         return $built;
     }
 }

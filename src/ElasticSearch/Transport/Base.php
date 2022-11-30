@@ -10,15 +10,15 @@ namespace ElasticSearch\Transport;
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-abstract class Base {
+abstract class Base
+{
 
     /**
      * What host to connect to for server
      * @var string
      */
     protected $host = "";
-    
+
     /**
      * Port to connect on
      * @var int
@@ -30,19 +30,24 @@ abstract class Base {
      * @var string
      */
     protected $index;
-    
+
     /**
      * ElasticSearch document type
      * @var string
      */
     protected $type;
 
+    /** @var bool */
+    protected $fixUnicode = true;
+
     /**
      * Default constructor, just set host and port
+     *
      * @param string $host
-     * @param int $port
+     * @param int    $port
      */
-    public function __construct($host, $port) {
+    public function __construct(string $host, int $port)
+    {
         $this->host = $host;
         $this->port = $port;
     }
@@ -50,20 +55,24 @@ abstract class Base {
     /**
      * Method for indexing a new document
      *
-     * @param array|object $document
-     * @param mixed $id
-     * @param array $options
+     * @param array       $document
+     * @param string|null $id
+     * @param array       $options
+     *
+     * @return array
      */
-    abstract public function index($document, $id=false, array $options = array());
+    abstract public function index(array $document, string $id = null, array $options = []): array;
 
     /**
      * Method for updating a document
      *
-     * @param array|object $partialDocument
-     * @param mixed        $id
-     * @param array        $options
+     * @param array  $partialDocument
+     * @param string $id
+     * @param array  $options
+     *
+     * @return array
      */
-    abstract public function update($partialDocument, $id, array $options = array());
+    abstract public function update(array $partialDocument, string $id, array $options = []): array;
 
     /**
      * Perform a request against the given path/method/payload combination
@@ -71,72 +80,112 @@ abstract class Base {
      * $es->request('/_status');
      *
      * @param string|array $path
-     * @param string $method
-     * @param array|bool $payload
-     * @return
+     * @param string       $method
+     * @param mixed        $payload
+     * @param array        $options
+     *
+     * @return array
      */
-    abstract public function request($path, $method="GET", $payload=false);
+    abstract public function request($path, string $method = 'GET', $payload = false, array $options = []): array;
 
     /**
      * Delete a document by its id
+     *
      * @param mixed $id
      */
-    abstract public function delete($id=false);
+    abstract public function delete($id = false): array;
 
     /**
      * Perform a search based on query
+     *
      * @param array|string $query
      */
     abstract public function search($query);
 
     /**
+     * Set timeout
+     *
+     * @param int $timeout
+     */
+    abstract public function setTimeout(int $timeout);
+
+    /**
+     * Get timeout
+     * @return int
+     */
+    abstract public function getTimeout(): int;
+
+    /**
+     * @param bool $fixUnicode
+     */
+    public function setFixUnicode(bool $fixUnicode): void
+    {
+        $this->fixUnicode = $fixUnicode;
+    }
+
+    /**
      * Search
      *
-     * @return array
-     * @param mixed $query String or array to use as criteria for delete
+     * @param mixed $query   String or array to use as criteria for delete
      * @param array $options Parameters to pass to delete action
+     *
+     * @return bool
      * @throws \Elasticsearch\Exception
      */
-    public function deleteByQuery($query, array $options = array()) {
+    public function deleteByQuery($query, array $options = []): bool
+    {
         throw new \Elasticsearch\Exception(__FUNCTION__ . ' not implemented for ' . __CLASS__);
     }
 
     /**
      * Set what index to act against
-     * @param string $index
+     *
+     * @param string|null $index
      */
-    public function setIndex($index) {
+    public function setIndex(?string $index): void
+    {
         $this->index = $index;
     }
 
     /**
      * Set what document types to act against
-     * @param string $type
+     *
+     * @param string|null $type
      */
-    public function setType($type) {
+    public function setType(?string $type): void
+    {
         $this->type = $type;
     }
 
     /**
      * Build a callable url
      *
+     * @param array|string $path
+     * @param array        $options Query parameter options to pass
+     *
      * @return string
-     * @param array|bool $path
-     * @param array $options Query parameter options to pass
      */
-    protected function buildUrl($path = false, array $options = array()) {
-        $isAbsolute = (is_array($path) ? $path[0][0] : $path[0]) === '/';
-        $url = $isAbsolute || null === $this->index ? '' : "/" . $this->index;
+    protected function buildUrl($path, array $options = []): string
+    {
+        if (is_array($path)) {
+            $first = (string) ($path[0] ?? '');
+            $firstChar = $first !== '' ? $first[0] : '';
+        } else {
+            $firstChar = $path[0];
+        }
+
+        $isAbsolute = $firstChar === '/';
+
+        $url = $isAbsolute || $this->index === null ? '' : "/{$this->index}";
 
         if ($path && is_array($path) && count($path) > 0) {
-            $path = implode("/", array_filter($path));
-            $url .= "/" . ltrim($path, '/');
+            $path = implode('/', array_filter($path));
+            $url .= '/' . ltrim($path, '/');
         }
-        if (substr($url, -1) === "/") {
-            $url = substr($url, 0, -1);
-        }
+        $url = rtrim($url, '/');
+
         if (count($options) > 0) {
-            $url .= "?" . http_build_query($options, '', '&');
+            $url .= (strpos($url, '?') !== false ? '&' : '?') . http_build_query($options, '', '&');
         }
 
         return $url;
