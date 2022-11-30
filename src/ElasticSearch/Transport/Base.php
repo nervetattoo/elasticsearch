@@ -167,7 +167,15 @@ abstract class Base
      */
     protected function buildUrl($path, array $options = []): string
     {
-        $isAbsolute = (is_array($path) ? $path[0][0] : $path[0]) === '/';
+        if (is_array($path)) {
+            $first = (string) $path[0];
+            $firstChar = $first !== '' ? $first[0] : '';
+        } else {
+            $firstChar = $path[0];
+        }
+
+        $isAbsolute = $firstChar === '/';
+
         $url = $isAbsolute || $this->index === null ? '' : "/{$this->index}";
 
         if ($path && is_array($path) && count($path) > 0) {
