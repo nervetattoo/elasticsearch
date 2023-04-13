@@ -477,4 +477,9 @@ class Client
     {
         return $this->commitBulk();
     }
+
+    public static function addProtocol(string $protocolClassName, string $protocolName): void
+    {
+        self::$_protocols[$protocolName] = $protocolClassName;
+    }
 }
